@@ -20,8 +20,11 @@
   .priv-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
   .priv-title{font-size:10px;font-weight:700;color:#4ade80;letter-spacing:.1em;}
   .priv-count{font-size:11px;color:var(--muted);}
-  .priv-dots{display:flex;gap:4px;}
-  .priv-dot{flex:1;height:6px;border-radius:3px;}
+  .priv-dots{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;}
+  .priv-dot{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;}
+  .priv-actions{display:flex;gap:6px;margin-top:4px;}
+  .buy-btn{background:rgba(74,222,128,.2);border:1px solid rgba(74,222,128,.4);border-radius:6px;padding:4px 10px;color:#4ade80;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.06em;}
+  .history-btn-sm{background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 10px;color:var(--muted);font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;}
   .sessions{padding:10px 14px;}
   .filter-row{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;}
   .filter-btn{background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 10px;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;color:var(--muted);}
@@ -30,7 +33,7 @@
   .sess-type{font-size:10px;font-weight:700;letter-spacing:.08em;margin-bottom:2px;}
   .sess-date{font-size:13px;font-weight:700;color:#f1f5f9;}
   .sess-notes{font-size:10px;color:#64748b;margin-top:6px;line-height:1.5;border-top:1px solid rgba(255,255,255,.05);padding-top:6px;}
-  .belt-badge{font-weight:700;font-size:10px;border-radius:4px;padding:3px 8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none;}
+  .belt-badge-btn{font-weight:700;font-size:10px;border-radius:4px;padding:3px 8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none;}
   .log-btn{background:#60a5fa;color:#0a0f1a;border:none;border-radius:7px;padding:6px 14px;font-family:var(--font);font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.08em;}
   .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:flex-end;justify-content:center;}
   .overlay.open{display:flex;}
@@ -41,6 +44,7 @@
   .field{margin-bottom:10px;}
   .field-label{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
   .field input,.field textarea,.field select{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;resize:vertical;}
+  .inp{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;}
   .row2{display:flex;gap:8px;}
   .row2 .field{flex:1;}
   .type-row{display:flex;gap:6px;margin-bottom:10px;}
@@ -60,10 +64,6 @@
   .add-roll-btn{width:100%;background:none;border:1px dashed rgba(96,165,250,.4);border-radius:8px;padding:9px;color:#60a5fa;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;margin-top:4px;}
   .roll-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:9px 11px;margin-bottom:6px;}
   .roll-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
-  .roll-opp{font-size:12px;font-weight:700;color:#f1f5f9;}
-  .roll-result{font-size:16px;font-weight:800;}
-  .roll-notes{font-size:10px;color:#64748b;line-height:1.5;}
-  .roll-subs{font-size:10px;margin-top:2px;}
   .result-row{display:flex;gap:6px;}
   .result-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 4px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);}
   .result-btn.win.active{background:rgba(74,222,128,.2);border-color:#4ade80;color:#4ade80;}
@@ -98,7 +98,11 @@
   .toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(8,13,24,.95);border:1px solid #4ade80;color:#4ade80;padding:10px 20px;border-radius:10px;font-size:12px;font-weight:700;z-index:999;white-space:nowrap;}
   .toast.show{display:block;}
   .opp-create{background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:10px;margin-top:6px;}
-  .inp{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;}
+  .purchase-card{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.15);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+  .purchase-info{font-size:11px;color:#f1f5f9;}
+  .purchase-meta{font-size:10px;color:var(--muted);margin-top:2px;}
+  .purchase-cost{font-size:14px;font-weight:800;color:#4ade80;}
+  .purchase-classes{font-size:10px;color:var(--muted);text-align:right;}
 </style>
 </head>
 <body>
@@ -109,7 +113,7 @@
     <div class="sub" id="today-lbl"><span class="dot">● SUPABASE</span></div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
-    <button class="belt-badge" id="belt-badge" onclick="openBeltModal()" style="background:#1e3a5f;color:#60a5fa">BLUE</button>
+    <button class="belt-badge-btn" id="belt-badge" onclick="openBeltModal()" style="background:#1e3a5f;color:#60a5fa">BLUE</button>
     <button class="log-btn" onclick="openNewSession()">+ LOG</button>
   </div>
 </div>
@@ -120,6 +124,10 @@
     <span class="priv-count" id="priv-count">0/10 used</span>
   </div>
   <div class="priv-dots" id="priv-dots"></div>
+  <div class="priv-actions">
+    <button class="buy-btn" onclick="openBuyModal()">💳 Buy Classes</button>
+    <button class="history-btn-sm" onclick="openPurchaseHistory()">📋 Purchase History</button>
+  </div>
 </div>
 
 <div class="nav">
@@ -167,7 +175,11 @@
       <div class="field"><div class="field-label">Duration (min)</div><input type="number" id="ns-dur" placeholder="90"></div>
     </div>
     <div class="field"><div class="field-label">Technique / Focus</div><input type="text" id="ns-tech" placeholder="e.g. Butterfly guard sweeps"></div>
-    <div class="field"><div class="field-label">Instructor</div><input type="text" id="ns-instr" placeholder="Professor name"></div>
+    <!-- Instructor field — swaps between text and dropdown depending on type -->
+    <div class="field" id="ns-instr-wrap">
+      <div class="field-label">Instructor</div>
+      <input type="text" id="ns-instr-text" placeholder="Professor name">
+    </div>
     <div class="field"><div class="field-label">Notes</div><textarea id="ns-notes" rows="2" placeholder="What happened, what you drilled..."></textarea></div>
     <div class="field" id="ns-workon-wrap"><div class="field-label">What to Work On</div><textarea id="ns-workon" rows="2" placeholder="Guard passing, not giving up back..."></textarea></div>
     <div class="field" id="ns-tips-wrap" style="display:none"><div class="field-label">💡 Instructor Tips</div><textarea id="ns-tips" rows="3" placeholder="Key details the instructor mentioned..."></textarea></div>
@@ -191,9 +203,12 @@
       <div class="field"><div class="field-label">Date</div><input type="date" id="es-date"></div>
       <div class="field"><div class="field-label">Duration (min)</div><input type="number" id="es-dur" placeholder="90"></div>
     </div>
-    <div class="field"><div class="field-label">Technique / Focus</div><input type="text" id="es-tech" placeholder="e.g. Butterfly guard sweeps"></div>
-    <div class="field"><div class="field-label">Instructor</div><input type="text" id="es-instr" placeholder="Professor name"></div>
-    <div class="field"><div class="field-label">Notes</div><textarea id="es-notes" rows="2" placeholder="What happened..."></textarea></div>
+    <div class="field"><div class="field-label">Technique / Focus</div><input type="text" id="es-tech"></div>
+    <div class="field" id="es-instr-wrap">
+      <div class="field-label">Instructor</div>
+      <input type="text" id="es-instr-text">
+    </div>
+    <div class="field"><div class="field-label">Notes</div><textarea id="es-notes" rows="2"></textarea></div>
     <div class="field" id="es-workon-wrap"><div class="field-label">What to Work On</div><textarea id="es-workon" rows="2"></textarea></div>
     <div class="field" id="es-tips-wrap" style="display:none"><div class="field-label">💡 Instructor Tips</div><textarea id="es-tips" rows="3"></textarea></div>
     <button class="save-modal-btn" id="es-save-btn" onclick="saveEditSession()" style="background:#60a5fa">Update Session</button>
@@ -214,6 +229,46 @@
     <div id="rolls-section"></div>
     <div id="roll-form-wrap"></div>
     <button class="del-btn" onclick="deleteSession()">🗑 Delete Session</button>
+  </div>
+</div>
+
+<!-- BUY PRIVATE CLASSES -->
+<div class="overlay" id="overlay-buy" onclick="closeIfOutside(event,'overlay-buy')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💳 Buy Private Classes</div>
+      <button class="close-btn" onclick="closeModal('overlay-buy')">×</button>
+    </div>
+    <div style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:#4ade80" id="buy-summary"></div>
+    <div class="row2">
+      <div class="field"><div class="field-label">Date Purchased</div><input type="date" id="buy-date" class="inp"></div>
+      <div class="field"><div class="field-label"># of Classes</div><input type="number" id="buy-classes" value="10" min="1" class="inp"></div>
+    </div>
+    <div class="field"><div class="field-label">Total Cost (USD)</div>
+      <div style="position:relative">
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px">$</span>
+        <input type="number" id="buy-cost" placeholder="1000" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px 8px 22px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field"><div class="field-label">Teacher</div><input type="text" id="buy-teacher" value="Angelo" class="inp"></div>
+      <div class="field"><div class="field-label">Gym</div><input type="text" id="buy-gym" value="FightSportsClub" class="inp"></div>
+    </div>
+    <div class="field"><div class="field-label">Notes (optional)</div><textarea id="buy-notes" rows="2" class="inp" placeholder="Any details..."></textarea></div>
+    <button class="save-modal-btn" onclick="savePurchase()" style="background:#4ade80">Save Purchase</button>
+  </div>
+</div>
+
+<!-- PURCHASE HISTORY -->
+<div class="overlay" id="overlay-purchases" onclick="closeIfOutside(event,'overlay-purchases')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📋 Purchase History</div>
+      <button class="close-btn" onclick="closeModal('overlay-purchases')">×</button>
+    </div>
+    <div id="purchase-summary-bar" style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px"></div>
+    <div id="purchase-list"></div>
+    <button class="save-modal-btn" onclick="openBuyModal()" style="background:#4ade80;margin-top:8px">+ Buy More Classes</button>
   </div>
 </div>
 
@@ -238,12 +293,11 @@ const SB_URL='https://skfuygyygrapnrkwzsmj.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrZnV5Z3l5Z3JhcG5ya3d6c21qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDc0NzYsImV4cCI6MjA5MDM4MzQ3Nn0.jl0FHAFzmWl8wLeWuKS0N8S_qFC92_WSHszdQhWYxCo';
 const EDGE=`${SB_URL}/functions/v1/bjj`;
 const HDRS={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`};
-const PRIVATES_TOTAL=10;
 
 async function GET(action,params={}){const qs=new URLSearchParams({action,...params}).toString();const r=await fetch(`${EDGE}?${qs}`,{method:'GET',headers:HDRS});if(!r.ok)throw new Error(`HTTP ${r.status}: ${await r.text()}`);return r.json();}
 async function POST(action,body){const r=await fetch(`${EDGE}?action=${action}`,{method:'POST',headers:HDRS,body:JSON.stringify(body)});if(!r.ok)throw new Error(`HTTP ${r.status}: ${await r.text()}`);return r.json();}
 
-let currentView='log',currentFilter='all',sessions=[],opponents=[],belt=null;
+let currentView='log',currentFilter='all',sessions=[],opponents=[],belt=null,purchases=[];
 let detailSession=null,detailRolls=[],showRollForm=false,editingRoll=null;
 let sessionType={ns:'gi',es:'gi'};
 let selectedResult='',selectedScore=0,creatingOpp=false;
@@ -264,30 +318,74 @@ function closeIfOutside(e,id){if(e.target.id===id)closeModal(id);}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 function v(id){return document.getElementById(id);}
 
+// Get unique teachers from purchases
+function uniqueTeachers(){return [...new Set(purchases.map(p=>p.teacher).filter(Boolean))];}
+
+// Get instructor value from form (handles both text input and select)
+function getInstructor(prefix){
+  const sel=v(`${prefix}-instr-select`);
+  if(sel)return sel.value||null;
+  return v(`${prefix}-instr-text`)?.value||null;
+}
+
+// Render instructor field — dropdown for private, text for gi/nogi
+function renderInstructorField(prefix, currentVal=''){
+  const wrap=v(`${prefix}-instr-wrap`);
+  if(!wrap)return;
+  const t=sessionType[prefix];
+  const teachers=uniqueTeachers();
+  if(t==='private'&&teachers.length>0){
+    // Build dropdown with unique teachers from purchases
+    const opts=teachers.map(t=>`<option value="${t}"${t===currentVal||(!currentVal&&t==='Angelo')?'selected':''}>${t}</option>`).join('');
+    wrap.innerHTML=`<div class="field-label">Instructor</div>
+      <select id="${prefix}-instr-select" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none">
+        ${opts}
+        <option value="">Other / Free text</option>
+      </select>`;
+  }else{
+    wrap.innerHTML=`<div class="field-label">Instructor</div>
+      <input type="text" id="${prefix}-instr-text" placeholder="Professor name" value="${currentVal}" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none">`;
+  }
+}
+
+// Private totals
+function totalPurchased(){return purchases.reduce((s,p)=>s+(p.classes_purchased||0),0);}
+function totalUsed(){return sessions.filter(s=>s.type==='private').length;}
+function totalRemaining(){return totalPurchased()-totalUsed();}
+function totalSpent(){return purchases.reduce((s,p)=>s+(parseFloat(p.cost_usd)||0),0);}
+function costPerClass(){const tp=totalPurchased();return tp>0?(totalSpent()/tp).toFixed(2):0;}
+
 async function init(){
   v('today-lbl').innerHTML=new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})+'<span class="dot">● SUPABASE</span>';
-  v('ns-date').value=todayKey();v('belt-date').value=todayKey();
+  v('ns-date').value=todayKey();v('belt-date').value=todayKey();v('buy-date').value=todayKey();
   setType('gi','ns');renderBeltModal();
   try{
-    const[b,s,o]=await Promise.all([GET('get_belt'),GET('get_sessions',{limit:'100'}),GET('get_opponents')]);
-    belt=b;sessions=s||[];opponents=o||[];
+    const[b,s,o,p]=await Promise.all([GET('get_belt'),GET('get_sessions',{limit:'100'}),GET('get_opponents'),GET('get_purchases')]);
+    belt=b;sessions=s||[];opponents=o||[];purchases=p||[];
     renderBelt();renderPrivBar();renderSessions();renderHistory();
   }catch(e){toast('Load failed: '+e.message,'#f87171');}
 }
 
-// ── Type selector (shared for new + edit) ─────────────────────────────────────
+// ── Type selector ─────────────────────────────────────────────────────────────
 function setType(t,prefix){
   sessionType[prefix]=t;
-  ['gi','nogi','private'].forEach(x=>{
-    const el=v(`${prefix}-type-${x}`);
-    if(el)el.className=`type-btn ${x}${t===x?' active':''}`;
-  });
+  ['gi','nogi','private'].forEach(x=>{const el=v(`${prefix}-type-${x}`);if(el)el.className=`type-btn ${x}${t===x?' active':''}`;});
+
+  // Private notice
   if(prefix==='ns'){
-    const used=sessions.filter(s=>s.type==='private').length;
+    const used=totalUsed(),purchased=totalPurchased(),remaining=totalRemaining();
     const notice=v('ns-priv-notice');
-    if(t==='private'){notice.style.display='block';notice.textContent=`Private #${used+1} of ${PRIVATES_TOTAL} — ${PRIVATES_TOTAL-used-1} remaining after this`;}
-    else notice.style.display='none';
+    if(t==='private'){
+      if(remaining<=0){notice.style.display='block';notice.style.color='#f87171';notice.style.borderColor='rgba(248,113,113,.25)';notice.style.background='rgba(248,113,113,.08)';notice.textContent=`⚠ No classes remaining! Purchase more to continue.`;}
+      else{notice.style.display='block';notice.style.color='#4ade80';notice.style.borderColor='rgba(74,222,128,.25)';notice.style.background='rgba(74,222,128,.08)';notice.textContent=`Class #${used+1} of ${purchased} — ${remaining-1} remaining after this`;}
+    }else notice.style.display='none';
   }
+
+  // Instructor field
+  const currentVal=v(`${prefix}-instr-text`)?.value||v(`${prefix}-instr-select`)?.value||'';
+  renderInstructorField(prefix,currentVal);
+
+  // Show/hide work-on vs tips
   const workon=v(`${prefix}-workon-wrap`),tips=v(`${prefix}-tips-wrap`),btn=v(`${prefix}-save-btn`);
   if(workon)workon.style.display=t==='private'?'none':'';
   if(tips)tips.style.display=t==='private'?'':'none';
@@ -317,22 +415,79 @@ async function saveBelt(){
 
 // ── Private bar ───────────────────────────────────────────────────────────────
 function renderPrivBar(){
-  const used=sessions.filter(s=>s.type==='private').length,left=PRIVATES_TOTAL-used;
-  v('priv-count').innerHTML=`${used}/${PRIVATES_TOTAL} used · <span style="color:${left<=3?'#f87171':'#4ade80'}">${left} remaining</span>`;
-  v('priv-dots').innerHTML=Array.from({length:PRIVATES_TOTAL},(_,i)=>`<div class="priv-dot" style="background:${i<used?'#4ade80':'rgba(255,255,255,.08)'}"></div>`).join('');
+  const used=totalUsed(),purchased=totalPurchased(),remaining=totalRemaining();
+  v('priv-count').innerHTML=`${used}/${purchased} used · <span style="color:${remaining<=3?'#f87171':'#4ade80'}">${remaining} remaining</span>`;
+  let dotsHtml='',usedSoFar=used;
+  purchases.slice().reverse().forEach(p=>{
+    for(let i=0;i<p.classes_purchased;i++){
+      const isUsed=usedSoFar>0;if(isUsed)usedSoFar--;
+      dotsHtml+=`<div class="priv-dot" style="background:${isUsed?'#4ade80':'rgba(255,255,255,.08)'};color:${isUsed?'#0a0f1a':'#334155'}" title="${isUsed?'Used':'Available'}">${isUsed?'✓':''}</div>`;
+    }
+  });
+  if(!dotsHtml)dotsHtml=`<div style="font-size:10px;color:var(--muted)">No classes purchased yet</div>`;
+  v('priv-dots').innerHTML=dotsHtml;
+}
+
+// ── Buy classes ───────────────────────────────────────────────────────────────
+function openBuyModal(){
+  const remaining=totalRemaining(),purchased=totalPurchased(),used=totalUsed();
+  v('buy-summary').innerHTML=`Currently: <strong style="color:#4ade80">${remaining} remaining</strong> of ${purchased} total · ${used} used · $${totalSpent().toFixed(0)} spent · $${costPerClass()}/class`;
+  v('buy-date').value=todayKey();v('buy-classes').value='10';v('buy-cost').value='';
+  v('buy-teacher').value='Angelo';v('buy-gym').value='FightSportsClub';v('buy-notes').value='';
+  closeModal('overlay-purchases');v('overlay-buy').classList.add('open');
+}
+async function savePurchase(){
+  const classes=parseInt(v('buy-classes').value)||0;
+  if(classes<1){toast('Enter number of classes','#fb923c');return;}
+  const btn=v('overlay-buy').querySelector('.save-modal-btn');
+  btn.textContent='Saving...';btn.disabled=true;
+  try{
+    const payload={date:v('buy-date').value||todayKey(),classes_purchased:classes,cost_usd:parseFloat(v('buy-cost').value)||null,teacher:v('buy-teacher').value||'Angelo',gym:v('buy-gym').value||'FightSportsClub',notes:v('buy-notes').value||null};
+    const p=await POST('save_purchase',payload);
+    purchases.unshift(p);renderPrivBar();closeModal('overlay-buy');toast(`${classes} classes added! 🎯`);
+  }catch(e){toast('Save failed: '+e.message,'#f87171');}
+  btn.textContent='Save Purchase';btn.disabled=false;
+}
+function openPurchaseHistory(){renderPurchaseList();v('overlay-purchases').classList.add('open');}
+function renderPurchaseList(){
+  const remaining=totalRemaining(),purchased=totalPurchased(),used=totalUsed();
+  v('purchase-summary-bar').innerHTML=`<span style="color:#4ade80;font-weight:700">${remaining} remaining</span> · ${used}/${purchased} used · Total: <span style="color:#4ade80;font-weight:700">$${totalSpent().toFixed(0)}</span> · Avg $${costPerClass()}/class`;
+  if(!purchases.length){v('purchase-list').innerHTML='<div class="empty">No purchases yet.</div>';return;}
+  v('purchase-list').innerHTML=purchases.map(p=>`
+    <div class="purchase-card">
+      <div>
+        <div class="purchase-info">🎯 ${p.classes_purchased} classes with <strong>${p.teacher}</strong></div>
+        <div class="purchase-meta">${p.gym} · ${fmtDate(p.date)}${p.notes?` · ${p.notes}`:''}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="purchase-cost">${p.cost_usd?'$'+parseFloat(p.cost_usd).toFixed(0):'—'}</div>
+        <div class="purchase-classes">${p.cost_usd&&p.classes_purchased?'$'+(p.cost_usd/p.classes_purchased).toFixed(0)+'/class':''}</div>
+        <button onclick="deletePurchase('${p.id}')" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px;margin-top:4px">🗑 delete</button>
+      </div>
+    </div>`).join('');
+}
+async function deletePurchase(id){
+  if(!confirm('Delete this purchase record?'))return;
+  try{await POST('delete_purchase',{id});purchases=purchases.filter(p=>p.id!==id);renderPrivBar();renderPurchaseList();toast('Purchase deleted','#f87171');}
+  catch(e){toast('Delete failed','#f87171');}
 }
 
 // ── New session ───────────────────────────────────────────────────────────────
 function openNewSession(){
   v('ns-date').value=todayKey();v('ns-dur').value='90';
-  ['ns-tech','ns-instr','ns-notes','ns-workon','ns-tips'].forEach(id=>{if(v(id))v(id).value='';});
-  setType('gi','ns');v('overlay-new').classList.add('open');
+  ['ns-tech','ns-notes','ns-workon','ns-tips'].forEach(id=>{if(v(id))v(id).value='';});
+  setType('gi','ns');
+  v('overlay-new').classList.add('open');
 }
 async function saveNewSession(){
   const btn=v('ns-save-btn');btn.textContent='Saving...';btn.disabled=true;
   try{
     const t=sessionType.ns;
-    const payload={type:t,date:v('ns-date').value||todayKey(),technique:v('ns-tech').value||null,instructor:v('ns-instr').value||null,duration_min:parseInt(v('ns-dur').value)||null,notes:v('ns-notes').value||null,what_to_work_on:t!=='private'?(v('ns-workon').value||null):null,private_tips:t==='private'?(v('ns-tips').value||null):null};
+    const payload={type:t,date:v('ns-date').value||todayKey(),technique:v('ns-tech').value||null,
+      instructor:getInstructor('ns'),
+      duration_min:parseInt(v('ns-dur').value)||null,notes:v('ns-notes').value||null,
+      what_to_work_on:t!=='private'?(v('ns-workon').value||null):null,
+      private_tips:t==='private'?(v('ns-tips').value||null):null};
     const sess=await POST('save_session',payload);
     sessions.unshift(sess);renderPrivBar();renderSessions();renderHistory();
     closeModal('overlay-new');toast('Session saved!');openDetail(sess);
@@ -345,7 +500,13 @@ function openEditSession(){
   const s=detailSession;if(!s)return;
   setType(s.type,'es');
   v('es-date').value=s.date||todayKey();v('es-dur').value=s.duration_min||'';
-  v('es-tech').value=s.technique||'';v('es-instr').value=s.instructor||'';
+  v('es-tech').value=s.technique||'';
+  // Set instructor after rendering field
+  setTimeout(()=>{
+    const sel=v('es-instr-select');const txt=v('es-instr-text');
+    if(sel)sel.value=s.instructor||'';
+    if(txt)txt.value=s.instructor||'';
+  },50);
   v('es-notes').value=s.notes||'';v('es-workon').value=s.what_to_work_on||'';v('es-tips').value=s.private_tips||'';
   v('overlay-edit').classList.add('open');
 }
@@ -353,14 +514,17 @@ async function saveEditSession(){
   const btn=v('es-save-btn');btn.textContent='Saving...';btn.disabled=true;
   try{
     const t=sessionType.es;
-    const payload={id:detailSession.id,type:t,date:v('es-date').value||detailSession.date,technique:v('es-tech').value||null,instructor:v('es-instr').value||null,duration_min:parseInt(v('es-dur').value)||null,notes:v('es-notes').value||null,what_to_work_on:t!=='private'?(v('es-workon').value||null):null,private_tips:t==='private'?(v('es-tips').value||null):null};
+    const payload={id:detailSession.id,type:t,date:v('es-date').value||detailSession.date,
+      technique:v('es-tech').value||null,
+      instructor:getInstructor('es'),
+      duration_min:parseInt(v('es-dur').value)||null,notes:v('es-notes').value||null,
+      what_to_work_on:t!=='private'?(v('es-workon').value||null):null,
+      private_tips:t==='private'?(v('es-tips').value||null):null};
     const updated=await POST('save_session',payload);
     const idx=sessions.findIndex(s=>s.id===detailSession.id);
     if(idx>=0)sessions[idx]=updated;
-    detailSession=updated;
-    closeModal('overlay-edit');
-    renderPrivBar();renderSessions();renderHistory();
-    refreshDetailInfo(updated);
+    detailSession=updated;closeModal('overlay-edit');
+    renderPrivBar();renderSessions();renderHistory();refreshDetailInfo(updated);
     toast('Session updated!');
   }catch(e){toast('Update failed: '+e.message,'#f87171');}
   btn.textContent='Update Session';btn.disabled=false;
@@ -427,19 +591,8 @@ function renderRolls(){
     ${detailRolls.map(r=>renderRollCard(r)).join('')}
     ${!showRollForm?`<button class="add-roll-btn" onclick="openRollForm()">+ Add Roll</button>`:''}`;
   v('roll-form-wrap').innerHTML=showRollForm?renderRollForm():'';
-  if(showRollForm){
-    selectedResult=editingRoll?.result||'';selectedScore=editingRoll?.score??0;creatingOpp=false;
-    document.querySelectorAll('.result-btn').forEach(b=>b.classList.toggle('active',b.dataset.result===selectedResult));
-    document.querySelectorAll('.score-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.score)===selectedScore));
-    if(editingRoll){
-      setTimeout(()=>{
-        const os=v('roll-opp');if(os&&editingRoll.opponent_id)os.value=editingRoll.opponent_id;
-        if(v('roll-dur'))v('roll-dur').value=editingRoll.duration_min||5;
-        if(v('roll-mysubs'))v('roll-mysubs').value=editingRoll.my_submissions||'';
-        if(v('roll-theirsubs'))v('roll-theirsubs').value=editingRoll.their_submissions||'';
-        if(v('roll-notes'))v('roll-notes').value=editingRoll.notes||'';
-      },50);
-    }
+  if(showRollForm&&editingRoll){
+    setTimeout(()=>{const os=v('roll-opp');if(os&&editingRoll.opponent_id)os.value=editingRoll.opponent_id;},50);
   }
 }
 function renderRollCard(r){
@@ -449,7 +602,7 @@ function renderRollCard(r){
   const safe=JSON.stringify(r).replace(/'/g,"\\'");
   return `<div class="roll-card" style="border-left:3px solid ${rc}">
     <div class="roll-head">
-      <div style="display:flex;align-items:center;gap:8px"><span class="roll-result" style="color:${rc}">${re}</span><span class="roll-opp">${oppName}</span>${oppBelt?beltBadge(oppBelt):''}</div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px;font-weight:800;color:${rc}">${re}</span><span style="font-size:12px;font-weight:700;color:#f1f5f9">${oppName}</span>${oppBelt?beltBadge(oppBelt):''}</div>
       <div style="display:flex;align-items:center;gap:6px">
         ${r.score!=null?`<span style="font-size:11px;font-weight:700;color:${r.score>0?'#4ade80':r.score<0?'#f87171':'#94a3b8'}">${r.score>0?'+':''}${r.score}</span>`:''}
         ${r.duration_min?`<span style="font-size:10px;color:var(--muted)">${r.duration_min}min</span>`:''}
@@ -457,9 +610,9 @@ function renderRollCard(r){
         <button onclick="deleteRoll('${r.id}')" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:0 2px">×</button>
       </div>
     </div>
-    ${r.notes?`<div class="roll-notes">${r.notes}</div>`:''}
-    ${r.my_submissions?`<div class="roll-subs" style="color:#4ade80">✓ ${r.my_submissions}</div>`:''}
-    ${r.their_submissions?`<div class="roll-subs" style="color:#f87171">✗ ${r.their_submissions}</div>`:''}
+    ${r.notes?`<div style="font-size:10px;color:#64748b;line-height:1.5">${r.notes}</div>`:''}
+    ${r.my_submissions?`<div style="font-size:10px;color:#4ade80;margin-top:2px">✓ ${r.my_submissions}</div>`:''}
+    ${r.their_submissions?`<div style="font-size:10px;color:#f87171;margin-top:2px">✗ ${r.their_submissions}</div>`:''}
   </div>`;
 }
 function renderRollForm(){
@@ -506,22 +659,17 @@ function openRollForm(){showRollForm=true;editingRoll=null;selectedResult='';sel
 function closeRollForm(){showRollForm=false;editingRoll=null;renderRolls();}
 function selResult(r){selectedResult=r;document.querySelectorAll('.result-btn').forEach(b=>b.classList.toggle('active',b.dataset.result===r));}
 function selScore(s){selectedScore=s;document.querySelectorAll('.score-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.score)===s));}
-function toggleCreateOpp(v2){creatingOpp=v2;renderRolls();}
-
+function toggleCreateOpp(val){creatingOpp=val;renderRolls();}
 function openEditRoll(rollJson){
-  let roll;
-  try{roll=typeof rollJson==='string'?JSON.parse(rollJson.replace(/\\'/g,"'")):rollJson;}catch(e){console.error(e);return;}
-  editingRoll=roll;selectedResult=roll.result||'';selectedScore=roll.score??0;
-  showRollForm=true;renderRolls();
+  let roll;try{roll=typeof rollJson==='string'?JSON.parse(rollJson.replace(/\\'/g,"'")):rollJson;}catch(e){return;}
+  editingRoll=roll;selectedResult=roll.result||'';selectedScore=roll.score??0;showRollForm=true;renderRolls();
 }
-
 async function createOpp(){
   const name=v('new-opp-name')?.value?.trim(),b=v('new-opp-belt')?.value;
   if(!name)return;
   try{const opp=await POST('add_opponent',{name,belt:b});opponents.push(opp);creatingOpp=false;renderRolls();setTimeout(()=>{const s=v('roll-opp');if(s)s.value=opp.id;},100);toast('Opponent added!');}
   catch(e){toast('Failed','#f87171');}
 }
-
 async function saveRoll(){
   if(!selectedResult){toast('Select a result','#fb923c');return;}
   const oppId=v('roll-opp')?.value||null;
@@ -535,13 +683,11 @@ async function saveRoll(){
     showRollForm=false;editingRoll=null;renderRolls();
   }catch(e){toast('Save failed: '+e.message,'#f87171');}
 }
-
 async function deleteRoll(id){
   if(!confirm('Delete this roll?'))return;
   try{await POST('delete_roll',{id});detailRolls=detailRolls.filter(r=>r.id!==id);renderRolls();toast('Roll deleted','#f87171');}
   catch(e){toast('Delete failed','#f87171');}
 }
-
 async function deleteSession(){
   if(!detailSession||!confirm('Delete this session and all its rolls?'))return;
   try{await POST('delete_session',{id:detailSession.id});sessions=sessions.filter(s=>s.id!==detailSession.id);renderPrivBar();renderSessions();renderHistory();closeModal('overlay-detail');toast('Session deleted','#f87171');}
@@ -552,10 +698,11 @@ async function deleteSession(){
 async function loadStats(){
   try{const s=await GET('get_stats');renderStats(s);}catch(e){toast('Stats failed','#f87171');}
 }
-function renderStats({sessions:S,rolls:R,opponents:O}){
+function renderStats({sessions:S,rolls:R,opponents:O,purchases:P}){
   const total=S.length,gi=S.filter(x=>x.type==='gi').length,nogi=S.filter(x=>x.type==='nogi').length,priv=S.filter(x=>x.type==='private').length;
   const wins=R.filter(r=>r.result==='win').length,losses=R.filter(r=>r.result==='loss').length,draws=R.filter(r=>r.result==='draw').length;
   const wr=R.length?Math.round(wins/R.length*100):0,avgRolls=S.length?Math.round(R.length/S.length*10)/10:0;
+  const totalBought=(P||[]).reduce((s,p)=>s+(p.classes_purchased||0),0);
   const mmap={};S.forEach(s=>{const m=s.date.slice(0,7);mmap[m]=(mmap[m]||0)+1;});
   const months=Object.entries(mmap).sort().slice(-6),maxM=Math.max(...months.map(x=>x[1]),1);
   const oppmap={};R.forEach(r=>{const n=r.bjj_opponents?.name||'Unknown';oppmap[n]=(oppmap[n]||0)+1;});
@@ -568,7 +715,7 @@ function renderStats({sessions:S,rolls:R,opponents:O}){
       <div class="stat-card"><div class="stat-label">TOTAL</div><div class="stat-val">${total}</div></div>
       <div class="stat-card"><div class="stat-label">GI</div><div class="stat-val" style="color:#60a5fa">${gi}</div></div>
       <div class="stat-card"><div class="stat-label">NO-GI</div><div class="stat-val" style="color:#fb923c">${nogi}</div></div>
-      <div class="stat-card"><div class="stat-label">PRIVATES</div><div class="stat-val" style="color:#4ade80">${priv}/${PRIVATES_TOTAL}</div><div class="stat-sub">${PRIVATES_TOTAL-priv} left</div></div>
+      <div class="stat-card"><div class="stat-label">PRIVATES</div><div class="stat-val" style="color:#4ade80">${priv}/${totalBought}</div><div class="stat-sub">${totalBought-priv} left</div></div>
     </div>
     <div class="section-title">ROLLING</div>
     <div class="stat-grid">
