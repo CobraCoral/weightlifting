@@ -352,6 +352,44 @@ function makeDefaultDraft(day){
   return d;
 }
 
+// Build the target badge from actual draft data (last session weights/reps)
+// Falls back to static program target if no real data exists
+function buildTargetBadge(ex){
+  const sets = draft[ex.id];
+  if(!sets || !sets.length) return `${ex.rt}${ex.u?' · '+ex.u:''}`;
+
+  // Collect non-empty weights and reps
+  const weights = sets.map(s=>parseFloat(s.w)).filter(v=>!isNaN(v)&&v>0);
+  const reps    = sets.map(s=>parseFloat(s.r)).filter(v=>!isNaN(v)&&v>0);
+  const nSets   = sets.length;
+
+  // If nothing filled in yet, show static target
+  if(!weights.length && !reps.length) return `${ex.rt}${ex.u?' · '+ex.u:''}`;
+
+  // Sets count
+  const setsStr = `${nSets}×`;
+
+  // Reps: show range if varied, single value if uniform, target if missing
+  let repsStr = ex.rt;
+  if(reps.length){
+    const minR = Math.min(...reps), maxR = Math.max(...reps);
+    repsStr = minR===maxR ? String(minR) : `${minR}–${maxR}`;
+  }
+
+  // Weight: show max (top set) with unit
+  let weightStr = '';
+  if(weights.length){
+    const maxW = Math.max(...weights);
+    // Format: drop trailing .0 but keep .5
+    const fmt = v => Number.isInteger(v) ? String(v) : v.toFixed(1).replace(/\.0$/,'');
+    weightStr = ` / ${fmt(maxW)}${ex.u?' '+ex.u:''}`;
+  } else if(ex.u){
+    weightStr = ` · ${ex.u}`;
+  }
+
+  return `${setsStr}${repsStr}${weightStr}`;
+}
+
 // ─── Timing calculations ──────────────────────────────────────────────────────
 // REST = time from previous set's completedAt → this set's startedAt
 // EXERCISE = time from this set's startedAt → this set's completedAt
@@ -511,9 +549,9 @@ function renderExercises(){
       setsHtml+=`<div class="set-row" style="background:${st.done?ac+'15':st.startedAt?ac+'07':'transparent'}" id="setrow-${ex.id}-${si}">
         <span class="set-num" style="color:${st.done?ac:st.startedAt?ac:'#475569'}">${si+1}</span>
         <input class="set-input" type="number" value="${st.w}" placeholder="wt"
-          style="color:${ac}" oninput="updSet('${ex.id}',${si},'w',this.value)">
+          style="color:${ac};-webkit-text-fill-color:${ac}" oninput="updSet('${ex.id}',${si},'w',this.value)">
         <input class="set-input" type="number" value="${st.r}" placeholder="reps"
-          oninput="updSet('${ex.id}',${si},'r',this.value)">
+          style="-webkit-text-fill-color:#e2e8f0" oninput="updSet('${ex.id}',${si},'r',this.value)">
         ${actionBtn}
         <button class="rm-btn" onclick="rmSet('${ex.id}',${si})">×</button>
         ${timeLabel}
@@ -526,7 +564,7 @@ function renderExercises(){
           <div><div class="ex-name">${ex.name}</div>${ex.alt?`<div class="ex-alt">or: ${ex.alt}</div>`:''}</div>
           <button class="card-edit-btn" onclick="openEditModal('${ex.id}')" title="Edit exercise">✏️</button>
         </div>
-        <div class="ex-target" style="color:${ac}">${ex.rt}${ex.u?' · '+ex.u:''}</div>
+        <div class="ex-target" style="color:${ac}">${buildTargetBadge(ex)}</div>
       </div>
       ${timingBar}
       <div class="set-header">
