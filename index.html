@@ -57,7 +57,13 @@
 .set-input{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:5px;padding:5px;font-family:var(–font);font-size:12px;text-align:center;outline:none;color:#e2e8f0;-webkit-text-fill-color:#e2e8f0;width:68px;-moz-appearance:textfield;}
 .set-input::-webkit-outer-spin-button,.set-input::-webkit-inner-spin-button{-webkit-appearance:none;}
 .chk-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(–dim);cursor:pointer;font-weight:700;font-size:12px;flex-shrink:0;transition:all .15s;color:#0a0f1a;background:transparent;font-family:var(–font);}
-.rm-btn{background:none;border:none;color:var(–dim);font-size:15px;cursor:pointer;padding:0 2px;flex-shrink:0;}
+.rm-btn{display:none;} /* hidden — replaced by swipe-to-delete */
+
+/* ── Swipe-to-delete ── */
+.swipe-wrap{position:relative;overflow:hidden;border-radius:4px;margin:1px 0;}
+.swipe-delete-bg{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:flex-end;padding-right:14px;border-radius:4px;pointer-events:none;min-width:80px;}
+.swipe-delete-label{font-size:10px;font-weight:800;letter-spacing:.08em;color:#fff;opacity:0;transition:opacity .1s;}
+.swipe-inner{position:relative;transition:transform .2s cubic-bezier(.25,.46,.45,.94);touch-action:pan-y;will-change:transform;}
 .set-time{font-size:9px;color:var(–muted);flex-shrink:0;white-space:nowrap;}
 
 /* ── Rest / exercise badges ── */
@@ -546,15 +552,24 @@ function renderExercises(){
           onclick="toggleDone('${ex.id}',${si})">${st.done?'✓':''}</button>`;
       }
 
-      setsHtml+=`<div class="set-row" style="background:${st.done?ac+'15':st.startedAt?ac+'07':'transparent'}" id="setrow-${ex.id}-${si}">
-        <span class="set-num" style="color:${st.done?ac:st.startedAt?ac:'#475569'}">${si+1}</span>
-        <input class="set-input" type="number" value="${st.w}" placeholder="wt"
-          style="color:${ac};-webkit-text-fill-color:${ac}" oninput="updSet('${ex.id}',${si},'w',this.value)">
-        <input class="set-input" type="number" value="${st.r}" placeholder="reps"
-          style="-webkit-text-fill-color:#e2e8f0" oninput="updSet('${ex.id}',${si},'r',this.value)">
-        ${actionBtn}
-        <button class="rm-btn" onclick="rmSet('${ex.id}',${si})">×</button>
-        ${timeLabel}
+      setsHtml+=`<div class="swipe-wrap" id="swipewrap-${ex.id}-${si}">
+        <div class="swipe-delete-bg" id="swipebg-${ex.id}-${si}" style="background:#7f1d1d">
+          <span class="swipe-delete-label" id="swipelbl-${ex.id}-${si}">DELETE</span>
+        </div>
+        <div class="swipe-inner" id="swipeinner-${ex.id}-${si}"
+          ontouchstart="swipeStart(event,'${ex.id}',${si})"
+          ontouchmove="swipeMove(event,'${ex.id}',${si})"
+          ontouchend="swipeEnd(event,'${ex.id}',${si})">
+          <div class="set-row" style="background:${st.done?ac+'15':st.startedAt?ac+'07':'transparent'}" id="setrow-${ex.id}-${si}">
+            <span class="set-num" style="color:${st.done?ac:st.startedAt?ac:'#475569'}">${si+1}</span>
+            <input class="set-input" type="number" value="${st.w}" placeholder="wt"
+              style="color:${ac};-webkit-text-fill-color:${ac}" oninput="updSet('${ex.id}',${si},'w',this.value)">
+            <input class="set-input" type="number" value="${st.r}" placeholder="reps"
+              style="-webkit-text-fill-color:#e2e8f0" oninput="updSet('${ex.id}',${si},'r',this.value)">
+            ${actionBtn}
+            ${timeLabel}
+          </div>
+        </div>
       </div>`;
     });
 
@@ -1107,6 +1122,110 @@ function drawChart() {
   for (let i = 0; i < n; i += step) {
     ctx.fillText(labels[i], xScale(i), PAD.top + ch + 18);
   }
+}
+
+// ─── Swipe-to-delete ─────────────────────────────────────────────────────────
+const _swipe = {};  // track per-row swipe state
+
+const SWIPE_PEEK    = 72;   // px revealed before "peek" — shows DELETE label
+const SWIPE_COMMIT  = 140;  // px — cross this threshold and release = delete
+
+function swipeStart(e, id, si) {
+  const key = `${id}-${si}`;
+  _swipe[key] = {
+    startX: e.touches[0].clientX,
+    startY: e.touches[0].clientY,
+    dx: 0,
+    committed: false,
+    cancelled: false,
+  };
+}
+
+function swipeMove(e, id, si) {
+  const key = `${id}-${si}`;
+  const s = _swipe[key];
+  if (!s || s.cancelled) return;
+
+  const dx = e.touches[0].clientX - s.startX;
+  const dy = e.touches[0].clientY - s.startY;
+
+  // If moving more vertically than horizontally, cancel swipe (allow scroll)
+  if (!s.dirLocked) {
+    if (Math.abs(dy) > Math.abs(dx) + 4) { s.cancelled = true; return; }
+    if (Math.abs(dx) > 6) s.dirLocked = true;
+    else return;
+  }
+
+  // Only allow left swipe (negative dx)
+  if (dx > 0) { resetSwipe(id, si); return; }
+
+  e.preventDefault(); // prevent scroll while swiping horizontally
+
+  const travel = Math.min(Math.abs(dx), SWIPE_COMMIT + 20);
+  s.dx = travel;
+  s.committed = travel >= SWIPE_COMMIT;
+
+  const inner = document.getElementById(`swipeinner-${id}-${si}`);
+  const bg    = document.getElementById(`swipebg-${id}-${si}`);
+  const lbl   = document.getElementById(`swipelbl-${id}-${si}`);
+  if (!inner) return;
+
+  inner.style.transition = 'none';
+  inner.style.transform  = `translateX(-${travel}px)`;
+
+  // Background: red intensifies as you drag further
+  const progress = Math.min(travel / SWIPE_COMMIT, 1);
+  const r = Math.round(127 + (248 - 127) * progress);
+  const g = Math.round(29  + (113 - 29)  * (1 - progress));
+  const b = Math.round(29  + (113 - 29)  * (1 - progress));
+  if (bg) bg.style.background = `rgb(${r},${g},${b})`;
+
+  // Show DELETE label once past peek threshold
+  if (lbl) lbl.style.opacity = travel > SWIPE_PEEK ? '1' : '0';
+
+  // Shake/bounce at commit threshold to signal "let go to delete"
+  if (s.committed && !s.shook) {
+    s.shook = true;
+    inner.style.transform = `translateX(-${SWIPE_COMMIT + 6}px)`;
+  }
+}
+
+function swipeEnd(e, id, si) {
+  const key = `${id}-${si}`;
+  const s = _swipe[key];
+  if (!s || s.cancelled) return;
+
+  if (s.committed) {
+    // Animate out then delete
+    const inner = document.getElementById(`swipeinner-${id}-${si}`);
+    const wrap  = document.getElementById(`swipewrap-${id}-${si}`);
+    if (inner) {
+      inner.style.transition = 'transform .18s ease-in';
+      inner.style.transform  = 'translateX(-110%)';
+    }
+    if (wrap) {
+      wrap.style.transition  = 'max-height .2s ease .15s, opacity .15s ease .15s';
+      wrap.style.overflow    = 'hidden';
+      wrap.style.maxHeight   = wrap.offsetHeight + 'px';
+      requestAnimationFrame(() => {
+        wrap.style.maxHeight = '0';
+        wrap.style.opacity   = '0';
+      });
+    }
+    setTimeout(() => rmSet(id, si), 340);
+  } else {
+    resetSwipe(id, si);
+  }
+  delete _swipe[key];
+}
+
+function resetSwipe(id, si) {
+  const inner = document.getElementById(`swipeinner-${id}-${si}`);
+  const bg    = document.getElementById(`swipebg-${id}-${si}`);
+  const lbl   = document.getElementById(`swipelbl-${id}-${si}`);
+  if (inner) { inner.style.transition = 'transform .2s cubic-bezier(.25,.46,.45,.94)'; inner.style.transform = 'translateX(0)'; }
+  if (bg)    bg.style.background = '#7f1d1d';
+  if (lbl)   lbl.style.opacity = '0';
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
