@@ -424,11 +424,22 @@ function exStats(sets){
 // ─── Draft ↔ DB conversion ────────────────────────────────────────────────────
 function draftToRows(day,date){
   const rows=[];
+  const skipped=[];
   PROGRAM[day].exercises.forEach(ex=>{
+    // Guard: exercise_id MUST be a number from the DB. If it isn't, skip the rows
+    // and warn the user — this prevents NOT NULL constraint violations on save.
+    if (typeof ex.id !== 'number') {
+      skipped.push(ex.name);
+      return;
+    }
     (draft[ex.id]||[]).forEach((st,i)=>{
       rows.push({date,day,exercise_id:ex.id,exercise:ex.name,set_number:i+1,weight:st.w||null,reps:st.r||null,done:st.done,started_at:st.startedAt||null,completed_at:st.completedAt||null});
     });
   });
+  if (skipped.length) {
+    console.warn('Skipped exercises without DB id:', skipped);
+    showToast(`Skipped ${skipped.length} unsaved exercise${skipped.length>1?'s':''}: ${skipped.join(', ')}`,'#fb923c');
+  }
   return rows;
 }
 
