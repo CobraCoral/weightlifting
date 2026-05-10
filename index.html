@@ -300,45 +300,14 @@ async function apiGet(p)    { const r=await fetch(`${EDGE}?${new URLSearchParams
 async function apiPost(p,b) { const r=await fetch(`${EDGE}?${new URLSearchParams(p)}`,{method:'POST',headers:HDRS,body:JSON.stringify(b)}); if(!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text().catch(()=>'')}`); return r.json(); }
 
 // ─── Program ─────────────────────────────────────────────────────────────────
+// Exercises themselves come from the `exercises` table in Supabase.
+// This object only holds per-day metadata (label + accent color).
+// PROGRAM[day].exercises is populated at boot from the DB.
 const PROGRAM = {
-  Tuesday:  {label:'Legs',                   accent:'#4ade80', exercises:[
-    {id:'hth',name:'Barbell Hip Thrust',     alt:'DB Hip Thrust',        ds:4,rt:'8-10',   dw:45,  u:'lb'},
-    {id:'cpt',name:'Cable Pull-Through',                                 ds:3,rt:'12-15',  dw:23,  u:'lb'},
-    {id:'sqm',name:'Squat Machine',          alt:'Hack Squat/Leg Press', ds:4,rt:'5-8',    dw:240, u:'lb'},
-    {id:'lpr',name:'Leg Press',                                          ds:3,rt:'8-10',   dw:180, u:'lb'},
-    {id:'lex',name:'Leg Extensions',                                     ds:3,rt:'10-12',  dw:165, u:'lb'},
-    {id:'lcl',name:'Prone Leg Curl',         alt:'Seated Leg Curl',      ds:3,rt:'10-12',  dw:85,  u:'lb'},
-    {id:'wlk',name:'Walking Lunges',                                     ds:2,rt:'20 steps',dw:0,  u:'BW'},
-    {id:'clf',name:'Calf Raises',                                        ds:3,rt:'15',     dw:110, u:'lb'},
-  ]},
-  Thursday: {label:'Pull + 3D Density',      accent:'#60a5fa', exercises:[
-    {id:'pup',name:'Neutral-Grip Pull-Ups',                              ds:4,rt:'10',     dw:-40, u:'lb assist'},
-    {id:'row',name:'Chest-Supported DB Row',                             ds:4,rt:'10',     dw:40,  u:'lb/hand'},
-    {id:'rdr',name:'Rear Delt Raises (CS)',                              ds:3,rt:'20',     dw:12.5,u:'lb/hand'},
-    {id:'hip',name:'High Incline DB Press',                              ds:3,rt:'10',     dw:40,  u:'lb/hand'},
-    {id:'fca',name:'Farmer Carries',                                     ds:3,rt:'30-45s', dw:85,  u:'lb/hand'},
-    {id:'abs',name:'Total Abdominal Machine',                            ds:3,rt:'15',     dw:100, u:'lb'},
-    {id:'hmc',name:'Hammer Curls',                                       ds:3,rt:'15',     dw:12.5,u:'lb/hand'},
-  ]},
-  Saturday: {label:'Push + Width',           accent:'#fb923c', exercises:[
-    {id:'ohp',name:'Seated Neutral DB OHP',                              ds:4,rt:'8',      dw:30,  u:'lb/hand'},
-    {id:'idb',name:'Incline DB Press',                                   ds:4,rt:'8',      dw:45,  u:'lb/hand'},
-    {id:'slr',name:'Strict DB Lateral Raises',                           ds:4,rt:'15',     dw:12.5,u:'lb/hand'},
-    {id:'clr',name:'Lean-Away Cable Lateral Raises',                     ds:3,rt:'15',     dw:9,   u:'lb'},
-    {id:'rpd',name:'Rope Triceps Pushdowns',                             ds:3,rt:'15',     dw:25,  u:'lb'},
-    {id:'otr',name:'Overhead Rope Tricep Ext.',                          ds:3,rt:'12',     dw:35,  u:'lb'},
-    {id:'vac',name:'Vacuum Holds',                                       ds:1,rt:'3-5 min',dw:0,   u:''},
-  ]},
-  Sunday:   {label:'Accessory + Weak Points',accent:'#c084fc', exercises:[
-    {id:'rds', name:'Rear Delt Raises',                                  ds:4,rt:'20',     dw:12.5,u:'lb/hand'},
-    {id:'fpl', name:'Face Pulls',                                        ds:3,rt:'20',     dw:22.5,u:'lb'},
-    {id:'ngc', name:'Neutral-Grip DB Curls (L leads)',                   ds:3,rt:'12',     dw:15,  u:'lb/hand'},
-    {id:'ihc', name:'Incline Hammer Curls 30deg',                        ds:3,rt:'12',     dw:15,  u:'lb/hand'},
-    {id:'clr2',name:'Lean-Away Cable Lateral Raises',                    ds:3,rt:'15',     dw:9,   u:'lb'},
-    {id:'otr2',name:'Overhead Rope Tricep Ext.',                         ds:3,rt:'12',     dw:47.5,u:'lb'},
-    {id:'abm', name:'Total Abdominal Machine',                           ds:3,rt:'10',     dw:100, u:'lb'},
-    {id:'vac2',name:'Vacuum Holds',                                      ds:1,rt:'3-5 min',dw:0,   u:''},
-  ]},
+  Tuesday:  {label:'Legs',                    accent:'#4ade80', exercises:[]},
+  Thursday: {label:'Pull + 3D Density',       accent:'#60a5fa', exercises:[]},
+  Saturday: {label:'Push + Width',            accent:'#fb923c', exercises:[]},
+  Sunday:   {label:'Accessory + Weak Points', accent:'#c084fc', exercises:[]},
 };
 
 const DAYS = ['Tuesday','Thursday','Saturday','Sunday'];
@@ -457,7 +426,7 @@ function draftToRows(day,date){
   const rows=[];
   PROGRAM[day].exercises.forEach(ex=>{
     (draft[ex.id]||[]).forEach((st,i)=>{
-      rows.push({date,day,exercise:ex.name,set_number:i+1,weight:st.w||null,reps:st.r||null,done:st.done,started_at:st.startedAt||null,completed_at:st.completedAt||null});
+      rows.push({date,day,exercise_id:ex.id,exercise:ex.name,set_number:i+1,weight:st.w||null,reps:st.r||null,done:st.done,started_at:st.startedAt||null,completed_at:st.completedAt||null});
     });
   });
   return rows;
@@ -466,7 +435,7 @@ function draftToRows(day,date){
 function rowsToDraft(rows,day){
   const d=makeDefaultDraft(day);
   PROGRAM[day].exercises.forEach(ex=>{
-    const er=rows.filter(r=>r.exercise===ex.name).sort((a,b)=>a.set_number-b.set_number);
+    const er=rows.filter(r=>r.exercise_id===ex.id).sort((a,b)=>a.set_number-b.set_number);
     if(er.length>0) d[ex.id]=er.map(r=>({w:r.weight||'',r:r.reps||'',done:r.done,startedAt:r.started_at||null,completedAt:r.completed_at||null}));
   });
   return d;
@@ -476,7 +445,7 @@ function rowsToDraft(rows,day){
 function rowsToFreshDraft(rows,day){
   const d=makeDefaultDraft(day);
   PROGRAM[day].exercises.forEach(ex=>{
-    const er=rows.filter(r=>r.exercise===ex.name).sort((a,b)=>a.set_number-b.set_number);
+    const er=rows.filter(r=>r.exercise_id===ex.id).sort((a,b)=>a.set_number-b.set_number);
     if(er.length>0) d[ex.id]=er.map(r=>({w:r.weight||'',r:r.reps||'',done:false,startedAt:null,completedAt:null}));
   });
   return d;
@@ -572,10 +541,10 @@ function renderExercises(){
       // - Done: show ✓ checkmark (filled)
       let actionBtn;
       if(!st.startedAt && !st.done){
-        actionBtn=`<button class="start-set-btn" style="color:${ac};border-color:${ac}50" onclick="startSet('${ex.id}',${si})">▶ start</button>`;
+        actionBtn=`<button class="start-set-btn" style="color:${ac};border-color:${ac}50" onclick="startSet(${ex.id},${si})">▶ start</button>`;
       } else {
         actionBtn=`<button class="chk-btn" style="background:${st.done?ac:'transparent'};border-color:${st.done?ac:'#334155'}"
-          onclick="toggleDone('${ex.id}',${si})">${st.done?'✓':''}</button>`;
+          onclick="toggleDone(${ex.id},${si})">${st.done?'✓':''}</button>`;
       }
 
       setsHtml+=`<div class="swipe-wrap" id="swipewrap-${ex.id}-${si}">
@@ -583,15 +552,15 @@ function renderExercises(){
           <span class="swipe-delete-label" id="swipelbl-${ex.id}-${si}">DELETE</span>
         </div>
         <div class="swipe-inner" id="swipeinner-${ex.id}-${si}"
-          ontouchstart="swipeStart(event,'${ex.id}',${si})"
-          ontouchmove="swipeMove(event,'${ex.id}',${si})"
-          ontouchend="swipeEnd(event,'${ex.id}',${si})">
+          ontouchstart="swipeStart(event,${ex.id},${si})"
+          ontouchmove="swipeMove(event,${ex.id},${si})"
+          ontouchend="swipeEnd(event,${ex.id},${si})">
           <div class="set-row" style="background:${st.done?ac+'15':st.startedAt?ac+'07':'transparent'}" id="setrow-${ex.id}-${si}">
             <span class="set-num" style="color:${st.done?ac:st.startedAt?ac:'#475569'}">${si+1}</span>
             <input class="set-input" type="number" value="${st.w}" placeholder="wt"
-              style="color:${ac};-webkit-text-fill-color:${ac}" oninput="updSet('${ex.id}',${si},'w',this.value)">
+              style="color:${ac};-webkit-text-fill-color:${ac}" oninput="updSet(${ex.id},${si},'w',this.value)">
             <input class="set-input" type="number" value="${st.r}" placeholder="reps"
-              style="-webkit-text-fill-color:#e2e8f0" oninput="updSet('${ex.id}',${si},'r',this.value)">
+              style="-webkit-text-fill-color:#e2e8f0" oninput="updSet(${ex.id},${si},'r',this.value)">
             ${actionBtn}
             ${timeLabel}
           </div>
@@ -603,13 +572,13 @@ function renderExercises(){
       <div class="card-head">
         <div style="display:flex;align-items:flex-start;gap:4px">
           <div><div class="ex-name">${ex.name}</div>${ex.alt?`<div class="ex-alt">or: ${ex.alt}</div>`:''}</div>
-          <button class="card-edit-btn" onclick="openEditModal('${ex.id}')" title="Edit exercise">✏️</button>
+          <button class="card-edit-btn" onclick="openEditModal(${ex.id})" title="Edit exercise">✏️</button>
         </div>
         <div class="ex-target" style="color:${ac}">${buildTargetBadge(ex)}</div>
       </div>
       <div class="reorder-controls">
-        <button class="reorder-arrow" onclick="moveExercise('${ex.id}',-1)" ${prog.exercises[0].id===ex.id?'disabled':''}>↑ up</button>
-        <button class="reorder-arrow" onclick="moveExercise('${ex.id}',1)" ${prog.exercises[prog.exercises.length-1].id===ex.id?'disabled':''}>↓ down</button>
+        <button class="reorder-arrow" onclick="moveExercise(${ex.id},-1)" ${prog.exercises[0].id===ex.id?'disabled':''}>↑ up</button>
+        <button class="reorder-arrow" onclick="moveExercise(${ex.id},1)" ${prog.exercises[prog.exercises.length-1].id===ex.id?'disabled':''}>↓ down</button>
       </div>
       ${timingBar}
       <div class="set-header">
@@ -620,7 +589,7 @@ function renderExercises(){
         <span class="sh" style="flex:1">TIME</span>
       </div>
       ${setsHtml}
-      <button class="add-btn" style="color:${ac};border-color:${ac}40" onclick="addSet('${ex.id}',${ex.dw})">+ set</button>
+      <button class="add-btn" style="color:${ac};border-color:${ac}40" onclick="addSet(${ex.id},${ex.dw})">+ set</button>
     </div>`;
   }).join('');
 
@@ -669,26 +638,10 @@ function moveExercise(exId, delta){
 
 async function persistOrder(){
   const exs = PROGRAM[currentDay].exercises;
-  // Save all exercises with their new sort_order in parallel
   showToast('Saving order...','#60a5fa');
   try {
-    await Promise.all(exs.map((ex, i) => fetch(`${SB_URL}/functions/v1/workouts?action=save_program_exercise`, {
-      method: 'POST',
-      headers: HDRS,
-      body: JSON.stringify({
-        id: ex.id,
-        day: currentDay,
-        name: ex.name,
-        alt: ex.alt || null,
-        ds: ex.ds,
-        rt: ex.rt,
-        dw: ex.dw,
-        u: ex.u || 'lb',
-        sort_order: i,
-        is_deleted: false,
-        is_custom: !!ex._isCustom,
-      })
-    })));
+    const orders = exs.map((ex, i) => ({ id: ex.id, sort_order: i }));
+    await apiPost({action:'reorder_exercises'}, { orders });
     showToast('Order saved!','#4ade80');
   } catch(e) {
     showToast('Order save failed: '+e.message,'#f87171');
@@ -735,7 +688,7 @@ function closeModal(e){
   document.getElementById('modal-overlay').classList.remove('open');
 }
 
-function saveModal(){
+async function saveModal(){
   const name   = document.getElementById('modal-name').value.trim();
   const alt    = document.getElementById('modal-alt').value.trim();
   const ds     = parseInt(document.getElementById('modal-sets').value)||3;
@@ -746,14 +699,26 @@ function saveModal(){
 
   const prog=PROGRAM[currentDay];
 
-  let exForSave;
   if(modalMode==='add'){
-    const id='ex'+Date.now().toString(36);
-    const newEx={id,name,ds,rt,dw,u,_isCustom:true};
-    if(alt) newEx.alt=alt;
+    // Save first to get a real DB-assigned integer id
+    const tempEx = {name,ds,rt,dw,u};
+    if(alt) tempEx.alt = alt;
+    const saved = await saveExercise(tempEx);
+    if(!saved){
+      document.getElementById('modal-overlay').classList.remove('open');
+      return;
+    }
+    const newEx = {
+      id: saved.id, name: saved.name, ds: saved.ds, rt: saved.rt,
+      dw: parseFloat(saved.dw)||0, u: saved.u,
+      _historicalNames: saved.historical_names || [],
+    };
+    if(saved.alt) newEx.alt = saved.alt;
     prog.exercises.push(newEx);
-    if(!draft[id]) draft[id]=Array.from({length:ds},()=>({w:dw===0?'':String(dw),r:'',done:false,startedAt:null,completedAt:null}));
-    exForSave=newEx;
+    if(!draft[newEx.id]) draft[newEx.id] = Array.from({length:ds},()=>({w:dw===0?'':String(dw),r:'',done:false,startedAt:null,completedAt:null}));
+    document.getElementById('modal-overlay').classList.remove('open');
+    renderExercises();
+    return;
   } else {
     const ex=prog.exercises.find(e=>e.id===modalEditId);
     if(ex){
@@ -761,23 +726,24 @@ function saveModal(){
       const cur=draft[ex.id]||[];
       while(cur.length<ds) cur.push({w:dw===0?'':String(dw),r:'',done:false,startedAt:null,completedAt:null});
       draft[ex.id]=cur;
-      exForSave=ex;
+      document.getElementById('modal-overlay').classList.remove('open');
+      renderExercises();
+      // Persist update (server will append old name to historical_names if changed)
+      saveExercise(ex);
+      return;
     }
   }
 
   document.getElementById('modal-overlay').classList.remove('open');
   renderExercises();
-
-  // Persist to Supabase so it survives reload / day switch
-  if(exForSave) saveProgramExercise(exForSave);
 }
 
 async function deleteExerciseFromProgram(){
-  if(!modalEditId) return;
+  if(modalEditId == null) return;
   const prog=PROGRAM[currentDay];
   const ex=prog.exercises.find(e=>e.id===modalEditId);
   if(!ex) return;
-  if(!confirm(`Delete "${ex.name}" from ${currentDay}? This won't affect past sessions.`)) return;
+  if(!confirm(`Delete "${ex.name}" from ${currentDay}? Past sessions stay intact.`)) return;
 
   const idx=prog.exercises.findIndex(e=>e.id===modalEditId);
   if(idx>=0) prog.exercises.splice(idx,1);
@@ -786,74 +752,64 @@ async function deleteExerciseFromProgram(){
   document.getElementById('modal-overlay').classList.remove('open');
   renderExercises();
 
-  // Persist deletion to Supabase
   try{
-    await fetch(`${SB_URL}/functions/v1/workouts?action=delete_program_exercise`,{
-      method:'POST', headers:HDRS,
-      body:JSON.stringify({id:modalEditId, is_custom:!!ex._isCustom})
-    });
+    await apiPost({action:'delete_exercise'}, {id: modalEditId});
     showToast('Exercise deleted','#f87171');
-  }catch(e){ showToast('Delete failed','#f87171'); }
+  }catch(e){ showToast('Delete failed: '+e.message,'#f87171'); }
 }
 
 // Persist a single exercise's customization
-async function saveProgramExercise(ex){
+async function saveExercise(ex){
+  const idx = PROGRAM[currentDay].exercises.findIndex(e => e.id === ex.id);
+  const payload = {
+    day: currentDay, name: ex.name, alt: ex.alt || null,
+    ds: ex.ds, rt: ex.rt, dw: ex.dw, u: ex.u || 'lb',
+    sort_order: idx >= 0 ? idx : 999,
+  };
+  // Only include id if it's already a real DB id (number). Omit for new exercises.
+  if (typeof ex.id === 'number') payload.id = ex.id;
   try{
-    const idx=PROGRAM[currentDay].exercises.findIndex(e=>e.id===ex.id);
-    const payload={
-      id: ex.id, day: currentDay, name: ex.name,
-      alt: ex.alt||null, ds: ex.ds, rt: ex.rt, dw: ex.dw, u: ex.u||'lb',
-      sort_order: idx, is_deleted: false, is_custom: !!ex._isCustom,
-    };
-    await fetch(`${SB_URL}/functions/v1/workouts?action=save_program_exercise`,{
-      method:'POST', headers:HDRS, body:JSON.stringify(payload)
-    });
-  }catch(e){ console.warn('saveProgramExercise failed',e); }
+    return await apiPost({action:'save_exercise'}, payload);
+  }catch(e){
+    showToast('Save failed: '+e.message,'#f87171');
+    return null;
+  }
 }
 
-// Load all overrides and merge them into PROGRAM
-async function loadProgramOverrides(){
+// Load all exercises from the canonical `exercises` table and populate PROGRAM
+async function loadExercises(){
   try{
-    const r=await fetch(`${SB_URL}/functions/v1/workouts?action=get_program`,{
-      method:'GET', headers:HDRS
-    });
-    if(!r.ok) return;
-    const overrides=await r.json();
-    if(!Array.isArray(overrides)) return;
+    const data = await apiGet({action:'get_exercises'});
+    if(!Array.isArray(data)) return;
 
-    // First pass: apply field overrides + insert custom + remove deleted
-    overrides.forEach(o=>{
-      const day=o.day;
-      if(!PROGRAM[day]) return;
-      const exs=PROGRAM[day].exercises;
-      const existing=exs.findIndex(e=>e.id===o.id);
-      if(o.is_deleted){
-        if(existing>=0) exs.splice(existing,1);
-        return;
-      }
-      const newEx={id:o.id, name:o.name, ds:o.ds, rt:o.rt, dw:parseFloat(o.dw)||0, u:o.u, _sortOrder:o.sort_order};
-      if(o.alt) newEx.alt=o.alt;
-      if(o.is_custom) newEx._isCustom=true;
-      if(existing>=0){
-        Object.assign(exs[existing], newEx);
-      } else if(o.is_custom){
-        exs.push(newEx);
-      }
+    // Reset all day buckets
+    Object.keys(PROGRAM).forEach(day => { PROGRAM[day].exercises = []; });
+
+    // Bucket by day, ordered by sort_order
+    data.forEach(e => {
+      if(!PROGRAM[e.day]) return;
+      const ex = {
+        id: e.id,                         // integer
+        name: e.name,
+        ds: e.ds,
+        rt: e.rt,
+        dw: parseFloat(e.dw) || 0,
+        u: e.u || '',
+        _historicalNames: Array.isArray(e.historical_names) ? e.historical_names : [],
+      };
+      if(e.alt) ex.alt = e.alt;
+      PROGRAM[e.day].exercises.push(ex);
     });
 
-    // Second pass: re-sort each day's exercises by _sortOrder (if any have it)
-    Object.keys(PROGRAM).forEach(day=>{
-      const exs=PROGRAM[day].exercises;
-      // Stable sort: exercises with _sortOrder set come in that order; rest preserve original position
-      const hasOrder = exs.some(e=>typeof e._sortOrder === 'number');
-      if(!hasOrder) return;
-      exs.sort((a,b)=>{
-        const ao = typeof a._sortOrder === 'number' ? a._sortOrder : 9999;
-        const bo = typeof b._sortOrder === 'number' ? b._sortOrder : 9999;
-        return ao - bo;
+    // Sort by sort_order (already ordered by API but be explicit)
+    Object.values(PROGRAM).forEach(p => {
+      p.exercises.sort((a,b) => {
+        const av = data.find(d => d.id === a.id)?.sort_order ?? 999;
+        const bv = data.find(d => d.id === b.id)?.sort_order ?? 999;
+        return av - bv;
       });
     });
-  }catch(e){ console.warn('loadProgramOverrides failed',e); }
+  }catch(e){ console.warn('loadExercises failed', e); }
 }
 
 function startLiveTimer(){
@@ -886,7 +842,12 @@ function renderHistory(){
   const p=PROGRAM[histDay];
   list.innerHTML=filtered.map((sess,si)=>{
     const exHtml=p.exercises.map(ex=>{
-      const rows=(sess.rows||[]).filter(r=>r.exercise===ex.name).sort((a,b)=>a.set_number-b.set_number);
+      // Match by exercise_id (preferred) or by name + historical names (legacy fallback)
+      const namesForEx = [ex.name, ...(ex._historicalNames || [])];
+      const rows=(sess.rows||[]).filter(r =>
+        r.exercise_id === ex.id ||
+        (r.exercise_id == null && namesForEx.includes(r.exercise))
+      ).sort((a,b)=>a.set_number-b.set_number);
       if(!rows.length) return '';
       // Compute stats from started_at / completed_at
       let statsStr='';
@@ -908,7 +869,7 @@ function renderHistory(){
         return `<span class="hist-set" style="background:${r.done?p.accent+'20':'rgba(255,255,255,.04)'};color:${r.done?p.accent:'#475569'};border:1px solid ${r.done?p.accent+'40':'rgba(255,255,255,.06)'}">${label}</span>`;
       }).join('');
       return `<div class="hist-ex">
-        <div class="hist-ex-name">${ex.name}<span style="color:var(--muted);font-weight:400">${statsStr}</span><button class="prog-btn" onclick="event.stopPropagation();openChartModal('${ex.name.replace(/'/g,"\\'")}')">📈</button></div>
+        <div class="hist-ex-name">${ex.name}<span style="color:var(--muted);font-weight:400">${statsStr}</span><button class="prog-btn" onclick="event.stopPropagation();openChartModal(${ex.id})">📈</button></div>
         <div class="hist-sets">${setsHtml}</div>
       </div>`;
     }).join('');
@@ -1049,7 +1010,11 @@ function exportAllCSV(){
   histData.forEach(sess=>{
     const p=PROGRAM[sess.day]; if(!p) return;
     p.exercises.forEach(ex=>{
-      (sess.rows||[]).filter(r=>r.exercise===ex.name).sort((a,b)=>a.set_number-b.set_number).forEach(r=>{
+      const namesForEx = [ex.name, ...(ex._historicalNames || [])];
+      (sess.rows||[]).filter(r =>
+        r.exercise_id === ex.id ||
+        (r.exercise_id == null && namesForEx.includes(r.exercise))
+      ).sort((a,b)=>a.set_number-b.set_number).forEach(r=>{
         lines.push(`${r.date},${r.day},"${r.exercise}",${r.set_number},${r.weight||''},${r.reps||''},${r.done?'yes':'no'},${r.started_at||''},${r.completed_at||''}`);
       });
     });
@@ -1059,6 +1024,7 @@ function exportAllCSV(){
 
 // ─── WMA Chart ────────────────────────────────────────────────────────────────
 let chartExName = '';
+let chartExId = null;
 let chartMetric = 'maxWeight';  // maxWeight | avgWeight | volume | maxReps
 let chartWmaPeriod = 3;
 
@@ -1078,22 +1044,25 @@ function wma(data, period) {
   return result;
 }
 
-function buildChartData(exName, metric) {
-  // Gather all history across all loaded days for this exercise name
-  // histData is indexed by histDay — we need to look across all days
-  // Instead use allHistoryRows which we collect on demand
+function buildChartData(exId, metric) {
   const rows = chartAllRows;
   if (!rows || !rows.length) return { labels: [], actual: [], dates: [] };
 
-  // Group by date, pick max weight per session for that exercise
+  // Match by exercise_id (preferred), fall back to current name + historical names for legacy rows
+  const nameSet = new Set(chartExNames || []);
+
+  // Group by date — pick best (top) weight per session for that exercise
   const byDate = {};
-  rows.filter(r => r.exercise === exName).forEach(r => {
-    const w = parseFloat(r.weight) || 0;
+  rows.filter(r =>
+    r.exercise_id === exId ||
+    (r.exercise_id == null && nameSet.has(r.exercise))
+  ).forEach(r => {
+    const w = parseFloat(r.weight);
     const rep = parseFloat(r.reps) || 0;
     if (!byDate[r.date]) byDate[r.date] = { weights: [], reps: [], volume: 0, sets: 0 };
-    if (w > 0) byDate[r.date].weights.push(w);
+    if (!isNaN(w) && w !== 0) byDate[r.date].weights.push(w);
     if (rep > 0) byDate[r.date].reps.push(rep);
-    byDate[r.date].volume += w * rep;
+    if (!isNaN(w)) byDate[r.date].volume += Math.abs(w) * rep;
     byDate[r.date].sets++;
   });
 
@@ -1101,25 +1070,39 @@ function buildChartData(exName, metric) {
   const labels = sorted.map(([d]) => fmtShort(d));
   const dates  = sorted.map(([d]) => d);
   let actual;
-  if (metric === 'maxWeight') actual = sorted.map(([, v]) => v.weights.length ? Math.max(...v.weights) : null);
-  else if (metric === 'avgWeight') actual = sorted.map(([, v]) => v.weights.length ? Math.round(v.weights.reduce((a,b)=>a+b,0)/v.weights.length*10)/10 : null);
-  else if (metric === 'volume') actual = sorted.map(([, v]) => Math.round(v.volume));
-  else actual = sorted.map(([, v]) => v.reps.length ? Math.max(...v.reps) : null);
+  if (metric === 'maxWeight') {
+    actual = sorted.map(([, v]) => v.weights.length ? Math.max(...v.weights) : null);
+  } else if (metric === 'avgWeight') {
+    actual = sorted.map(([, v]) => v.weights.length ? Math.round(v.weights.reduce((a,b)=>a+b,0)/v.weights.length*10)/10 : null);
+  } else if (metric === 'volume') {
+    actual = sorted.map(([, v]) => Math.round(v.volume));
+  } else {
+    actual = sorted.map(([, v]) => v.reps.length ? Math.max(...v.reps) : null);
+  }
   return { labels, actual, dates };
 }
 
 let chartAllRows = [];
-async function openChartModal(exName) {
-  chartExName = exName;
-  chartMetric = 'maxWeight';
+let chartExNames = []; // [currentName, ...historicalNames]
+async function openChartModal(exId) {
+  // exId is the integer DB id; look up the exercise to get its display name + historical names
+  const prog = PROGRAM[histDay];
+  const ex = prog?.exercises.find(e => e.id === exId);
+  const exName = ex?.name || `Exercise #${exId}`;
+  chartExId    = exId;
+  chartExName  = exName;
+  chartExNames = [exName, ...(ex?._historicalNames || [])];
+  chartMetric  = 'maxWeight';
   chartWmaPeriod = 3;
-  // Load all history for the current histDay from Supabase
   try {
     const rows = await apiGet({ action: 'get_by_day', day: histDay });
     chartAllRows = rows || [];
   } catch { chartAllRows = []; }
   document.getElementById('chart-ex-title').textContent = exName;
-  document.getElementById('chart-ex-sub').textContent = histDay + ' — weight progression';
+  const subtitle = chartExNames.length > 1
+    ? `${histDay} — incl. ${chartExNames.length - 1} prior name${chartExNames.length > 2 ? 's' : ''}`
+    : `${histDay} — weight progression`;
+  document.getElementById('chart-ex-sub').textContent = subtitle;
   document.getElementById('chart-modal-overlay').classList.add('open');
   updateChartControls();
   drawChart();
@@ -1163,7 +1146,7 @@ function segmentColor(v1, v2, threshold=0.5) {
 function drawChart() {
   const canvas = document.getElementById('wma-canvas');
   if (!canvas) return;
-  const { labels, actual, dates } = buildChartData(chartExName, chartMetric);
+  const { labels, actual, dates } = buildChartData(chartExId, chartMetric);
   const wmaLine = chartWmaPeriod > 0 ? wma(actual, chartWmaPeriod) : [];
   const n = labels.length;
 
@@ -1414,7 +1397,7 @@ function resetSwipe(id, si) {
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 (async () => {
-  await loadProgramOverrides();
+  await loadExercises();
   renderAll();
   await loadDraft();
 })();
