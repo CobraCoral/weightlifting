@@ -330,13 +330,15 @@ function todayKey() { return new Date().toISOString().slice(0,10); }
 function fmtDate(iso) { return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}); }
 function fmtShort(iso) { return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
 
-// Safely embed a JSON object inside an HTML attribute (e.g. onclick="foo(${escapeAttr(obj)})")
-// Escapes both apostrophes and double quotes so the handler runs cleanly regardless of input
-function escapeAttr(obj) {
-  return JSON.stringify(obj)
-    .replace(/&/g,'&amp;')
-    .replace(/'/g,'&#39;')
-    .replace(/"/g,'&quot;');
+// Encode a JS object as base64 so it's safe to embed in HTML attributes
+// (no quotes, apostrophes, or HTML-meaningful chars to worry about)
+function encodeObj(obj) {
+  // btoa requires Latin-1; use unescape(encodeURIComponent(...)) for full UTF-8
+  return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+}
+function decodeObj(b64) {
+  try { return JSON.parse(decodeURIComponent(escape(atob(b64)))); }
+  catch(e) { return null; }
 }
 const BELT_BG  = {white:'#f1f5f9',blue:'#1e3a5f',purple:'#3b1f5e',brown:'#3d1f0a',black:'#111827'};
 const BELT_FG  = {white:'#0f172a',blue:'#60a5fa',purple:'#c084fc',brown:'#fb923c',black:'#f8fafc'};
@@ -490,7 +492,7 @@ function renderSessions() {
   if (!list.length) { el.innerHTML='<div class="empty">No sessions yet. Tap + LOG to add one.</div>'; return; }
   el.innerHTML = list.slice(0,30).map(s => {
     const ac = TYPE_AC[s.type]||'#60a5fa';
-    return `<div class="sess-card" onclick='openDetail(${escapeAttr(s)})' style="--ac:${ac};border-left-color:${ac}">
+    return `<div class="sess-card" onclick="openDetail('${encodeObj(s)}')" style="--ac:${ac};border-left-color:${ac}">
       <div class="sess-type" style="color:${ac}">${TYPE_EM[s.type]} ${s.type.toUpperCase()}</div>
       <div class="sess-date">${fmtDate(s.date)}</div>
       ${s.technique?`<div class="sess-tech">📌 ${s.technique}</div>`:''}
@@ -505,7 +507,7 @@ function renderHistory() {
   document.getElementById('history-label').textContent = `ALL SESSIONS — ${sessions.length} total`;
   document.getElementById('hist-list').innerHTML = sessions.map(s => {
     const ac = TYPE_AC[s.type]||'#60a5fa';
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-left:2px solid ${ac};border-radius:8px;margin-bottom:5px;cursor:pointer" onclick='openDetail(${escapeAttr(s)})'>
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-left:2px solid ${ac};border-radius:8px;margin-bottom:5px;cursor:pointer" onclick="openDetail('${encodeObj(s)}')">
       <div>
         <span style="font-size:9px;color:${ac};font-weight:700;margin-right:6px">${TYPE_EM[s.type]}${s.type.toUpperCase()}</span>
         <span style="font-size:12px;color:#f1f5f9;font-weight:600">${fmtShort(s.date)}</span>
@@ -518,7 +520,11 @@ function renderHistory() {
 
 // ── Session detail ────────────────────────────────────────────────────────────
 async function openDetail(sess) {
-  if (typeof sess === 'string') sess = JSON.parse(sess);
+  if (typeof sess === 'string') {
+    // Try base64 decode first (new format), fall back to JSON.parse (legacy)
+    sess = decodeObj(sess) || (() => { try { return JSON.parse(sess); } catch { return null; } })();
+    if (!sess) return;
+  }
   detailSession = sess;
   showRollForm = false;
   const ac = TYPE_AC[sess.type]||'#60a5fa';
@@ -582,7 +588,7 @@ function renderRollCard(r) {
         ${r.score!=null?`<span class="roll-score" style="color:${r.score>0?'#4ade80':r.score<0?'#f87171':'#94a3b8'}">${r.score>0?'+':''}${r.score}</span>`:''}
         ${r.duration_min?`<span style="font-size:10px;color:var(--muted)">${r.duration_min}min</span>`:''}
         <button onclick="deleteRoll('${r.id}')" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px">×</button>
-        <button onclick='openEditRoll(${escapeAttr(r)})' style="background:none;border:1px solid rgba(255,255,255,.1);border-radius:4px;color:var(--muted);cursor:pointer;font-size:10px;padding:2px 6px">✏️</button>
+        <button onclick="openEditRoll('${encodeObj(r)}')" style="background:none;border:1px solid rgba(255,255,255,.1);border-radius:4px;color:var(--muted);cursor:pointer;font-size:10px;padding:2px 6px">✏️</button>
       </div>
     </div>
     ${r.notes?`<div class="roll-notes">${r.notes}</div>`:''}
@@ -845,7 +851,10 @@ btn.textContent = ‘Update Session’; btn.disabled = false;
 let editingRoll = null;
 
 function openEditRoll(roll) {
-if (typeof roll === ‘string’) roll = JSON.parse(roll);
+if (typeof roll === ‘string’) {
+roll = decodeObj(roll) || (() => { try { return JSON.parse(roll); } catch { return null; } })();
+if (!roll) return;
+}
 editingRoll = roll;
 selectedResult = roll.result || ‘’;
 selectedScore = roll.score ?? 0;
