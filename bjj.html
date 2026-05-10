@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -9,103 +10,135 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;max-width:680px;margin:0 auto;padding-bottom:80px;}
   input,textarea,select{font-family:var(--font);}
-  .header{padding:14px 14px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-  .title{font-size:14px;font-weight:800;letter-spacing:.22em;color:#f8fafc;}
-  .sub{font-size:10px;color:var(--muted);margin-top:2px;}
-  .dot{color:#22c55e;margin-left:8px;font-size:9px;}
-  .nav{display:flex;border-bottom:1px solid rgba(255,255,255,.05);padding:0 14px;}
-  .nav-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.08em;padding:10px 10px;cursor:pointer;}
-  .nav-btn.active{color:#60a5fa;border-bottom-color:#60a5fa;}
-  .priv-bar{margin:10px 14px;padding:10px 14px;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;}
-  .priv-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-  .priv-title{font-size:10px;font-weight:700;color:#4ade80;letter-spacing:.1em;}
-  .priv-count{font-size:11px;color:var(--muted);}
-  .priv-dots{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;}
-  .priv-dot{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;}
-  .priv-actions{display:flex;gap:6px;margin-top:4px;}
-  .buy-btn{background:rgba(74,222,128,.2);border:1px solid rgba(74,222,128,.4);border-radius:6px;padding:4px 10px;color:#4ade80;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.06em;}
-  .history-btn-sm{background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 10px;color:var(--muted);font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;}
-  .sessions{padding:10px 14px;}
-  .filter-row{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;}
-  .filter-btn{background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 10px;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;color:var(--muted);}
-  .filter-btn.active{border-color:var(--ac);color:var(--ac);}
-  .sess-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer;border-left:3px solid var(--ac);}
-  .sess-type{font-size:10px;font-weight:700;letter-spacing:.08em;margin-bottom:2px;}
-  .sess-date{font-size:13px;font-weight:700;color:#f1f5f9;}
-  .sess-notes{font-size:10px;color:#64748b;margin-top:6px;line-height:1.5;border-top:1px solid rgba(255,255,255,.05);padding-top:6px;}
-  .belt-badge-btn{font-weight:700;font-size:10px;border-radius:4px;padding:3px 8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none;}
-  .log-btn{background:#60a5fa;color:#0a0f1a;border:none;border-radius:7px;padding:6px 14px;font-family:var(--font);font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.08em;}
-  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:flex-end;justify-content:center;}
-  .overlay.open{display:flex;}
-  .modal{background:#0d1525;border:1px solid rgba(255,255,255,.09);border-radius:14px 14px 0 0;padding:20px 16px 36px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;}
-  .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-  .modal-title{font-size:13px;font-weight:700;color:#f1f5f9;}
-  .close-btn{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;}
-  .field{margin-bottom:10px;}
-  .field-label{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
-  .field input,.field textarea,.field select{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;resize:vertical;}
-  .inp{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;}
-  .row2{display:flex;gap:8px;}
-  .row2 .field{flex:1;}
-  .type-row{display:flex;gap:6px;margin-bottom:10px;}
-  .type-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:9px 4px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);}
-  .type-btn.gi.active{background:rgba(96,165,250,.18);border-color:#60a5fa;color:#60a5fa;}
-  .type-btn.nogi.active{background:rgba(251,146,60,.18);border-color:#fb923c;color:#fb923c;}
-  .type-btn.private.active{background:rgba(74,222,128,.18);border-color:#4ade80;color:#4ade80;}
-  .save-modal-btn{width:100%;color:#0a0f1a;border:none;border-radius:8px;padding:11px;font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer;margin-top:8px;letter-spacing:.1em;}
-  .del-btn{width:100%;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);border-radius:8px;padding:9px;color:#f87171;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;margin-top:12px;}
-  .edit-btn{background:none;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:4px 10px;color:var(--muted);font-family:var(--font);font-size:11px;cursor:pointer;}
-  .detail-info{background:rgba(255,255,255,.03);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px;line-height:1.7;}
-  .work-on{color:#fb923c;}
-  .tip{color:#4ade80;}
-  .rolls-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-  .rolls-label{font-size:10px;color:var(--muted);letter-spacing:.1em;}
-  .roll-stats{display:flex;gap:10px;font-size:11px;}
-  .add-roll-btn{width:100%;background:none;border:1px dashed rgba(96,165,250,.4);border-radius:8px;padding:9px;color:#60a5fa;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;margin-top:4px;}
-  .roll-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:9px 11px;margin-bottom:6px;}
-  .roll-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
-  .result-row{display:flex;gap:6px;}
-  .result-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 4px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);}
-  .result-btn.win.active{background:rgba(74,222,128,.2);border-color:#4ade80;color:#4ade80;}
-  .result-btn.loss.active{background:rgba(248,113,113,.2);border-color:#f87171;color:#f87171;}
-  .result-btn.draw.active{background:rgba(148,163,184,.15);border-color:#94a3b8;color:#94a3b8;}
-  .score-row{display:flex;gap:4px;}
-  .score-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 2px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);}
-  .score-btn.pos.active{background:rgba(74,222,128,.2);border-color:#4ade80;color:#4ade80;}
-  .score-btn.neg.active{background:rgba(248,113,113,.2);border-color:#f87171;color:#f87171;}
-  .score-btn.neu.active{background:rgba(148,163,184,.15);border-color:#94a3b8;color:#94a3b8;}
-  .belt-row{display:flex;gap:5px;flex-wrap:wrap;}
-  .belt-btn{flex:1;min-width:60px;border:2px solid transparent;border-radius:7px;padding:8px 4px;font-family:var(--font);font-size:11px;font-weight:800;cursor:pointer;text-transform:capitalize;}
-  .stripe-row{display:flex;gap:6px;}
-  .stripe-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);}
-  .stripe-btn.active{background:rgba(192,132,252,.25);border-color:#c084fc;color:#c084fc;}
-  .stats{padding:12px 14px;}
-  .stat-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
-  .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;flex:1;min-width:100px;}
-  .stat-label{font-size:9px;color:var(--muted);letter-spacing:.08em;margin-bottom:4px;}
-  .stat-val{font-size:22px;font-weight:800;}
-  .stat-sub{font-size:10px;color:var(--dim);margin-top:2px;}
-  .section-title{font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:8px;}
-  .chart-bar-row{display:flex;align-items:flex-end;gap:5px;height:80px;margin-bottom:4px;}
-  .chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
-  .chart-bar{width:100%;border-radius:3px 3px 0 0;}
-  .chart-label{font-size:8px;color:var(--muted);}
-  .chart-val{font-size:9px;color:#60a5fa;font-weight:700;}
-  .opp-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);}
-  .opp-name{font-size:12px;color:#f1f5f9;}
-  .opp-wld{display:flex;gap:8px;font-size:11px;}
-  .empty{color:var(--dim);text-align:center;padding:40px;font-size:13px;}
-  .toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(8,13,24,.95);border:1px solid #4ade80;color:#4ade80;padding:10px 20px;border-radius:10px;font-size:12px;font-weight:700;z-index:999;white-space:nowrap;}
-  .toast.show{display:block;}
-  .opp-create{background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:10px;margin-top:6px;}
-  .purchase-card{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.15);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
-  .purchase-info{font-size:11px;color:#f1f5f9;}
-  .purchase-meta{font-size:10px;color:var(--muted);margin-top:2px;}
-  .purchase-cost{font-size:14px;font-weight:800;color:#4ade80;}
-  .purchase-classes{font-size:10px;color:var(--muted);text-align:right;}
+
+/* Header */
+.header{padding:14px 14px 10px;border-bottom:1px solid var(–border);display:flex;justify-content:space-between;align-items:center;}
+.title{font-size:14px;font-weight:800;letter-spacing:.22em;color:#f8fafc;}
+.sub{font-size:10px;color:var(–muted);margin-top:2px;}
+.dot{color:#22c55e;margin-left:8px;font-size:9px;}
+
+/* Nav */
+.nav{display:flex;border-bottom:1px solid rgba(255,255,255,.05);padding:0 14px;}
+.nav-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(–muted);font-family:var(–font);font-size:11px;font-weight:700;letter-spacing:.08em;padding:10px 10px;cursor:pointer;}
+.nav-btn.active{color:#60a5fa;border-bottom-color:#60a5fa;}
+
+/* Private tracker */
+.priv-bar{margin:10px 14px;padding:10px 14px;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;}
+.priv-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.priv-title{font-size:10px;font-weight:700;color:#4ade80;letter-spacing:.1em;}
+.priv-count{font-size:11px;color:var(–muted);}
+.priv-dots{display:flex;gap:4px;}
+.priv-dot{flex:1;height:6px;border-radius:3px;}
+
+/* Session cards */
+.sessions{padding:10px 14px;}
+.filter-row{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;}
+.filter-btn{background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 10px;font-family:var(–font);font-size:10px;font-weight:700;cursor:pointer;color:var(–muted);}
+.filter-btn.active{border-color:var(–ac);color:var(–ac);}
+.sess-card{background:var(–bg2);border:1px solid var(–border);border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer;border-left:3px solid var(–ac);}
+.sess-type{font-size:10px;font-weight:700;letter-spacing:.08em;margin-bottom:2px;}
+.sess-date{font-size:13px;font-weight:700;color:#f1f5f9;}
+.sess-tech{font-size:11px;color:#94a3b8;margin-top:2px;}
+.sess-instr{font-size:10px;color:var(–muted);margin-top:1px;}
+.sess-notes{font-size:10px;color:#64748b;margin-top:6px;line-height:1.5;border-top:1px solid rgba(255,255,255,.05);padding-top:6px;}
+
+/* Belt badge */
+.belt-badge{font-weight:700;font-size:10px;border-radius:4px;padding:3px 8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none;}
+
+/* Log session button */
+.log-btn{background:#60a5fa;color:#0a0f1a;border:none;border-radius:7px;padding:6px 14px;font-family:var(–font);font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.08em;}
+
+/* Modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:flex-end;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:#0d1525;border:1px solid rgba(255,255,255,.09);border-radius:14px 14px 0 0;padding:20px 16px 36px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.modal-title{font-size:13px;font-weight:700;color:#f1f5f9;}
+.close-btn{background:none;border:none;color:var(–muted);font-size:22px;cursor:pointer;line-height:1;}
+.field{margin-bottom:10px;}
+.field-label{font-size:10px;color:var(–muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+.field input,.field textarea,.field select{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(–text);font-family:var(–font);font-size:12px;outline:none;resize:vertical;}
+.row2{display:flex;gap:8px;}
+.row2 .field{flex:1;}
+.type-row{display:flex;gap:6px;margin-bottom:10px;}
+.type-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:9px 4px;font-family:var(–font);font-size:11px;font-weight:700;cursor:pointer;color:var(–muted);}
+.type-btn.active{background:rgba(96,165,250,.18);border-color:#60a5fa;color:#60a5fa;}
+.type-btn.gi.active{background:rgba(96,165,250,.18);border-color:#60a5fa;color:#60a5fa;}
+.type-btn.nogi.active{background:rgba(251,146,60,.18);border-color:#fb923c;color:#fb923c;}
+.type-btn.private.active{background:rgba(74,222,128,.18);border-color:#4ade80;color:#4ade80;}
+.save-modal-btn{width:100%;background:#60a5fa;color:#0a0f1a;border:none;border-radius:8px;padding:11px;font-family:var(–font);font-size:12px;font-weight:800;cursor:pointer;margin-top:8px;letter-spacing:.1em;}
+.del-btn{width:100%;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);border-radius:8px;padding:9px;color:#f87171;font-family:var(–font);font-size:11px;font-weight:700;cursor:pointer;margin-top:12px;}
+
+/* Session detail */
+.detail-info{background:rgba(255,255,255,.03);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px;line-height:1.7;}
+.detail-info .tech{font-size:12px;font-weight:700;color:#f1f5f9;margin-bottom:4px;}
+.work-on{color:#fb923c;}
+.tip{color:#4ade80;}
+
+/* Rolls */
+.rolls-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.rolls-label{font-size:10px;color:var(–muted);letter-spacing:.1em;}
+.roll-stats{display:flex;gap:10px;font-size:11px;}
+.add-roll-btn{width:100%;background:none;border:1px dashed rgba(96,165,250,.4);border-radius:8px;padding:9px;color:#60a5fa;font-family:var(–font);font-size:11px;font-weight:700;cursor:pointer;margin-top:4px;}
+.roll-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:9px 11px;margin-bottom:6px;}
+.roll-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.roll-opp{font-size:12px;font-weight:700;color:#f1f5f9;}
+.roll-result{font-size:16px;font-weight:800;}
+.roll-score{font-size:11px;font-weight:700;}
+.roll-notes{font-size:10px;color:#64748b;line-height:1.5;}
+.roll-subs{font-size:10px;margin-top:2px;}
+
+/* Result buttons */
+.result-row{display:flex;gap:6px;}
+.result-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 4px;font-family:var(–font);font-size:11px;font-weight:700;cursor:pointer;color:var(–muted);}
+.result-btn.win.active{background:rgba(74,222,128,.2);border-color:#4ade80;color:#4ade80;}
+.result-btn.loss.active{background:rgba(248,113,113,.2);border-color:#f87171;color:#f87171;}
+.result-btn.draw.active{background:rgba(148,163,184,.15);border-color:#94a3b8;color:#94a3b8;}
+
+/* Score row */
+.score-row{display:flex;gap:4px;}
+.score-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 2px;font-family:var(–font);font-size:11px;font-weight:700;cursor:pointer;color:var(–muted);}
+.score-btn.pos.active{background:rgba(74,222,128,.2);border-color:#4ade80;color:#4ade80;}
+.score-btn.neg.active{background:rgba(248,113,113,.2);border-color:#f87171;color:#f87171;}
+.score-btn.neu.active{background:rgba(148,163,184,.15);border-color:#94a3b8;color:#94a3b8;}
+
+/* Belt modal */
+.belt-row{display:flex;gap:5px;flex-wrap:wrap;}
+.belt-btn{flex:1;min-width:60px;border:2px solid transparent;border-radius:7px;padding:8px 4px;font-family:var(–font);font-size:11px;font-weight:800;cursor:pointer;text-transform:capitalize;}
+.stripe-row{display:flex;gap:6px;}
+.stripe-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;font-family:var(–font);font-size:12px;font-weight:700;cursor:pointer;color:var(–muted);}
+.stripe-btn.active{background:rgba(192,132,252,.25);border-color:#c084fc;color:#c084fc;}
+
+/* Stats */
+.stats{padding:12px 14px;}
+.stat-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.stat-card{background:var(–bg2);border:1px solid var(–border);border-radius:10px;padding:12px 14px;flex:1;min-width:100px;}
+.stat-label{font-size:9px;color:var(–muted);letter-spacing:.08em;margin-bottom:4px;}
+.stat-val{font-size:22px;font-weight:800;}
+.stat-sub{font-size:10px;color:var(–dim);margin-top:2px;}
+.section-title{font-size:10px;color:var(–muted);letter-spacing:.1em;margin-bottom:8px;}
+.chart-bar-row{display:flex;align-items:flex-end;gap:5px;height:80px;margin-bottom:4px;}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.chart-bar{width:100%;border-radius:3px 3px 0 0;}
+.chart-label{font-size:8px;color:var(–muted);}
+.chart-val{font-size:9px;color:#60a5fa;font-weight:700;}
+.opp-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.opp-name{font-size:12px;color:#f1f5f9;}
+.opp-wld{display:flex;gap:8px;font-size:11px;}
+.empty{color:var(–dim);text-align:center;padding:40px;font-size:13px;}
+
+/* Toast */
+.toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(8,13,24,.95);border:1px solid #4ade80;color:#4ade80;padding:10px 20px;border-radius:10px;font-size:12px;font-weight:700;z-index:999;white-space:nowrap;}
+.toast.show{display:block;}
+
+/* Opp dropdown */
+.opp-create{background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:10px;margin-top:6px;}
 </style>
+
 </head>
 <body>
+
+<!-- Header -->
 
 <div class="header">
   <div>
@@ -113,10 +146,12 @@
     <div class="sub" id="today-lbl"><span class="dot">● SUPABASE</span></div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
-    <button class="belt-badge-btn" id="belt-badge" onclick="openBeltModal()" style="background:#1e3a5f;color:#60a5fa">BLUE</button>
+    <button class="belt-badge" id="belt-badge" onclick="openBeltModal()" style="background:#1e3a5f;color:#60a5fa">BLUE</button>
     <button class="log-btn" onclick="openNewSession()">+ LOG</button>
   </div>
 </div>
+
+<!-- Private tracker -->
 
 <div class="priv-bar">
   <div class="priv-label">
@@ -124,17 +159,17 @@
     <span class="priv-count" id="priv-count">0/10 used</span>
   </div>
   <div class="priv-dots" id="priv-dots"></div>
-  <div class="priv-actions">
-    <button class="buy-btn" onclick="openBuyModal()">💳 Buy Classes</button>
-    <button class="history-btn-sm" onclick="openPurchaseHistory()">📋 Purchase History</button>
-  </div>
 </div>
+
+<!-- Nav -->
 
 <div class="nav">
   <button class="nav-btn active" onclick="switchView('log')" id="nav-log">📋 LOG</button>
   <button class="nav-btn" onclick="switchView('history')" id="nav-history">🗂 HISTORY</button>
   <button class="nav-btn" onclick="switchView('stats')" id="nav-stats">📊 STATS</button>
 </div>
+
+<!-- Log view -->
 
 <div id="view-log" class="sessions">
   <div class="filter-row">
@@ -146,10 +181,14 @@
   <div id="sess-list"><div class="empty">Loading...</div></div>
 </div>
 
+<!-- History view -->
+
 <div id="view-history" style="display:none;padding:12px 14px">
   <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:10px" id="history-label">ALL SESSIONS</div>
   <div id="hist-list"></div>
 </div>
+
+<!-- Stats view -->
 
 <div id="view-stats" style="display:none" class="stats">
   <div id="stats-content"><div class="empty">Loading stats...</div></div>
@@ -157,7 +196,8 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- NEW SESSION -->
+<!-- ── NEW SESSION MODAL ── -->
+
 <div class="overlay" id="overlay-new" onclick="closeIfOutside(event,'overlay-new')">
   <div class="modal">
     <div class="modal-header">
@@ -165,63 +205,32 @@
       <button class="close-btn" onclick="closeModal('overlay-new')">×</button>
     </div>
     <div class="type-row">
-      <button class="type-btn gi" onclick="setType('gi','ns')" id="ns-type-gi">🥋 GI</button>
-      <button class="type-btn nogi" onclick="setType('nogi','ns')" id="ns-type-nogi">🩳 NO-GI</button>
-      <button class="type-btn private" onclick="setType('private','ns')" id="ns-type-private">🎯 PRIVATE</button>
+      <button class="type-btn gi" onclick="setType('gi')" id="type-gi">🥋 GI</button>
+      <button class="type-btn nogi" onclick="setType('nogi')" id="type-nogi">🩳 NO-GI</button>
+      <button class="type-btn private" onclick="setType('private')" id="type-private">🎯 PRIVATE</button>
     </div>
-    <div id="ns-priv-notice" style="display:none;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);border-radius:7px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:#4ade80"></div>
+    <div id="priv-notice" style="display:none;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);border-radius:7px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:#4ade80"></div>
     <div class="row2">
       <div class="field"><div class="field-label">Date</div><input type="date" id="ns-date"></div>
       <div class="field"><div class="field-label">Duration (min)</div><input type="number" id="ns-dur" placeholder="90"></div>
     </div>
     <div class="field"><div class="field-label">Technique / Focus</div><input type="text" id="ns-tech" placeholder="e.g. Butterfly guard sweeps"></div>
-    <!-- Instructor field — swaps between text and dropdown depending on type -->
-    <div class="field" id="ns-instr-wrap">
-      <div class="field-label">Instructor</div>
-      <input type="text" id="ns-instr-text" placeholder="Professor name">
-    </div>
+    <div class="field"><div class="field-label">Instructor</div><input type="text" id="ns-instr" placeholder="Professor name"></div>
     <div class="field"><div class="field-label">Notes</div><textarea id="ns-notes" rows="2" placeholder="What happened, what you drilled..."></textarea></div>
     <div class="field" id="ns-workon-wrap"><div class="field-label">What to Work On</div><textarea id="ns-workon" rows="2" placeholder="Guard passing, not giving up back..."></textarea></div>
-    <div class="field" id="ns-tips-wrap" style="display:none"><div class="field-label">💡 Instructor Tips</div><textarea id="ns-tips" rows="3" placeholder="Key details the instructor mentioned..."></textarea></div>
-    <button class="save-modal-btn" id="ns-save-btn" onclick="saveNewSession()" style="background:#60a5fa">Save Session</button>
+    <div class="field" id="ns-tips-wrap" style="display:none"><div class="field-label">💡 Instructor Tips / Key Points</div><textarea id="ns-tips" rows="3" placeholder="Key details the instructor mentioned..."></textarea></div>
+    <button class="save-modal-btn" id="ns-save-btn" onclick="saveNewSession()">Save Session</button>
   </div>
 </div>
 
-<!-- EDIT SESSION -->
-<div class="overlay" id="overlay-edit" onclick="closeIfOutside(event,'overlay-edit')">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">✏️ Edit Session</div>
-      <button class="close-btn" onclick="closeModal('overlay-edit')">×</button>
-    </div>
-    <div class="type-row">
-      <button class="type-btn gi" onclick="setType('gi','es')" id="es-type-gi">🥋 GI</button>
-      <button class="type-btn nogi" onclick="setType('nogi','es')" id="es-type-nogi">🩳 NO-GI</button>
-      <button class="type-btn private" onclick="setType('private','es')" id="es-type-private">🎯 PRIVATE</button>
-    </div>
-    <div class="row2">
-      <div class="field"><div class="field-label">Date</div><input type="date" id="es-date"></div>
-      <div class="field"><div class="field-label">Duration (min)</div><input type="number" id="es-dur" placeholder="90"></div>
-    </div>
-    <div class="field"><div class="field-label">Technique / Focus</div><input type="text" id="es-tech"></div>
-    <div class="field" id="es-instr-wrap">
-      <div class="field-label">Instructor</div>
-      <input type="text" id="es-instr-text">
-    </div>
-    <div class="field"><div class="field-label">Notes</div><textarea id="es-notes" rows="2"></textarea></div>
-    <div class="field" id="es-workon-wrap"><div class="field-label">What to Work On</div><textarea id="es-workon" rows="2"></textarea></div>
-    <div class="field" id="es-tips-wrap" style="display:none"><div class="field-label">💡 Instructor Tips</div><textarea id="es-tips" rows="3"></textarea></div>
-    <button class="save-modal-btn" id="es-save-btn" onclick="saveEditSession()" style="background:#60a5fa">Update Session</button>
-  </div>
-</div>
+<!-- ── SESSION DETAIL MODAL ── -->
 
-<!-- SESSION DETAIL -->
 <div class="overlay" id="overlay-detail" onclick="closeIfOutside(event,'overlay-detail')">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="detail-title">Session</div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button class="edit-btn" onclick="openEditSession()">✏️ edit</button>
+        <button onclick="openEditSession()" style="background:none;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:4px 10px;color:var(--muted);font-family:var(--font);font-size:11px;cursor:pointer">✏️ edit</button>
         <button class="close-btn" onclick="closeModal('overlay-detail')">×</button>
       </div>
     </div>
@@ -232,47 +241,34 @@
   </div>
 </div>
 
-<!-- BUY PRIVATE CLASSES -->
-<div class="overlay" id="overlay-buy" onclick="closeIfOutside(event,'overlay-buy')">
+<!-- ── EDIT SESSION MODAL ── -->
+
+<div class="overlay" id="overlay-edit" onclick="closeIfOutside(event,'overlay-edit')">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">💳 Buy Private Classes</div>
-      <button class="close-btn" onclick="closeModal('overlay-buy')">×</button>
+      <div class="modal-title">✏️ Edit Session</div>
+      <button class="close-btn" onclick="closeModal('overlay-edit')">×</button>
     </div>
-    <div style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:#4ade80" id="buy-summary"></div>
-    <div class="row2">
-      <div class="field"><div class="field-label">Date Purchased</div><input type="date" id="buy-date" class="inp"></div>
-      <div class="field"><div class="field-label"># of Classes</div><input type="number" id="buy-classes" value="10" min="1" class="inp"></div>
-    </div>
-    <div class="field"><div class="field-label">Total Cost (USD)</div>
-      <div style="position:relative">
-        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px">$</span>
-        <input type="number" id="buy-cost" placeholder="1000" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px 8px 22px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;">
-      </div>
+    <div class="type-row">
+      <button class="type-btn gi" onclick="setEditType('gi')" id="edit-type-gi">🥋 GI</button>
+      <button class="type-btn nogi" onclick="setEditType('nogi')" id="edit-type-nogi">🩳 NO-GI</button>
+      <button class="type-btn private" onclick="setEditType('private')" id="edit-type-private">🎯 PRIVATE</button>
     </div>
     <div class="row2">
-      <div class="field"><div class="field-label">Teacher</div><input type="text" id="buy-teacher" value="Angelo" class="inp"></div>
-      <div class="field"><div class="field-label">Gym</div><input type="text" id="buy-gym" value="FightSportsClub" class="inp"></div>
+      <div class="field"><div class="field-label">Date</div><input type="date" id="es-date"></div>
+      <div class="field"><div class="field-label">Duration (min)</div><input type="number" id="es-dur" placeholder="90"></div>
     </div>
-    <div class="field"><div class="field-label">Notes (optional)</div><textarea id="buy-notes" rows="2" class="inp" placeholder="Any details..."></textarea></div>
-    <button class="save-modal-btn" onclick="savePurchase()" style="background:#4ade80">Save Purchase</button>
+    <div class="field"><div class="field-label">Technique / Focus</div><input type="text" id="es-tech" placeholder="e.g. Butterfly guard sweeps"></div>
+    <div class="field"><div class="field-label">Instructor</div><input type="text" id="es-instr" placeholder="Professor name"></div>
+    <div class="field"><div class="field-label">Notes</div><textarea id="es-notes" rows="2" placeholder="What happened, what you drilled..."></textarea></div>
+    <div class="field" id="es-workon-wrap"><div class="field-label">What to Work On</div><textarea id="es-workon" rows="2" placeholder="Guard passing, not giving up back..."></textarea></div>
+    <div class="field" id="es-tips-wrap" style="display:none"><div class="field-label">💡 Instructor Tips</div><textarea id="es-tips" rows="3" placeholder="Key details the instructor mentioned..."></textarea></div>
+    <button class="save-modal-btn" id="es-save-btn" onclick="saveEditSession()">Update Session</button>
   </div>
 </div>
 
-<!-- PURCHASE HISTORY -->
-<div class="overlay" id="overlay-purchases" onclick="closeIfOutside(event,'overlay-purchases')">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">📋 Purchase History</div>
-      <button class="close-btn" onclick="closeModal('overlay-purchases')">×</button>
-    </div>
-    <div id="purchase-summary-bar" style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px"></div>
-    <div id="purchase-list"></div>
-    <button class="save-modal-btn" onclick="openBuyModal()" style="background:#4ade80;margin-top:8px">+ Buy More Classes</button>
-  </div>
-</div>
+<!-- ── BELT MODAL ── -->
 
-<!-- BELT -->
 <div class="overlay" id="overlay-belt" onclick="closeIfOutside(event,'overlay-belt')">
   <div class="modal">
     <div class="modal-header">
@@ -280,461 +276,603 @@
       <button class="close-btn" onclick="closeModal('overlay-belt')">×</button>
     </div>
     <div style="text-align:center;margin-bottom:16px" id="belt-preview"></div>
-    <div class="field"><div class="field-label">Belt</div><div class="belt-row" id="belt-row"></div></div>
-    <div class="field"><div class="field-label">Stripes (0–4)</div><div class="stripe-row" id="stripe-row"></div></div>
-    <div class="field"><div class="field-label">Achieved On</div><input type="date" id="belt-date" class="inp"></div>
-    <div class="field"><div class="field-label">Notes</div><textarea id="belt-notes" class="inp" rows="2" placeholder="Tournament? Promotion notes..."></textarea></div>
+    <div class="field">
+      <div class="field-label">Belt</div>
+      <div class="belt-row" id="belt-row"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">Stripes (0–4)</div>
+      <div class="stripe-row" id="stripe-row"></div>
+    </div>
+    <div class="field"><div class="field-label">Achieved On</div><input type="date" id="belt-date"></div>
+    <div class="field"><div class="field-label">Notes</div><textarea id="belt-notes" rows="2" placeholder="Tournament? Promotion notes..."></textarea></div>
     <button class="save-modal-btn" style="background:#c084fc" onclick="saveBelt()">Update Belt</button>
   </div>
 </div>
 
 <script>
-const SB_URL='https://skfuygyygrapnrkwzsmj.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrZnV5Z3l5Z3JhcG5ya3d6c21qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDc0NzYsImV4cCI6MjA5MDM4MzQ3Nn0.jl0FHAFzmWl8wLeWuKS0N8S_qFC92_WSHszdQhWYxCo';
-const EDGE=`${SB_URL}/functions/v1/bjj`;
-const HDRS={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`};
+// ── Config ────────────────────────────────────────────────────────────────────
+const SB_URL = 'https://skfuygyygrapnrkwzsmj.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrZnV5Z3l5Z3JhcG5ya3d6c21qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDc0NzYsImV4cCI6MjA5MDM4MzQ3Nn0.jl0FHAFzmWl8wLeWuKS0N8S_qFC92_WSHszdQhWYxCo';
+const EDGE = `${SB_URL}/functions/v1/bjj`;
+const HDRS = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`};
+const PRIVATES_TOTAL = 10;
 
-async function GET(action,params={}){const qs=new URLSearchParams({action,...params}).toString();const r=await fetch(`${EDGE}?${qs}`,{method:'GET',headers:HDRS});if(!r.ok)throw new Error(`HTTP ${r.status}: ${await r.text()}`);return r.json();}
-async function POST(action,body){const r=await fetch(`${EDGE}?action=${action}`,{method:'POST',headers:HDRS,body:JSON.stringify(body)});if(!r.ok)throw new Error(`HTTP ${r.status}: ${await r.text()}`);return r.json();}
-
-let currentView='log',currentFilter='all',sessions=[],opponents=[],belt=null,purchases=[];
-let detailSession=null,detailRolls=[],showRollForm=false,editingRoll=null;
-let sessionType={ns:'gi',es:'gi'};
-let selectedResult='',selectedScore=0,creatingOpp=false;
-let editBeltData={belt:'blue',stripes:0};
-
-const BELT_BG={white:'#f1f5f9',blue:'#1e3a5f',purple:'#3b1f5e',brown:'#3d1f0a',black:'#111827'};
-const BELT_FG={white:'#0f172a',blue:'#60a5fa',purple:'#c084fc',brown:'#fb923c',black:'#f8fafc'};
-const TYPE_AC={gi:'#60a5fa',nogi:'#fb923c',private:'#4ade80'};
-const TYPE_EM={gi:'🥋',nogi:'🩳',private:'🎯'};
-const BELTS=['white','blue','purple','brown','black'];
-
-function todayKey(){return new Date().toISOString().slice(0,10);}
-function fmtDate(iso){return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});}
-function fmtShort(iso){return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});}
-function beltBadge(b,s=0,size='sm'){const fs=size==='lg'?13:10,px=size==='lg'?'8px 14px':'3px 8px';return `<span style="background:${BELT_BG[b]||'#475569'};color:${BELT_FG[b]||'#fff'};font-weight:700;font-size:${fs}px;border-radius:4px;padding:${px};letter-spacing:.06em;text-transform:uppercase">${b}${s>0?' '+'|'.repeat(s):''}</span>`;}
-function toast(msg,color='#4ade80'){const t=document.getElementById('toast');t.textContent=msg;t.style.borderColor=color;t.style.color=color;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
-function closeIfOutside(e,id){if(e.target.id===id)closeModal(id);}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-function v(id){return document.getElementById(id);}
-
-// Get unique teachers from purchases
-function uniqueTeachers(){return [...new Set(purchases.map(p=>p.teacher).filter(Boolean))];}
-
-// Get instructor value from form (handles both text input and select)
-function getInstructor(prefix){
-  const sel=v(`${prefix}-instr-select`);
-  if(sel)return sel.value||null;
-  return v(`${prefix}-instr-text`)?.value||null;
+async function GET(action, params={}) {
+  const qs = new URLSearchParams({action,...params}).toString();
+  const r = await fetch(`${EDGE}?${qs}`, {method:'GET',headers:HDRS});
+  if (!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text()}`);
+  return r.json();
+}
+async function POST(action, body) {
+  const r = await fetch(`${EDGE}?action=${action}`, {method:'POST',headers:HDRS,body:JSON.stringify(body)});
+  if (!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text()}`);
+  return r.json();
 }
 
-// Render instructor field — dropdown for private, text for gi/nogi
-function renderInstructorField(prefix, currentVal=''){
-  const wrap=v(`${prefix}-instr-wrap`);
-  if(!wrap)return;
-  const t=sessionType[prefix];
-  const teachers=uniqueTeachers();
-  if(t==='private'&&teachers.length>0){
-    // Build dropdown with unique teachers from purchases
-    const opts=teachers.map(t=>`<option value="${t}"${t===currentVal||(!currentVal&&t==='Angelo')?'selected':''}>${t}</option>`).join('');
-    wrap.innerHTML=`<div class="field-label">Instructor</div>
-      <select id="${prefix}-instr-select" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none">
-        ${opts}
-        <option value="">Other / Free text</option>
-      </select>`;
-  }else{
-    wrap.innerHTML=`<div class="field-label">Instructor</div>
-      <input type="text" id="${prefix}-instr-text" placeholder="Professor name" value="${currentVal}" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none">`;
-  }
+// ── State ─────────────────────────────────────────────────────────────────────
+let currentView = 'log';
+let currentFilter = 'all';
+let sessions = [];
+let opponents = [];
+let belt = null;
+let detailSession = null;
+let detailRolls = [];
+let newSessionType = 'gi';
+let selectedResult = '';
+let selectedScore = 0;
+let editBeltData = {belt:'blue',stripes:0};
+let showRollForm = false;
+let creatingOpp = false;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function todayKey() { return new Date().toISOString().slice(0,10); }
+function fmtDate(iso) { return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}); }
+function fmtShort(iso) { return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+
+// Safely embed a JSON object inside an HTML attribute (e.g. onclick="foo(${escapeAttr(obj)})")
+// Escapes both apostrophes and double quotes so the handler runs cleanly regardless of input
+function escapeAttr(obj) {
+  return JSON.stringify(obj)
+    .replace(/&/g,'&amp;')
+    .replace(/'/g,'&#39;')
+    .replace(/"/g,'&quot;');
+}
+const BELT_BG  = {white:'#f1f5f9',blue:'#1e3a5f',purple:'#3b1f5e',brown:'#3d1f0a',black:'#111827'};
+const BELT_FG  = {white:'#0f172a',blue:'#60a5fa',purple:'#c084fc',brown:'#fb923c',black:'#f8fafc'};
+const TYPE_AC  = {gi:'#60a5fa',nogi:'#fb923c',private:'#4ade80'};
+const TYPE_EM  = {gi:'🥋',nogi:'🩳',private:'🎯'};
+const BELTS    = ['white','blue','purple','brown','black'];
+
+function beltBadge(b, s=0, size='sm') {
+  const fs = size==='lg'?13:10, px = size==='lg'?'8px 14px':'3px 8px';
+  return `<span style="background:${BELT_BG[b]||'#475569'};color:${BELT_FG[b]||'#fff'};font-weight:700;font-size:${fs}px;border-radius:4px;padding:${px};letter-spacing:.06em;text-transform:uppercase">${b}${s>0?' '+'|'.repeat(s):''}</span>`;
 }
 
-// Private totals
-function totalPurchased(){return purchases.reduce((s,p)=>s+(p.classes_purchased||0),0);}
-function totalUsed(){return sessions.filter(s=>s.type==='private').length;}
-function totalRemaining(){return totalPurchased()-totalUsed();}
-function totalSpent(){return purchases.reduce((s,p)=>s+(parseFloat(p.cost_usd)||0),0);}
-function costPerClass(){const tp=totalPurchased();return tp>0?(totalSpent()/tp).toFixed(2):0;}
-
-async function init(){
-  v('today-lbl').innerHTML=new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})+'<span class="dot">● SUPABASE</span>';
-  v('ns-date').value=todayKey();v('belt-date').value=todayKey();v('buy-date').value=todayKey();
-  setType('gi','ns');renderBeltModal();
-  try{
-    const[b,s,o,p]=await Promise.all([GET('get_belt'),GET('get_sessions',{limit:'100'}),GET('get_opponents'),GET('get_purchases')]);
-    belt=b;sessions=s||[];opponents=o||[];purchases=p||[];
-    renderBelt();renderPrivBar();renderSessions();renderHistory();
-  }catch(e){toast('Load failed: '+e.message,'#f87171');}
+function toast(msg, color='#4ade80') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.borderColor = color; t.style.color = color;
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3500);
 }
 
-// ── Type selector ─────────────────────────────────────────────────────────────
-function setType(t,prefix){
-  sessionType[prefix]=t;
-  ['gi','nogi','private'].forEach(x=>{const el=v(`${prefix}-type-${x}`);if(el)el.className=`type-btn ${x}${t===x?' active':''}`;});
+function closeIfOutside(e, id) { if(e.target.id===id) closeModal(id); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-  // Private notice
-  if(prefix==='ns'){
-    const used=totalUsed(),purchased=totalPurchased(),remaining=totalRemaining();
-    const notice=v('ns-priv-notice');
-    if(t==='private'){
-      if(remaining<=0){notice.style.display='block';notice.style.color='#f87171';notice.style.borderColor='rgba(248,113,113,.25)';notice.style.background='rgba(248,113,113,.08)';notice.textContent=`⚠ No classes remaining! Purchase more to continue.`;}
-      else{notice.style.display='block';notice.style.color='#4ade80';notice.style.borderColor='rgba(74,222,128,.25)';notice.style.background='rgba(74,222,128,.08)';notice.textContent=`Class #${used+1} of ${purchased} — ${remaining-1} remaining after this`;}
-    }else notice.style.display='none';
-  }
-
-  // Instructor field
-  const currentVal=v(`${prefix}-instr-text`)?.value||v(`${prefix}-instr-select`)?.value||'';
-  renderInstructorField(prefix,currentVal);
-
-  // Show/hide work-on vs tips
-  const workon=v(`${prefix}-workon-wrap`),tips=v(`${prefix}-tips-wrap`),btn=v(`${prefix}-save-btn`);
-  if(workon)workon.style.display=t==='private'?'none':'';
-  if(tips)tips.style.display=t==='private'?'':'none';
-  if(btn)btn.style.background=TYPE_AC[t];
+// ── Boot ──────────────────────────────────────────────────────────────────────
+async function init() {
+  document.getElementById('today-lbl').innerHTML =
+    new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'}) +
+    '<span class="dot">● SUPABASE</span>';
+  document.getElementById('ns-date').value = todayKey();
+  document.getElementById('belt-date').value = todayKey();
+  setType('gi');
+  renderBeltModal();
+  try {
+    const [b, s, o] = await Promise.all([GET('get_belt'), GET('get_sessions',{limit:'100'}), GET('get_opponents')]);
+    belt = b; sessions = s||[]; opponents = o||[];
+    renderBelt(); renderPrivBar(); renderSessions(); renderHistory();
+  } catch(e) { toast('Load failed: '+e.message,'#f87171'); }
 }
 
 // ── Belt ──────────────────────────────────────────────────────────────────────
-function renderBelt(){
-  if(!belt)return;
-  const el=v('belt-badge');
-  el.style.background=BELT_BG[belt.belt]||'#475569';el.style.color=BELT_FG[belt.belt]||'#fff';
-  el.textContent=belt.belt.toUpperCase()+(belt.stripes>0?' '+'|'.repeat(belt.stripes):'');
-  editBeltData={belt:belt.belt,stripes:belt.stripes,id:belt.id};
+function renderBelt() {
+  if (!belt) return;
+  const el = document.getElementById('belt-badge');
+  el.style.background = BELT_BG[belt.belt]||'#475569';
+  el.style.color = BELT_FG[belt.belt]||'#fff';
+  el.textContent = belt.belt.toUpperCase() + (belt.stripes>0?' '+'|'.repeat(belt.stripes):'');
+  editBeltData = {belt:belt.belt, stripes:belt.stripes};
 }
-function openBeltModal(){editBeltData=belt?{belt:belt.belt,stripes:belt.stripes,id:belt.id}:{belt:'blue',stripes:0};renderBeltModal();v('overlay-belt').classList.add('open');}
-function renderBeltModal(){
-  v('belt-preview').innerHTML=beltBadge(editBeltData.belt,editBeltData.stripes,'lg');
-  v('belt-row').innerHTML=BELTS.map(b=>`<button class="belt-btn" onclick="selBelt('${b}')" style="background:${BELT_BG[b]};color:${BELT_FG[b]};border-color:${editBeltData.belt===b?BELT_FG[b]:'transparent'}">${b}</button>`).join('');
-  v('stripe-row').innerHTML=[0,1,2,3,4].map(s=>`<button class="stripe-btn${editBeltData.stripes===s?' active':''}" onclick="selStripe(${s})">${s}</button>`).join('');
+
+function openBeltModal() {
+  editBeltData = belt ? {belt:belt.belt,stripes:belt.stripes,id:belt.id} : {belt:'blue',stripes:0};
+  renderBeltModal(); document.getElementById('overlay-belt').classList.add('open');
 }
-function selBelt(b){editBeltData.belt=b;renderBeltModal();}
-function selStripe(s){editBeltData.stripes=s;renderBeltModal();}
-async function saveBelt(){
-  try{const payload={...editBeltData,achieved_on:v('belt-date').value||null,notes:v('belt-notes').value||null};belt=await POST('update_belt',payload);renderBelt();closeModal('overlay-belt');toast('Belt updated! OSS 🥋','#c084fc');}
-  catch(e){toast('Save failed','#f87171');}
+
+function renderBeltModal() {
+  document.getElementById('belt-preview').innerHTML = beltBadge(editBeltData.belt, editBeltData.stripes, 'lg');
+  document.getElementById('belt-row').innerHTML = BELTS.map(b =>
+    `<button class="belt-btn" onclick="selBelt('${b}')" style="background:${BELT_BG[b]};color:${BELT_FG[b]};border-color:${editBeltData.belt===b?BELT_FG[b]:'transparent'}">${b}</button>`
+  ).join('');
+  document.getElementById('stripe-row').innerHTML = [0,1,2,3,4].map(s =>
+    `<button class="stripe-btn${editBeltData.stripes===s?' active':''}" onclick="selStripe(${s})">${s}</button>`
+  ).join('');
+}
+
+function selBelt(b) { editBeltData.belt=b; renderBeltModal(); }
+function selStripe(s) { editBeltData.stripes=s; renderBeltModal(); }
+
+async function saveBelt() {
+  try {
+    const payload = {...editBeltData, achieved_on:document.getElementById('belt-date').value||null, notes:document.getElementById('belt-notes').value||null};
+    belt = await POST('update_belt', payload);
+    renderBelt(); closeModal('overlay-belt'); toast('Belt updated! OSS 🥋','#c084fc');
+  } catch(e) { toast('Save failed','#f87171'); }
 }
 
 // ── Private bar ───────────────────────────────────────────────────────────────
-function renderPrivBar(){
-  const used=totalUsed(),purchased=totalPurchased(),remaining=totalRemaining();
-  v('priv-count').innerHTML=`${used}/${purchased} used · <span style="color:${remaining<=3?'#f87171':'#4ade80'}">${remaining} remaining</span>`;
-  let dotsHtml='',usedSoFar=used;
-  purchases.slice().reverse().forEach(p=>{
-    for(let i=0;i<p.classes_purchased;i++){
-      const isUsed=usedSoFar>0;if(isUsed)usedSoFar--;
-      dotsHtml+=`<div class="priv-dot" style="background:${isUsed?'#4ade80':'rgba(255,255,255,.08)'};color:${isUsed?'#0a0f1a':'#334155'}" title="${isUsed?'Used':'Available'}">${isUsed?'✓':''}</div>`;
-    }
-  });
-  if(!dotsHtml)dotsHtml=`<div style="font-size:10px;color:var(--muted)">No classes purchased yet</div>`;
-  v('priv-dots').innerHTML=dotsHtml;
-}
-
-// ── Buy classes ───────────────────────────────────────────────────────────────
-function openBuyModal(){
-  const remaining=totalRemaining(),purchased=totalPurchased(),used=totalUsed();
-  v('buy-summary').innerHTML=`Currently: <strong style="color:#4ade80">${remaining} remaining</strong> of ${purchased} total · ${used} used · $${totalSpent().toFixed(0)} spent · $${costPerClass()}/class`;
-  v('buy-date').value=todayKey();v('buy-classes').value='10';v('buy-cost').value='';
-  v('buy-teacher').value='Angelo';v('buy-gym').value='FightSportsClub';v('buy-notes').value='';
-  closeModal('overlay-purchases');v('overlay-buy').classList.add('open');
-}
-async function savePurchase(){
-  const classes=parseInt(v('buy-classes').value)||0;
-  if(classes<1){toast('Enter number of classes','#fb923c');return;}
-  const btn=v('overlay-buy').querySelector('.save-modal-btn');
-  btn.textContent='Saving...';btn.disabled=true;
-  try{
-    const payload={date:v('buy-date').value||todayKey(),classes_purchased:classes,cost_usd:parseFloat(v('buy-cost').value)||null,teacher:v('buy-teacher').value||'Angelo',gym:v('buy-gym').value||'FightSportsClub',notes:v('buy-notes').value||null};
-    const p=await POST('save_purchase',payload);
-    purchases.unshift(p);renderPrivBar();closeModal('overlay-buy');toast(`${classes} classes added! 🎯`);
-  }catch(e){toast('Save failed: '+e.message,'#f87171');}
-  btn.textContent='Save Purchase';btn.disabled=false;
-}
-function openPurchaseHistory(){renderPurchaseList();v('overlay-purchases').classList.add('open');}
-function renderPurchaseList(){
-  const remaining=totalRemaining(),purchased=totalPurchased(),used=totalUsed();
-  v('purchase-summary-bar').innerHTML=`<span style="color:#4ade80;font-weight:700">${remaining} remaining</span> · ${used}/${purchased} used · Total: <span style="color:#4ade80;font-weight:700">$${totalSpent().toFixed(0)}</span> · Avg $${costPerClass()}/class`;
-  if(!purchases.length){v('purchase-list').innerHTML='<div class="empty">No purchases yet.</div>';return;}
-  v('purchase-list').innerHTML=purchases.map(p=>`
-    <div class="purchase-card">
-      <div>
-        <div class="purchase-info">🎯 ${p.classes_purchased} classes with <strong>${p.teacher}</strong></div>
-        <div class="purchase-meta">${p.gym} · ${fmtDate(p.date)}${p.notes?` · ${p.notes}`:''}</div>
-      </div>
-      <div style="text-align:right">
-        <div class="purchase-cost">${p.cost_usd?'$'+parseFloat(p.cost_usd).toFixed(0):'—'}</div>
-        <div class="purchase-classes">${p.cost_usd&&p.classes_purchased?'$'+(p.cost_usd/p.classes_purchased).toFixed(0)+'/class':''}</div>
-        <button onclick="deletePurchase('${p.id}')" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px;margin-top:4px">🗑 delete</button>
-      </div>
-    </div>`).join('');
-}
-async function deletePurchase(id){
-  if(!confirm('Delete this purchase record?'))return;
-  try{await POST('delete_purchase',{id});purchases=purchases.filter(p=>p.id!==id);renderPrivBar();renderPurchaseList();toast('Purchase deleted','#f87171');}
-  catch(e){toast('Delete failed','#f87171');}
+function renderPrivBar() {
+  const used = sessions.filter(s=>s.type==='private').length;
+  const left = PRIVATES_TOTAL - used;
+  document.getElementById('priv-count').innerHTML = `${used}/${PRIVATES_TOTAL} used · <span style="color:${left<=3?'#f87171':'#4ade80'}">${left} remaining</span>`;
+  document.getElementById('priv-dots').innerHTML = Array.from({length:PRIVATES_TOTAL},(_,i)=>
+    `<div class="priv-dot" style="background:${i<used?'#4ade80':'rgba(255,255,255,.08)'}"></div>`
+  ).join('');
 }
 
 // ── New session ───────────────────────────────────────────────────────────────
-function openNewSession(){
-  v('ns-date').value=todayKey();v('ns-dur').value='90';
-  ['ns-tech','ns-notes','ns-workon','ns-tips'].forEach(id=>{if(v(id))v(id).value='';});
-  setType('gi','ns');
-  v('overlay-new').classList.add('open');
-}
-async function saveNewSession(){
-  const btn=v('ns-save-btn');btn.textContent='Saving...';btn.disabled=true;
-  try{
-    const t=sessionType.ns;
-    const payload={type:t,date:v('ns-date').value||todayKey(),technique:v('ns-tech').value||null,
-      instructor:getInstructor('ns'),
-      duration_min:parseInt(v('ns-dur').value)||null,notes:v('ns-notes').value||null,
-      what_to_work_on:t!=='private'?(v('ns-workon').value||null):null,
-      private_tips:t==='private'?(v('ns-tips').value||null):null};
-    const sess=await POST('save_session',payload);
-    sessions.unshift(sess);renderPrivBar();renderSessions();renderHistory();
-    closeModal('overlay-new');toast('Session saved!');openDetail(sess);
-  }catch(e){toast('Save failed: '+e.message,'#f87171');}
-  btn.textContent='Save Session';btn.disabled=false;
+function setType(t) {
+  newSessionType = t;
+  ['gi','nogi','private'].forEach(x => {
+    const el = document.getElementById('type-'+x);
+    el.className = `type-btn ${x}${t===x?' active':''}`;
+  });
+  const used = sessions.filter(s=>s.type==='private').length;
+  const notice = document.getElementById('priv-notice');
+  if (t==='private') {
+    notice.style.display='block';
+    notice.textContent = `Private #${used+1} of ${PRIVATES_TOTAL} — ${PRIVATES_TOTAL-used-1} remaining after this`;
+  } else { notice.style.display='none'; }
+  document.getElementById('ns-workon-wrap').style.display = t==='private'?'none':'';
+  document.getElementById('ns-tips-wrap').style.display = t==='private'?'':'none';
+  const btn = document.getElementById('ns-save-btn');
+  btn.style.background = TYPE_AC[t];
 }
 
-// ── Edit session ──────────────────────────────────────────────────────────────
-function openEditSession(){
-  const s=detailSession;if(!s)return;
-  setType(s.type,'es');
-  v('es-date').value=s.date||todayKey();v('es-dur').value=s.duration_min||'';
-  v('es-tech').value=s.technique||'';
-  // Set instructor after rendering field
-  setTimeout(()=>{
-    const sel=v('es-instr-select');const txt=v('es-instr-text');
-    if(sel)sel.value=s.instructor||'';
-    if(txt)txt.value=s.instructor||'';
-  },50);
-  v('es-notes').value=s.notes||'';v('es-workon').value=s.what_to_work_on||'';v('es-tips').value=s.private_tips||'';
-  v('overlay-edit').classList.add('open');
-}
-async function saveEditSession(){
-  const btn=v('es-save-btn');btn.textContent='Saving...';btn.disabled=true;
-  try{
-    const t=sessionType.es;
-    const payload={id:detailSession.id,type:t,date:v('es-date').value||detailSession.date,
-      technique:v('es-tech').value||null,
-      instructor:getInstructor('es'),
-      duration_min:parseInt(v('es-dur').value)||null,notes:v('es-notes').value||null,
-      what_to_work_on:t!=='private'?(v('es-workon').value||null):null,
-      private_tips:t==='private'?(v('es-tips').value||null):null};
-    const updated=await POST('save_session',payload);
-    const idx=sessions.findIndex(s=>s.id===detailSession.id);
-    if(idx>=0)sessions[idx]=updated;
-    detailSession=updated;closeModal('overlay-edit');
-    renderPrivBar();renderSessions();renderHistory();refreshDetailInfo(updated);
-    toast('Session updated!');
-  }catch(e){toast('Update failed: '+e.message,'#f87171');}
-  btn.textContent='Update Session';btn.disabled=false;
-}
-function refreshDetailInfo(s){
-  v('detail-title').textContent=`${TYPE_EM[s.type]} ${s.type.toUpperCase()} — ${fmtDate(s.date)}`;
-  v('detail-info').innerHTML=`
-    ${s.technique?`<div style="font-size:12px;font-weight:700;color:#f1f5f9;margin-bottom:4px">📌 ${s.technique}</div>`:''}
-    ${s.instructor?`<div style="color:#94a3b8">👤 ${s.instructor}</div>`:''}
-    ${s.duration_min?`<div style="color:var(--muted)">⏱ ${s.duration_min} min</div>`:''}
-    ${s.notes?`<div style="color:#64748b;margin-top:4px;line-height:1.6">${s.notes}</div>`:''}
-    ${s.what_to_work_on?`<div class="work-on" style="margin-top:6px">⚠ Work on: ${s.what_to_work_on}</div>`:''}
-    ${s.private_tips?`<div class="tip" style="margin-top:6px;line-height:1.6">💡 Tips: ${s.private_tips}</div>`:''}`;
+function openNewSession() {
+  document.getElementById('ns-date').value = todayKey();
+  document.getElementById('ns-dur').value = '90';
+  document.getElementById('ns-tech').value = '';
+  document.getElementById('ns-instr').value = '';
+  document.getElementById('ns-notes').value = '';
+  document.getElementById('ns-workon').value = '';
+  document.getElementById('ns-tips').value = '';
+  setType('gi');
+  document.getElementById('overlay-new').classList.add('open');
 }
 
-// ── Session list ──────────────────────────────────────────────────────────────
-function setFilter(f){
-  currentFilter=f;
-  document.querySelectorAll('.filter-btn').forEach(b=>{const a=b.dataset.filter===f;b.classList.toggle('active',a);if(a&&f!=='all')b.style.setProperty('--ac',TYPE_AC[f]);});
+async function saveNewSession() {
+  const btn = document.getElementById('ns-save-btn');
+  btn.textContent='Saving...'; btn.disabled=true;
+  try {
+    const payload = {
+      type: newSessionType,
+      date: document.getElementById('ns-date').value || todayKey(),
+      technique: document.getElementById('ns-tech').value||null,
+      instructor: document.getElementById('ns-instr').value||null,
+      duration_min: parseInt(document.getElementById('ns-dur').value)||null,
+      notes: document.getElementById('ns-notes').value||null,
+      what_to_work_on: newSessionType!=='private'?(document.getElementById('ns-workon').value||null):null,
+      private_tips: newSessionType==='private'?(document.getElementById('ns-tips').value||null):null,
+    };
+    const sess = await POST('save_session', payload);
+    sessions.unshift(sess); renderPrivBar(); renderSessions(); renderHistory();
+    closeModal('overlay-new'); toast('Session saved!');
+    openDetail(sess);
+  } catch(e) { toast('Save failed: '+e.message,'#f87171'); }
+  btn.textContent='Save Session'; btn.disabled=false;
+}
+
+// ── Render sessions ───────────────────────────────────────────────────────────
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    const isActive = b.dataset.filter===f;
+    b.classList.toggle('active', isActive);
+    if (isActive && f!=='all') b.style.setProperty('--ac', TYPE_AC[f]);
+  });
   renderSessions();
 }
-function renderSessions(){
-  const list=currentFilter==='all'?sessions:sessions.filter(s=>s.type===currentFilter);
-  const el=v('sess-list');
-  if(!list.length){el.innerHTML='<div class="empty">No sessions yet. Tap + LOG to add one.</div>';return;}
-  el.innerHTML=list.slice(0,30).map(s=>{
-    const ac=TYPE_AC[s.type]||'#60a5fa';
-    return `<div class="sess-card" onclick='openDetail(${JSON.stringify(s)})' style="--ac:${ac};border-left-color:${ac}">
+
+function renderSessions() {
+  const list = currentFilter==='all' ? sessions : sessions.filter(s=>s.type===currentFilter);
+  const el = document.getElementById('sess-list');
+  if (!list.length) { el.innerHTML='<div class="empty">No sessions yet. Tap + LOG to add one.</div>'; return; }
+  el.innerHTML = list.slice(0,30).map(s => {
+    const ac = TYPE_AC[s.type]||'#60a5fa';
+    return `<div class="sess-card" onclick='openDetail(${escapeAttr(s)})' style="--ac:${ac};border-left-color:${ac}">
       <div class="sess-type" style="color:${ac}">${TYPE_EM[s.type]} ${s.type.toUpperCase()}</div>
       <div class="sess-date">${fmtDate(s.date)}</div>
-      ${s.technique?`<div style="font-size:11px;color:#94a3b8;margin-top:2px">📌 ${s.technique}</div>`:''}
-      ${s.instructor?`<div style="font-size:10px;color:var(--muted);margin-top:1px">👤 ${s.instructor}</div>`:''}
-      ${s.duration_min?`<div style="font-size:10px;color:var(--muted);margin-top:1px">⏱ ${s.duration_min}min</div>`:''}
+      ${s.technique?`<div class="sess-tech">📌 ${s.technique}</div>`:''}
+      ${s.instructor?`<div class="sess-instr">👤 ${s.instructor}</div>`:''}
+      ${s.duration_min?`<div class="sess-instr">⏱ ${s.duration_min}min</div>`:''}
       ${s.notes?`<div class="sess-notes">${s.notes.slice(0,120)}${s.notes.length>120?'…':''}</div>`:''}
     </div>`;
   }).join('');
 }
-function renderHistory(){
-  v('history-label').textContent=`ALL SESSIONS — ${sessions.length} total`;
-  v('hist-list').innerHTML=sessions.map(s=>{
-    const ac=TYPE_AC[s.type]||'#60a5fa';
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-left:2px solid ${ac};border-radius:8px;margin-bottom:5px;cursor:pointer" onclick='openDetail(${JSON.stringify(s)})'>
-      <div><span style="font-size:9px;color:${ac};font-weight:700;margin-right:6px">${TYPE_EM[s.type]}${s.type.toUpperCase()}</span><span style="font-size:12px;color:#f1f5f9;font-weight:600">${fmtShort(s.date)}</span>${s.technique?`<span style="font-size:10px;color:#64748b;margin-left:8px">${s.technique.slice(0,30)}</span>`:''}</div>
+
+function renderHistory() {
+  document.getElementById('history-label').textContent = `ALL SESSIONS — ${sessions.length} total`;
+  document.getElementById('hist-list').innerHTML = sessions.map(s => {
+    const ac = TYPE_AC[s.type]||'#60a5fa';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-left:2px solid ${ac};border-radius:8px;margin-bottom:5px;cursor:pointer" onclick='openDetail(${escapeAttr(s)})'>
+      <div>
+        <span style="font-size:9px;color:${ac};font-weight:700;margin-right:6px">${TYPE_EM[s.type]}${s.type.toUpperCase()}</span>
+        <span style="font-size:12px;color:#f1f5f9;font-weight:600">${fmtShort(s.date)}</span>
+        ${s.technique?`<span style="font-size:10px;color:#64748b;margin-left:8px">${s.technique.slice(0,30)}</span>`:''}
+      </div>
       <span style="font-size:10px;color:var(--dim)">▶</span>
     </div>`;
   }).join('');
 }
 
 // ── Session detail ────────────────────────────────────────────────────────────
-async function openDetail(sess){
-  if(typeof sess==='string')sess=JSON.parse(sess);
-  detailSession=sess;showRollForm=false;editingRoll=null;
-  refreshDetailInfo(sess);
-  v('overlay-detail').classList.add('open');
-  try{detailRolls=await GET('get_rolls',{session_id:sess.id})||[];}catch{detailRolls=[];}
+async function openDetail(sess) {
+  if (typeof sess === 'string') sess = JSON.parse(sess);
+  detailSession = sess;
+  showRollForm = false;
+  const ac = TYPE_AC[sess.type]||'#60a5fa';
+  document.getElementById('detail-title').textContent = `${TYPE_EM[sess.type]} ${sess.type.toUpperCase()} — ${fmtDate(sess.date)}`;
+  document.getElementById('detail-info').innerHTML = `
+    ${sess.technique?`<div class="tech">📌 ${sess.technique}</div>`:''}
+    ${sess.instructor?`<div style="color:#94a3b8">👤 ${sess.instructor}</div>`:''}
+    ${sess.duration_min?`<div style="color:var(--muted)">⏱ ${sess.duration_min} min</div>`:''}
+    ${sess.notes?`<div style="color:#64748b;margin-top:4px;line-height:1.6">${sess.notes}</div>`:''}
+    ${sess.what_to_work_on?`<div class="work-on" style="margin-top:6px">⚠ Work on: ${sess.what_to_work_on}</div>`:''}
+    ${sess.private_tips?`<div class="tip" style="margin-top:6px;line-height:1.6">💡 Tips: ${sess.private_tips}</div>`:''}
+  `;
+  document.getElementById('overlay-detail').classList.add('open');
+  // Load rolls
+  try {
+    detailRolls = await GET('get_rolls',{session_id:sess.id}) || [];
+  } catch { detailRolls = []; }
   renderRolls();
 }
-function renderRolls(){
-  const sess=detailSession;
-  if(sess.type==='private'){v('rolls-section').innerHTML='';v('roll-form-wrap').innerHTML='';return;}
-  const wins=detailRolls.filter(r=>r.result==='win').length,losses=detailRolls.filter(r=>r.result==='loss').length,draws=detailRolls.filter(r=>r.result==='draw').length;
-  v('rolls-section').innerHTML=`
-    <div class="rolls-header"><div class="rolls-label">ROLLS (${detailRolls.length})</div><div class="roll-stats"><span style="color:#4ade80">W:${wins}</span><span style="color:#f87171">L:${losses}</span><span style="color:#94a3b8">D:${draws}</span></div></div>
+
+function renderRolls() {
+  const sess = detailSession;
+  if (sess.type==='private') { document.getElementById('rolls-section').innerHTML=''; document.getElementById('roll-form-wrap').innerHTML=''; return; }
+  const wins = detailRolls.filter(r=>r.result==='win').length;
+  const losses = detailRolls.filter(r=>r.result==='loss').length;
+  const draws = detailRolls.filter(r=>r.result==='draw').length;
+  document.getElementById('rolls-section').innerHTML = `
+    <div class="rolls-header">
+      <div class="rolls-label">ROLLS (${detailRolls.length})</div>
+      <div class="roll-stats">
+        <span style="color:#4ade80">W:${wins}</span>
+        <span style="color:#f87171">L:${losses}</span>
+        <span style="color:#94a3b8">D:${draws}</span>
+      </div>
+    </div>
     ${detailRolls.map(r=>renderRollCard(r)).join('')}
-    ${!showRollForm?`<button class="add-roll-btn" onclick="openRollForm()">+ Add Roll</button>`:''}`;
-  v('roll-form-wrap').innerHTML=showRollForm?renderRollForm():'';
-  if(showRollForm&&editingRoll){
-    setTimeout(()=>{const os=v('roll-opp');if(os&&editingRoll.opponent_id)os.value=editingRoll.opponent_id;},50);
+    ${!showRollForm?`<button class="add-roll-btn" onclick="openRollForm()">+ Add Roll</button>`:''}
+  `;
+  document.getElementById('roll-form-wrap').innerHTML = showRollForm ? renderRollForm() : '';
+  if (showRollForm) {
+    selectedResult=''; selectedScore=0; creatingOpp=false;
+    document.querySelectorAll('.result-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.score-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelector('.score-btn[data-score="0"]')?.classList.add('active','neu');
   }
 }
-function renderRollCard(r){
-  const rc=r.result==='win'?'#4ade80':r.result==='loss'?'#f87171':'#94a3b8';
-  const re=r.result==='win'?'✓':r.result==='loss'?'✗':'~';
-  const oppName=r.bjj_opponents?.name||'Unknown',oppBelt=r.opponent_belt||r.bjj_opponents?.belt;
-  const safe=JSON.stringify(r).replace(/'/g,"\\'");
+
+function renderRollCard(r) {
+  const rc = r.result==='win'?'#4ade80':r.result==='loss'?'#f87171':'#94a3b8';
+  const re = r.result==='win'?'✓':r.result==='loss'?'✗':'~';
+  const oppName = r.bjj_opponents?.name || 'Unknown';
+  const oppBelt = r.opponent_belt || r.bjj_opponents?.belt;
   return `<div class="roll-card" style="border-left:3px solid ${rc}">
     <div class="roll-head">
-      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px;font-weight:800;color:${rc}">${re}</span><span style="font-size:12px;font-weight:700;color:#f1f5f9">${oppName}</span>${oppBelt?beltBadge(oppBelt):''}</div>
-      <div style="display:flex;align-items:center;gap:6px">
-        ${r.score!=null?`<span style="font-size:11px;font-weight:700;color:${r.score>0?'#4ade80':r.score<0?'#f87171':'#94a3b8'}">${r.score>0?'+':''}${r.score}</span>`:''}
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="roll-result" style="color:${rc}">${re}</span>
+        <span class="roll-opp">${oppName}</span>
+        ${oppBelt?beltBadge(oppBelt):''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${r.score!=null?`<span class="roll-score" style="color:${r.score>0?'#4ade80':r.score<0?'#f87171':'#94a3b8'}">${r.score>0?'+':''}${r.score}</span>`:''}
         ${r.duration_min?`<span style="font-size:10px;color:var(--muted)">${r.duration_min}min</span>`:''}
-        <button onclick="openEditRoll('${safe}')" style="background:none;border:1px solid rgba(255,255,255,.12);border-radius:4px;color:var(--muted);cursor:pointer;font-size:10px;padding:2px 6px">✏️</button>
-        <button onclick="deleteRoll('${r.id}')" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:0 2px">×</button>
+        <button onclick="deleteRoll('${r.id}')" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px">×</button>
+        <button onclick='openEditRoll(${escapeAttr(r)})' style="background:none;border:1px solid rgba(255,255,255,.1);border-radius:4px;color:var(--muted);cursor:pointer;font-size:10px;padding:2px 6px">✏️</button>
       </div>
     </div>
-    ${r.notes?`<div style="font-size:10px;color:#64748b;line-height:1.5">${r.notes}</div>`:''}
-    ${r.my_submissions?`<div style="font-size:10px;color:#4ade80;margin-top:2px">✓ ${r.my_submissions}</div>`:''}
-    ${r.their_submissions?`<div style="font-size:10px;color:#f87171;margin-top:2px">✗ ${r.their_submissions}</div>`:''}
-  </div>`;
-}
-function renderRollForm(){
-  const oppOptions=opponents.map(o=>`<option value="${o.id}">${o.name} (${o.belt})</option>`).join('');
-  return `<div style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:10px;padding:12px;margin-top:8px">
-    <div style="font-size:10px;color:#60a5fa;font-weight:700;letter-spacing:.1em;margin-bottom:10px">${editingRoll?'✏️ EDIT ROLL':'ADD ROLL'}</div>
-    <div class="field"><div class="field-label">Opponent</div>
-    ${!creatingOpp?`<div style="display:flex;gap:6px">
-      <select id="roll-opp" class="inp" style="flex:1"><option value="">Unknown / Anonymous</option>${oppOptions}</select>
-      <button onclick="toggleCreateOpp(true)" style="background:none;border:1px solid rgba(96,165,250,.3);border-radius:6px;padding:8px 10px;color:#60a5fa;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">+ New</button>
-    </div>`:`<div class="opp-create">
-      <div style="display:flex;gap:6px;margin-bottom:6px">
-        <input id="new-opp-name" type="text" placeholder="Name" class="inp" style="flex:1">
-        <select id="new-opp-belt" class="inp" style="width:auto">${BELTS.map(b=>`<option value="${b}"${b==='blue'?' selected':''}>${b}</option>`).join('')}</select>
-      </div>
-      <div style="display:flex;gap:6px">
-        <button onclick="createOpp()" style="flex:1;background:#60a5fa;color:#0a0f1a;border:none;border-radius:6px;padding:7px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer">Add</button>
-        <button onclick="toggleCreateOpp(false)" style="flex:1;background:rgba(255,255,255,.06);color:#94a3b8;border:none;border-radius:6px;padding:7px;font-family:var(--font);font-size:11px;cursor:pointer">Cancel</button>
-      </div>
-    </div>`}
-    </div>
-    <div class="field"><div class="field-label">Result</div>
-    <div class="result-row">
-      <button class="result-btn win${selectedResult==='win'?' active':''}" data-result="win" onclick="selResult('win')">✓ WIN</button>
-      <button class="result-btn loss${selectedResult==='loss'?' active':''}" data-result="loss" onclick="selResult('loss')">✗ LOSS</button>
-      <button class="result-btn draw${selectedResult==='draw'?' active':''}" data-result="draw" onclick="selResult('draw')">~ DRAW</button>
-    </div></div>
-    <div style="display:flex;gap:8px">
-      <div class="field" style="flex:2"><div class="field-label">Score (-2 to +2)</div>
-      <div class="score-row">${[-2,-1,0,1,2].map(s=>`<button class="score-btn ${s>0?'pos':s<0?'neg':'neu'}${s===selectedScore?' active':''}" data-score="${s}" onclick="selScore(${s})">${s>0?'+':''}${s}</button>`).join('')}</div></div>
-      <div class="field" style="flex:1"><div class="field-label">Duration (min)</div><input type="number" id="roll-dur" value="${editingRoll?.duration_min||5}" class="inp"></div>
-    </div>
-    <div class="field"><div class="field-label">My Submissions</div><input type="text" id="roll-mysubs" placeholder="Triangle, armbar..." class="inp" value="${editingRoll?.my_submissions||''}"></div>
-    <div class="field"><div class="field-label">Their Submissions</div><input type="text" id="roll-theirsubs" placeholder="Rear naked..." class="inp" value="${editingRoll?.their_submissions||''}"></div>
-    <div class="field"><div class="field-label">Notes</div><textarea id="roll-notes" rows="2" placeholder="What worked, key moments..." class="inp">${editingRoll?.notes||''}</textarea></div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button onclick="saveRoll()" style="flex:2;background:#60a5fa;color:#0a0f1a;border:none;border-radius:8px;padding:10px;font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer">${editingRoll?'Update Roll':'Save Roll'}</button>
-      <button onclick="closeRollForm()" style="flex:1;background:rgba(255,255,255,.06);color:#94a3b8;border:none;border-radius:8px;padding:10px;font-family:var(--font);font-size:12px;cursor:pointer">Cancel</button>
-    </div>
+    ${r.notes?`<div class="roll-notes">${r.notes}</div>`:''}
+    ${r.my_submissions?`<div class="roll-subs" style="color:#4ade80">✓ ${r.my_submissions}</div>`:''}
+    ${r.their_submissions?`<div class="roll-subs" style="color:#f87171">✗ ${r.their_submissions}</div>`:''}
   </div>`;
 }
 
-function openRollForm(){showRollForm=true;editingRoll=null;selectedResult='';selectedScore=0;renderRolls();}
-function closeRollForm(){showRollForm=false;editingRoll=null;renderRolls();}
-function selResult(r){selectedResult=r;document.querySelectorAll('.result-btn').forEach(b=>b.classList.toggle('active',b.dataset.result===r));}
-function selScore(s){selectedScore=s;document.querySelectorAll('.score-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.score)===s));}
-function toggleCreateOpp(val){creatingOpp=val;renderRolls();}
-function openEditRoll(rollJson){
-  let roll;try{roll=typeof rollJson==='string'?JSON.parse(rollJson.replace(/\\'/g,"'")):rollJson;}catch(e){return;}
-  editingRoll=roll;selectedResult=roll.result||'';selectedScore=roll.score??0;showRollForm=true;renderRolls();
+function renderRollForm() {
+  const oppOptions = opponents.map(o=>`<option value="${o.id}">${o.name} (${o.belt})</option>`).join('');
+  return `<div style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:10px;padding:12px;margin-top:8px">
+    <div style="font-size:10px;color:#60a5fa;font-weight:700;letter-spacing:.1em;margin-bottom:10px">${editingRoll ? '✏️ EDIT ROLL' : 'ADD ROLL'}</div>
+    <div class="field">
+      <div class="field-label">Opponent</div>
+      ${!creatingOpp ? `
+        <div style="display:flex;gap:6px">
+          <select id="roll-opp" style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none">
+            <option value="">Unknown / Anonymous</option>${oppOptions}
+          </select>
+          <button onclick="toggleCreateOpp(true)" style="background:none;border:1px solid rgba(96,165,250,.3);border-radius:6px;padding:8px 10px;color:#60a5fa;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">+ New</button>
+        </div>` : `
+        <div class="opp-create">
+          <div style="display:flex;gap:6px;margin-bottom:6px">
+            <input id="new-opp-name" type="text" placeholder="Name" style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none">
+            <select id="new-opp-belt" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;color:var(--text);font-size:11px;outline:none">
+              ${BELTS.map(b=>`<option value="${b}"${b==='blue'?' selected':''}>${b}</option>`).join('')}
+            </select>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button onclick="createOpp()" style="flex:1;background:#60a5fa;color:#0a0f1a;border:none;border-radius:6px;padding:7px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer">Add</button>
+            <button onclick="toggleCreateOpp(false)" style="flex:1;background:rgba(255,255,255,.06);color:#94a3b8;border:none;border-radius:6px;padding:7px;font-family:var(--font);font-size:11px;cursor:pointer">Cancel</button>
+          </div>
+        </div>`}
+    </div>
+    <div class="field">
+      <div class="field-label">Result</div>
+      <div class="result-row">
+        <button class="result-btn win" data-result="win" onclick="selResult('win')">✓ WIN</button>
+        <button class="result-btn loss" data-result="loss" onclick="selResult('loss')">✗ LOSS</button>
+        <button class="result-btn draw" data-result="draw" onclick="selResult('draw')">~ DRAW</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div class="field" style="flex:2">
+        <div class="field-label">Score (-2 to +2)</div>
+        <div class="score-row">
+          ${[-2,-1,0,1,2].map(s=>`<button class="score-btn ${s>0?'pos':s<0?'neg':'neu'}${s===0?' active':''}" data-score="${s}" onclick="selScore(${s})">${s>0?'+':''}${s}</button>`).join('')}
+        </div>
+      </div>
+      <div class="field" style="flex:1">
+        <div class="field-label">Duration (min)</div>
+        <input type="number" id="roll-dur" value="5" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none">
+      </div>
+    </div>
+    <div class="field"><div class="field-label">My Submissions</div><input type="text" id="roll-mysubs" placeholder="Triangle, armbar..." style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none"></div>
+    <div class="field"><div class="field-label">Their Submissions</div><input type="text" id="roll-theirsubs" placeholder="Rear naked..." style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none"></div>
+    <div class="field"><div class="field-label">Notes</div><textarea id="roll-notes" rows="2" placeholder="What worked, key moments..." style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none;resize:vertical"></textarea></div>
+
+```
+<div style="display:flex;gap:8px;margin-top:8px">
+  <button onclick="saveRoll()" style="flex:2;background:#60a5fa;color:#0a0f1a;border:none;border-radius:8px;padding:10px;font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer">Save Roll</button>
+  <button onclick="closeRollForm()" style="flex:1;background:rgba(255,255,255,.06);color:#94a3b8;border:none;border-radius:8px;padding:10px;font-family:var(--font);font-size:12px;cursor:pointer">Cancel</button>
+</div>
+```
+
+  </div>`;
 }
-async function createOpp(){
-  const name=v('new-opp-name')?.value?.trim(),b=v('new-opp-belt')?.value;
-  if(!name)return;
-  try{const opp=await POST('add_opponent',{name,belt:b});opponents.push(opp);creatingOpp=false;renderRolls();setTimeout(()=>{const s=v('roll-opp');if(s)s.value=opp.id;},100);toast('Opponent added!');}
-  catch(e){toast('Failed','#f87171');}
+
+function openRollForm()   { showRollForm=true;  renderRolls(); }
+function closeRollForm()  { showRollForm=false; editingRoll=null; renderRolls(); }
+function selResult(r)     { selectedResult=r; document.querySelectorAll(’.result-btn’).forEach(b=>b.classList.toggle(‘active’,b.dataset.result===r)); }
+function selScore(s)      { selectedScore=s; document.querySelectorAll(’.score-btn’).forEach(b=>b.classList.toggle(‘active’,parseInt(b.dataset.score)===s)); }
+function toggleCreateOpp(v){ creatingOpp=v; renderRolls(); }
+
+async function createOpp() {
+const name = document.getElementById(‘new-opp-name’)?.value?.trim();
+const belt = document.getElementById(‘new-opp-belt’)?.value;
+if (!name) return;
+try {
+const opp = await POST(‘add_opponent’,{name,belt});
+opponents.push(opp);
+creatingOpp=false; renderRolls();
+setTimeout(()=>{ const sel=document.getElementById(‘roll-opp’); if(sel) sel.value=opp.id; },100);
+toast(‘Opponent added!’);
+} catch(e) { toast(‘Failed’,’#f87171’); }
 }
-async function saveRoll(){
-  if(!selectedResult){toast('Select a result','#fb923c');return;}
-  const oppId=v('roll-opp')?.value||null;
-  const opp=opponents.find(o=>o.id===oppId);
-  try{
-    const payload={session_id:detailSession.id,date:detailSession.date,opponent_id:oppId||null,opponent_belt:opp?.belt||null,result:selectedResult,score:selectedScore,duration_min:parseInt(v('roll-dur')?.value)||null,my_submissions:v('roll-mysubs')?.value||null,their_submissions:v('roll-theirsubs')?.value||null,notes:v('roll-notes')?.value||null};
-    if(editingRoll)payload.id=editingRoll.id;
-    const roll=await POST('save_roll',payload);
-    if(editingRoll){const idx=detailRolls.findIndex(r=>r.id===editingRoll.id);if(idx>=0)detailRolls[idx]=roll;toast('Roll updated!');}
-    else{detailRolls.push(roll);toast('Roll saved!');}
-    showRollForm=false;editingRoll=null;renderRolls();
-  }catch(e){toast('Save failed: '+e.message,'#f87171');}
+
+async function saveRoll() {
+if (!selectedResult) { toast(‘Select a result’,’#fb923c’); return; }
+const oppId = document.getElementById(‘roll-opp’)?.value||null;
+const opp = opponents.find(o=>o.id===oppId);
+try {
+const payload = {
+session_id: detailSession.id,
+date: detailSession.date,
+opponent_id: oppId||null,
+opponent_belt: opp?.belt||null,
+result: selectedResult,
+score: selectedScore,
+duration_min: parseInt(document.getElementById(‘roll-dur’)?.value)||null,
+my_submissions: document.getElementById(‘roll-mysubs’)?.value||null,
+their_submissions: document.getElementById(‘roll-theirsubs’)?.value||null,
+notes: document.getElementById(‘roll-notes’)?.value||null,
+};
+if (editingRoll) payload.id = editingRoll.id;
+const roll = await POST(‘save_roll’, payload);
+if (editingRoll) {
+const idx = detailRolls.findIndex(r => r.id === editingRoll.id);
+if (idx >= 0) detailRolls[idx] = roll;
+editingRoll = null;
+toast(‘Roll updated!’);
+} else {
+detailRolls.push(roll);
+toast(‘Roll saved!’);
 }
-async function deleteRoll(id){
-  if(!confirm('Delete this roll?'))return;
-  try{await POST('delete_roll',{id});detailRolls=detailRolls.filter(r=>r.id!==id);renderRolls();toast('Roll deleted','#f87171');}
-  catch(e){toast('Delete failed','#f87171');}
+showRollForm = false; renderRolls();
+} catch(e) { toast(‘Save failed: ‘+e.message,’#f87171’); }
 }
-async function deleteSession(){
-  if(!detailSession||!confirm('Delete this session and all its rolls?'))return;
-  try{await POST('delete_session',{id:detailSession.id});sessions=sessions.filter(s=>s.id!==detailSession.id);renderPrivBar();renderSessions();renderHistory();closeModal('overlay-detail');toast('Session deleted','#f87171');}
-  catch(e){toast('Delete failed','#f87171');}
+
+async function deleteRoll(id) {
+if (!confirm(‘Delete this roll?’)) return;
+try {
+await POST(‘delete_roll’,{id});
+detailRolls = detailRolls.filter(r=>r.id!==id); renderRolls(); toast(‘Roll deleted’,’#f87171’);
+} catch(e) { toast(‘Delete failed’,’#f87171’); }
+}
+
+async function deleteSession() {
+if (!detailSession || !confirm(‘Delete this session and all its rolls?’)) return;
+try {
+await POST(‘delete_session’,{id:detailSession.id});
+sessions = sessions.filter(s=>s.id!==detailSession.id);
+renderPrivBar(); renderSessions(); renderHistory();
+closeModal(‘overlay-detail’); toast(‘Session deleted’,’#f87171’);
+} catch(e) { toast(‘Delete failed’,’#f87171’); }
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
-async function loadStats(){
-  try{const s=await GET('get_stats');renderStats(s);}catch(e){toast('Stats failed','#f87171');}
-}
-function renderStats({sessions:S,rolls:R,opponents:O,purchases:P}){
-  const total=S.length,gi=S.filter(x=>x.type==='gi').length,nogi=S.filter(x=>x.type==='nogi').length,priv=S.filter(x=>x.type==='private').length;
-  const wins=R.filter(r=>r.result==='win').length,losses=R.filter(r=>r.result==='loss').length,draws=R.filter(r=>r.result==='draw').length;
-  const wr=R.length?Math.round(wins/R.length*100):0,avgRolls=S.length?Math.round(R.length/S.length*10)/10:0;
-  const totalBought=(P||[]).reduce((s,p)=>s+(p.classes_purchased||0),0);
-  const mmap={};S.forEach(s=>{const m=s.date.slice(0,7);mmap[m]=(mmap[m]||0)+1;});
-  const months=Object.entries(mmap).sort().slice(-6),maxM=Math.max(...months.map(x=>x[1]),1);
-  const oppmap={};R.forEach(r=>{const n=r.bjj_opponents?.name||'Unknown';oppmap[n]=(oppmap[n]||0)+1;});
-  const topOpps=Object.entries(oppmap).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const oppWL=O.filter(o=>R.some(r=>r.opponent_id===o.id)).map(o=>{const or=R.filter(r=>r.opponent_id===o.id);return{name:o.name,belt:o.belt,w:or.filter(r=>r.result==='win').length,l:or.filter(r=>r.result==='loss').length,d:or.filter(r=>r.result==='draw').length};});
-  v('stats-content').innerHTML=`
-    ${belt?`<div style="text-align:center;margin-bottom:16px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px"><div class="section-title" style="margin-bottom:8px">CURRENT RANK</div>${beltBadge(belt.belt,belt.stripes,'lg')}${belt.achieved_on?`<div style="font-size:10px;color:var(--muted);margin-top:8px">Since ${fmtDate(belt.achieved_on)}</div>`:''}</div>`:''}
-    <div class="section-title">TRAINING VOLUME</div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="stat-label">TOTAL</div><div class="stat-val">${total}</div></div>
-      <div class="stat-card"><div class="stat-label">GI</div><div class="stat-val" style="color:#60a5fa">${gi}</div></div>
-      <div class="stat-card"><div class="stat-label">NO-GI</div><div class="stat-val" style="color:#fb923c">${nogi}</div></div>
-      <div class="stat-card"><div class="stat-label">PRIVATES</div><div class="stat-val" style="color:#4ade80">${priv}/${totalBought}</div><div class="stat-sub">${totalBought-priv} left</div></div>
-    </div>
-    <div class="section-title">ROLLING</div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="stat-label">TOTAL ROLLS</div><div class="stat-val">${R.length}</div></div>
-      <div class="stat-card"><div class="stat-label">WIN RATE</div><div class="stat-val" style="color:#4ade80">${wr}%</div><div class="stat-sub">${wins}W ${losses}L ${draws}D</div></div>
-      <div class="stat-card"><div class="stat-label">AVG/CLASS</div><div class="stat-val" style="color:#60a5fa">${avgRolls}</div></div>
-    </div>
-    ${months.length?`<div class="section-title">SESSIONS / MONTH</div><div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px"><div class="chart-bar-row">${months.map(([m,c])=>`<div class="chart-bar-wrap"><div class="chart-val">${c}</div><div class="chart-bar" style="height:${Math.round(c/maxM*64)+8}px;background:rgba(96,165,250,.5)"></div><div class="chart-label">${m.slice(5)}</div></div>`).join('')}</div></div>`:''}
-    ${topOpps.length?`<div class="section-title">TOP TRAINING PARTNERS</div><div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px">${topOpps.map(([name,count],i)=>`<div class="opp-row"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:10px;color:var(--dim);font-weight:700;width:18px">#${i+1}</span><span class="opp-name">${name}</span></div><span style="font-size:11px;color:#60a5fa;font-weight:700">${count} rolls</span></div>`).join('')}</div>`:''}
-    ${oppWL.length?`<div class="section-title">W/L vs PARTNERS</div><div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px">${oppWL.map((o,i,arr)=>`<div class="opp-row"${i===arr.length-1?' style="border:none"':''}><div style="display:flex;align-items:center;gap:8px"><span class="opp-name">${o.name}</span>${o.belt?beltBadge(o.belt):''}</div><div class="opp-wld"><span style="color:#4ade80">${o.w}W</span><span style="color:#f87171">${o.l}L</span><span style="color:#94a3b8">${o.d}D</span></div></div>`).join('')}</div>`:''}`;
+async function loadStats() {
+try {
+const s = await GET(‘get_stats’);
+renderStats(s);
+} catch(e) { toast(‘Stats failed’,’#f87171’); }
 }
 
-function switchView(v2){
-  currentView=v2;
-  ['log','history','stats'].forEach(x=>{v('view-'+x).style.display=x===v2?'':'none';v('nav-'+x).classList.toggle('active',x===v2);});
-  if(v2==='stats')loadStats();
+function renderStats({sessions:S, rolls:R, opponents:O}) {
+const total=S.length, gi=S.filter(x=>x.type===‘gi’).length, nogi=S.filter(x=>x.type===‘nogi’).length, priv=S.filter(x=>x.type===‘private’).length;
+const wins=R.filter(r=>r.result===‘win’).length, losses=R.filter(r=>r.result===‘loss’).length, draws=R.filter(r=>r.result===‘draw’).length;
+const wr=R.length?Math.round(wins/R.length*100):0;
+const avgRolls=S.length?Math.round(R.length/S.length*10)/10:0;
+
+// Monthly chart
+const mmap={};
+S.forEach(s=>{ const m=s.date.slice(0,7); mmap[m]=(mmap[m]||0)+1; });
+const months=Object.entries(mmap).sort().slice(-6);
+const maxM=Math.max(…months.map(x=>x[1]),1);
+
+// Top partners
+const oppmap={};
+R.forEach(r=>{ const n=r.bjj_opponents?.name||‘Unknown’; oppmap[n]=(oppmap[n]||0)+1; });
+const topOpps=Object.entries(oppmap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+// W/L per opp
+const oppWL = O.filter(o=>R.some(r=>r.opponent_id===o.id)).map(o=>{
+const or=R.filter(r=>r.opponent_id===o.id);
+return {name:o.name,belt:o.belt,w:or.filter(r=>r.result===‘win’).length,l:or.filter(r=>r.result===‘loss’).length,d:or.filter(r=>r.result===‘draw’).length};
+});
+
+document.getElementById(‘stats-content’).innerHTML = ` ${belt?`<div style="text-align:center;margin-bottom:16px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px">
+<div class="section-title" style="margin-bottom:8px">CURRENT RANK</div>
+${beltBadge(belt.belt,belt.stripes,‘lg’)}
+${belt.achieved_on?`<div style="font-size:10px;color:var(--muted);margin-top:8px">Since ${fmtDate(belt.achieved_on)}</div>`:’’}
+</div>`:''} <div class="section-title">TRAINING VOLUME</div> <div class="stat-grid"> <div class="stat-card"><div class="stat-label">TOTAL CLASSES</div><div class="stat-val">${total}</div></div> <div class="stat-card"><div class="stat-label">GI</div><div class="stat-val" style="color:#60a5fa">${gi}</div></div> <div class="stat-card"><div class="stat-label">NO-GI</div><div class="stat-val" style="color:#fb923c">${nogi}</div></div> <div class="stat-card"><div class="stat-label">PRIVATES</div><div class="stat-val" style="color:#4ade80">${priv}/${PRIVATES_TOTAL}</div><div class="stat-sub">${PRIVATES_TOTAL-priv} left</div></div> </div> <div class="section-title">ROLLING</div> <div class="stat-grid"> <div class="stat-card"><div class="stat-label">TOTAL ROLLS</div><div class="stat-val">${R.length}</div></div> <div class="stat-card"><div class="stat-label">WIN RATE</div><div class="stat-val" style="color:#4ade80">${wr}%</div><div class="stat-sub">${wins}W ${losses}L ${draws}D</div></div> <div class="stat-card"><div class="stat-label">AVG / CLASS</div><div class="stat-val" style="color:#60a5fa">${avgRolls}</div></div> </div> ${months.length?`
+<div class="section-title">SESSIONS / MONTH</div>
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
+<div class="chart-bar-row">
+${months.map(([m,c])=>`<div class="chart-bar-wrap"> <div class="chart-val">${c}</div> <div class="chart-bar" style="height:${Math.round(c/maxM*64)+8}px;background:rgba(96,165,250,.5)"></div> <div class="chart-label">${m.slice(5)}</div> </div>`).join(’’)}
+</div>
+</div>`:''} ${topOpps.length?`
+<div class="section-title">TOP TRAINING PARTNERS</div>
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px">
+${topOpps.map(([name,count],i)=>`<div class="opp-row"> <div style="display:flex;align-items:center;gap:8px"> <span style="font-size:10px;color:var(--dim);font-weight:700;width:18px">#${i+1}</span> <span class="opp-name">${name}</span> </div> <span style="font-size:11px;color:#60a5fa;font-weight:700">${count} rolls</span> </div>`).join(’’)}
+</div>`:''} ${oppWL.length?`
+<div class="section-title">W/L vs PARTNERS</div>
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px">
+${oppWL.map((o,i,arr)=>`<div class="opp-row" ${i===arr.length-1?'style="border:none"':''}> <div style="display:flex;align-items:center;gap:8px"> <span class="opp-name">${o.name}</span> ${o.belt?beltBadge(o.belt):''} </div> <div class="opp-wld"> <span style="color:#4ade80">${o.w}W</span> <span style="color:#f87171">${o.l}L</span> <span style="color:#94a3b8">${o.d}D</span> </div> </div>`).join(’’)}
+</div>`:''} `;
 }
 
+// ── View switching ────────────────────────────────────────────────────────────
+function switchView(v) {
+currentView = v;
+[‘log’,‘history’,‘stats’].forEach(x => {
+document.getElementById(‘view-’+x).style.display = x===v?’’:‘none’;
+document.getElementById(‘nav-’+x).classList.toggle(‘active’, x===v);
+});
+if (v===‘stats’) loadStats();
+}
+
+// ── Edit session ──────────────────────────────────────────────────────────────
+let editSessionType = ‘gi’;
+
+function setEditType(t) {
+editSessionType = t;
+[‘gi’,‘nogi’,‘private’].forEach(x => {
+const el = document.getElementById(‘edit-type-’+x);
+el.className = `type-btn ${x}${t===x?' active':''}`;
+});
+document.getElementById(‘es-workon-wrap’).style.display = t===‘private’?‘none’:’’;
+document.getElementById(‘es-tips-wrap’).style.display = t===‘private’?’’:‘none’;
+document.getElementById(‘es-save-btn’).style.background = TYPE_AC[t];
+}
+
+function openEditSession() {
+const s = detailSession; if (!s) return;
+editSessionType = s.type;
+setEditType(s.type);
+document.getElementById(‘es-date’).value = s.date || todayKey();
+document.getElementById(‘es-dur’).value = s.duration_min || ‘’;
+document.getElementById(‘es-tech’).value = s.technique || ‘’;
+document.getElementById(‘es-instr’).value = s.instructor || ‘’;
+document.getElementById(‘es-notes’).value = s.notes || ‘’;
+document.getElementById(‘es-workon’).value = s.what_to_work_on || ‘’;
+document.getElementById(‘es-tips’).value = s.private_tips || ‘’;
+document.getElementById(‘overlay-edit’).classList.add(‘open’);
+}
+
+async function saveEditSession() {
+const btn = document.getElementById(‘es-save-btn’);
+btn.textContent = ‘Saving…’; btn.disabled = true;
+try {
+const payload = {
+id: detailSession.id,
+type: editSessionType,
+date: document.getElementById(‘es-date’).value || detailSession.date,
+technique: document.getElementById(‘es-tech’).value || null,
+instructor: document.getElementById(‘es-instr’).value || null,
+duration_min: parseInt(document.getElementById(‘es-dur’).value) || null,
+notes: document.getElementById(‘es-notes’).value || null,
+what_to_work_on: editSessionType !== ‘private’ ? (document.getElementById(‘es-workon’).value || null) : null,
+private_tips: editSessionType === ‘private’ ? (document.getElementById(‘es-tips’).value || null) : null,
+};
+const updated = await POST(‘save_session’, payload);
+// Update in local array
+const idx = sessions.findIndex(s => s.id === detailSession.id);
+if (idx >= 0) sessions[idx] = updated;
+detailSession = updated;
+closeModal(‘overlay-edit’);
+renderPrivBar(); renderSessions(); renderHistory();
+// Refresh detail view
+const ac = TYPE_AC[updated.type] || ‘#60a5fa’;
+document.getElementById(‘detail-title’).textContent = `${TYPE_EM[updated.type]} ${updated.type.toUpperCase()} — ${fmtDate(updated.date)}`;
+document.getElementById(‘detail-info’).innerHTML = `${updated.technique ?`<div class="tech">📌 ${updated.technique}</div>`: ''} ${updated.instructor ?`<div style="color:#94a3b8">👤 ${updated.instructor}</div>`: ''} ${updated.duration_min ?`<div style="color:var(--muted)">⏱ ${updated.duration_min} min</div>`: ''} ${updated.notes ?`<div style="color:#64748b;margin-top:4px;line-height:1.6">${updated.notes}</div>`: ''} ${updated.what_to_work_on ?`<div class="work-on" style="margin-top:6px">⚠ Work on: ${updated.what_to_work_on}</div>`: ''} ${updated.private_tips ?`<div class="tip" style="margin-top:6px;line-height:1.6">💡 Tips: ${updated.private_tips}</div>`: ''}`;
+toast(‘Session updated!’);
+} catch(e) { toast(’Update failed: ’ + e.message, ‘#f87171’); }
+btn.textContent = ‘Update Session’; btn.disabled = false;
+}
+
+// ── Edit roll ─────────────────────────────────────────────────────────────────
+let editingRoll = null;
+
+function openEditRoll(roll) {
+if (typeof roll === ‘string’) roll = JSON.parse(roll);
+editingRoll = roll;
+selectedResult = roll.result || ‘’;
+selectedScore = roll.score ?? 0;
+showRollForm = true;
+renderRolls();
+// Pre-fill the form after render
+setTimeout(() => {
+const oppSel = document.getElementById(‘roll-opp’);
+if (oppSel && roll.opponent_id) oppSel.value = roll.opponent_id;
+const durEl = document.getElementById(‘roll-dur’);
+if (durEl) durEl.value = roll.duration_min || 5;
+const mySubsEl = document.getElementById(‘roll-mysubs’);
+if (mySubsEl) mySubsEl.value = roll.my_submissions || ‘’;
+const theirSubsEl = document.getElementById(‘roll-theirsubs’);
+if (theirSubsEl) theirSubsEl.value = roll.their_submissions || ‘’;
+const notesEl = document.getElementById(‘roll-notes’);
+if (notesEl) notesEl.value = roll.notes || ‘’;
+// Highlight result
+document.querySelectorAll(’.result-btn’).forEach(b => b.classList.toggle(‘active’, b.dataset.result === roll.result));
+// Highlight score
+document.querySelectorAll(’.score-btn’).forEach(b => b.classList.toggle(‘active’, parseInt(b.dataset.score) === roll.score));
+}, 50);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
 init();
 </script>
+
 </body>
 </html>
