@@ -144,6 +144,24 @@ canvas#wma-canvas{width:100%;display:block;border-radius:8px;background:rgba(255
 .ex-section-label{font-size:9px;color:var(–muted);letter-spacing:.12em;text-transform:uppercase;}
 .add-ex-btn{background:none;border:1px solid;border-radius:6px;padding:4px 10px;font-family:var(–font);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.06em;}
 
+/* ── Reorder mode ── */
+.reorder-btn{background:none;border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:4px 10px;font-family:var(–font);font-size:11px;font-weight:700;cursor:pointer;color:var(–muted);letter-spacing:.06em;margin-right:6px;}
+.reorder-btn.active{background:rgba(96,165,250,.18);border-color:#60a5fa;color:#60a5fa;}
+body.reordering .ex-timing,
+body.reordering .set-header,
+body.reordering .swipe-wrap,
+body.reordering .add-btn,
+body.reordering .card-edit-btn{display:none!important;}
+body.reordering .card{padding:9px 11px;cursor:grab;}
+body.reordering .card-head{margin-bottom:0;}
+.reorder-controls{display:none;margin-top:6px;gap:6px;align-items:center;}
+body.reordering .reorder-controls{display:flex;}
+.reorder-arrow{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;font-family:var(–font);font-size:14px;font-weight:700;cursor:pointer;color:#94a3b8;}
+.reorder-arrow:active{background:rgba(96,165,250,.2);color:#60a5fa;}
+.reorder-arrow:disabled{opacity:.25;cursor:not-allowed;}
+.reorder-banner{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3);border-radius:8px;padding:8px 12px;margin:6px 14px 0;font-size:11px;color:#60a5fa;display:none;text-align:center;letter-spacing:.04em;}
+body.reordering .reorder-banner{display:block;}
+
 /* ── Edit pencil on card ── */
 .card-edit-btn{background:none;border:none;color:var(–muted);font-size:13px;cursor:pointer;padding:0 2px;line-height:1;margin-left:4px;}
 .card-edit-btn:hover{color:var(–text);}
@@ -169,8 +187,12 @@ canvas#wma-canvas{width:100%;display:block;border-radius:8px;background:rgba(255
   <div class="day-tabs" id="day-tabs"></div>
   <div class="ex-section-header">
     <span class="ex-section-label">EXERCISES</span>
-    <button class="add-ex-btn" id="add-ex-btn" onclick="openAddModal()">+ add exercise</button>
+    <div>
+      <button class="reorder-btn" id="reorder-btn" onclick="toggleReorderMode()">🔀 reorder</button>
+      <button class="add-ex-btn" id="add-ex-btn" onclick="openAddModal()">+ add exercise</button>
+    </div>
   </div>
+  <div class="reorder-banner" id="reorder-banner">Reorder mode — use ↑ ↓ to move exercises, then tap Done</div>
   <div id="ex-loading" class="loading" style="display:none">Loading from Supabase...</div>
   <div class="ex-list" id="ex-list"></div>
   <div class="action-row">
@@ -217,6 +239,7 @@ canvas#wma-canvas{width:100%;display:block;border-radius:8px;background:rgba(255
       <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
       <button class="modal-btn modal-btn-save" id="modal-save-btn" onclick="saveModal()">Save</button>
     </div>
+    <button id="modal-del-btn" onclick="deleteExerciseFromProgram()" style="display:none;width:100%;margin-top:10px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171;border-radius:8px;padding:9px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.05em">🗑 Delete Exercise</button>
   </div>
 </div>
 
@@ -273,8 +296,8 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const EDGE   = `${SB_URL}/functions/v1/workouts`;
 const HDRS   = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`};
 
-async function apiGet(p)    { const r=await fetch(`${EDGE}?${new URLSearchParams(p)}`,{method:'GET',headers:HDRS}); if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }
-async function apiPost(p,b) { const r=await fetch(`${EDGE}?${new URLSearchParams(p)}`,{method:'POST',headers:HDRS,body:JSON.stringify(b)}); if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }
+async function apiGet(p)    { const r=await fetch(`${EDGE}?${new URLSearchParams(p)}`,{method:'GET',headers:HDRS}); if(!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text().catch(()=>'')}`); return r.json(); }
+async function apiPost(p,b) { const r=await fetch(`${EDGE}?${new URLSearchParams(p)}`,{method:'POST',headers:HDRS,body:JSON.stringify(b)}); if(!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text().catch(()=>'')}`); return r.json(); }
 
 // ─── Program ─────────────────────────────────────────────────────────────────
 const PROGRAM = {
@@ -364,8 +387,8 @@ function buildTargetBadge(ex){
   const sets = draft[ex.id];
   if(!sets || !sets.length) return `${ex.rt}${ex.u?' · '+ex.u:''}`;
 
-  // Collect non-empty weights and reps
-  const weights = sets.map(s=>parseFloat(s.w)).filter(v=>!isNaN(v)&&v>0);
+  // Collect non-empty weights and reps (allow negative for assisted exercises)
+  const weights = sets.map(s=>parseFloat(s.w)).filter(v=>!isNaN(v)&&v!==0);
   const reps    = sets.map(s=>parseFloat(s.r)).filter(v=>!isNaN(v)&&v>0);
   const nSets   = sets.length;
 
@@ -382,13 +405,16 @@ function buildTargetBadge(ex){
     repsStr = minR===maxR ? String(minR) : `${minR}–${maxR}`;
   }
 
-  // Weight: show max (top set) with unit
+  // Weight: show top set with unit
+  // For assisted exercises (all negative), top = closest to zero (least assist)
+  // For regular exercises, top = max
   let weightStr = '';
   if(weights.length){
-    const maxW = Math.max(...weights);
+    const allNeg = weights.every(w=>w<0);
+    const topW = allNeg ? Math.max(...weights) : Math.max(...weights);
     // Format: drop trailing .0 but keep .5
     const fmt = v => Number.isInteger(v) ? String(v) : v.toFixed(1).replace(/\.0$/,'');
-    weightStr = ` / ${fmt(maxW)}${ex.u?' '+ex.u:''}`;
+    weightStr = ` / ${fmt(topW)}${ex.u?' '+ex.u:''}`;
   } else if(ex.u){
     weightStr = ` · ${ex.u}`;
   }
@@ -581,6 +607,10 @@ function renderExercises(){
         </div>
         <div class="ex-target" style="color:${ac}">${buildTargetBadge(ex)}</div>
       </div>
+      <div class="reorder-controls">
+        <button class="reorder-arrow" onclick="moveExercise('${ex.id}',-1)" ${prog.exercises[0].id===ex.id?'disabled':''}>↑ up</button>
+        <button class="reorder-arrow" onclick="moveExercise('${ex.id}',1)" ${prog.exercises[prog.exercises.length-1].id===ex.id?'disabled':''}>↓ down</button>
+      </div>
       ${timingBar}
       <div class="set-header">
         <span class="sh" style="width:22px">#</span>
@@ -607,6 +637,64 @@ function renderExercises(){
   startLiveTimer();
 }
 
+// ─── Reorder mode ─────────────────────────────────────────────────────────────
+let reordering = false;
+
+function toggleReorderMode(){
+  reordering = !reordering;
+  const btn = document.getElementById('reorder-btn');
+  if(reordering){
+    document.body.classList.add('reordering');
+    btn.classList.add('active');
+    btn.textContent = '✓ done';
+  } else {
+    document.body.classList.remove('reordering');
+    btn.classList.remove('active');
+    btn.textContent = '🔀 reorder';
+    // Persist all sort_orders to Supabase
+    persistOrder();
+  }
+}
+
+function moveExercise(exId, delta){
+  const exs = PROGRAM[currentDay].exercises;
+  const idx = exs.findIndex(e=>e.id===exId);
+  if(idx<0) return;
+  const newIdx = idx + delta;
+  if(newIdx < 0 || newIdx >= exs.length) return;
+  // Swap
+  [exs[idx], exs[newIdx]] = [exs[newIdx], exs[idx]];
+  renderExercises();
+}
+
+async function persistOrder(){
+  const exs = PROGRAM[currentDay].exercises;
+  // Save all exercises with their new sort_order in parallel
+  showToast('Saving order...','#60a5fa');
+  try {
+    await Promise.all(exs.map((ex, i) => fetch(`${SB_URL}/functions/v1/workouts?action=save_program_exercise`, {
+      method: 'POST',
+      headers: HDRS,
+      body: JSON.stringify({
+        id: ex.id,
+        day: currentDay,
+        name: ex.name,
+        alt: ex.alt || null,
+        ds: ex.ds,
+        rt: ex.rt,
+        dw: ex.dw,
+        u: ex.u || 'lb',
+        sort_order: i,
+        is_deleted: false,
+        is_custom: !!ex._isCustom,
+      })
+    })));
+    showToast('Order saved!','#4ade80');
+  } catch(e) {
+    showToast('Order save failed: '+e.message,'#f87171');
+  }
+}
+
 // ─── Modal state ──────────────────────────────────────────────────────────────
 let modalMode = 'add'; // 'add' | 'edit'
 let modalEditId = null;
@@ -620,6 +708,7 @@ function openAddModal(){
   document.getElementById('modal-reps').value='8-10';
   document.getElementById('modal-weight').value='';
   document.getElementById('modal-unit').value='lb';
+  document.getElementById('modal-del-btn').style.display='none';
   document.getElementById('modal-overlay').classList.add('open');
   setTimeout(()=>document.getElementById('modal-name').focus(),100);
 }
@@ -636,6 +725,7 @@ function openEditModal(exId){
   document.getElementById('modal-reps').value=ex.rt;
   document.getElementById('modal-weight').value=ex.dw===0?'':ex.dw;
   document.getElementById('modal-unit').value=ex.u||'lb';
+  document.getElementById('modal-del-btn').style.display='block';
   document.getElementById('modal-overlay').classList.add('open');
   setTimeout(()=>document.getElementById('modal-name').focus(),100);
 }
@@ -656,28 +746,114 @@ function saveModal(){
 
   const prog=PROGRAM[currentDay];
 
+  let exForSave;
   if(modalMode==='add'){
-    // Generate unique id
     const id='ex'+Date.now().toString(36);
-    const newEx={id,name,ds,rt,dw,u};
+    const newEx={id,name,ds,rt,dw,u,_isCustom:true};
     if(alt) newEx.alt=alt;
     prog.exercises.push(newEx);
-    // Init draft for this exercise
     if(!draft[id]) draft[id]=Array.from({length:ds},()=>({w:dw===0?'':String(dw),r:'',done:false,startedAt:null,completedAt:null}));
+    exForSave=newEx;
   } else {
-    // Edit existing
     const ex=prog.exercises.find(e=>e.id===modalEditId);
     if(ex){
       ex.name=name; ex.alt=alt||undefined; ex.ds=ds; ex.rt=rt; ex.dw=dw; ex.u=u;
-      // Resize draft sets if needed
       const cur=draft[ex.id]||[];
       while(cur.length<ds) cur.push({w:dw===0?'':String(dw),r:'',done:false,startedAt:null,completedAt:null});
       draft[ex.id]=cur;
+      exForSave=ex;
     }
   }
 
   document.getElementById('modal-overlay').classList.remove('open');
   renderExercises();
+
+  // Persist to Supabase so it survives reload / day switch
+  if(exForSave) saveProgramExercise(exForSave);
+}
+
+async function deleteExerciseFromProgram(){
+  if(!modalEditId) return;
+  const prog=PROGRAM[currentDay];
+  const ex=prog.exercises.find(e=>e.id===modalEditId);
+  if(!ex) return;
+  if(!confirm(`Delete "${ex.name}" from ${currentDay}? This won't affect past sessions.`)) return;
+
+  const idx=prog.exercises.findIndex(e=>e.id===modalEditId);
+  if(idx>=0) prog.exercises.splice(idx,1);
+  delete draft[modalEditId];
+
+  document.getElementById('modal-overlay').classList.remove('open');
+  renderExercises();
+
+  // Persist deletion to Supabase
+  try{
+    await fetch(`${SB_URL}/functions/v1/workouts?action=delete_program_exercise`,{
+      method:'POST', headers:HDRS,
+      body:JSON.stringify({id:modalEditId, is_custom:!!ex._isCustom})
+    });
+    showToast('Exercise deleted','#f87171');
+  }catch(e){ showToast('Delete failed','#f87171'); }
+}
+
+// Persist a single exercise's customization
+async function saveProgramExercise(ex){
+  try{
+    const idx=PROGRAM[currentDay].exercises.findIndex(e=>e.id===ex.id);
+    const payload={
+      id: ex.id, day: currentDay, name: ex.name,
+      alt: ex.alt||null, ds: ex.ds, rt: ex.rt, dw: ex.dw, u: ex.u||'lb',
+      sort_order: idx, is_deleted: false, is_custom: !!ex._isCustom,
+    };
+    await fetch(`${SB_URL}/functions/v1/workouts?action=save_program_exercise`,{
+      method:'POST', headers:HDRS, body:JSON.stringify(payload)
+    });
+  }catch(e){ console.warn('saveProgramExercise failed',e); }
+}
+
+// Load all overrides and merge them into PROGRAM
+async function loadProgramOverrides(){
+  try{
+    const r=await fetch(`${SB_URL}/functions/v1/workouts?action=get_program`,{
+      method:'GET', headers:HDRS
+    });
+    if(!r.ok) return;
+    const overrides=await r.json();
+    if(!Array.isArray(overrides)) return;
+
+    // First pass: apply field overrides + insert custom + remove deleted
+    overrides.forEach(o=>{
+      const day=o.day;
+      if(!PROGRAM[day]) return;
+      const exs=PROGRAM[day].exercises;
+      const existing=exs.findIndex(e=>e.id===o.id);
+      if(o.is_deleted){
+        if(existing>=0) exs.splice(existing,1);
+        return;
+      }
+      const newEx={id:o.id, name:o.name, ds:o.ds, rt:o.rt, dw:parseFloat(o.dw)||0, u:o.u, _sortOrder:o.sort_order};
+      if(o.alt) newEx.alt=o.alt;
+      if(o.is_custom) newEx._isCustom=true;
+      if(existing>=0){
+        Object.assign(exs[existing], newEx);
+      } else if(o.is_custom){
+        exs.push(newEx);
+      }
+    });
+
+    // Second pass: re-sort each day's exercises by _sortOrder (if any have it)
+    Object.keys(PROGRAM).forEach(day=>{
+      const exs=PROGRAM[day].exercises;
+      // Stable sort: exercises with _sortOrder set come in that order; rest preserve original position
+      const hasOrder = exs.some(e=>typeof e._sortOrder === 'number');
+      if(!hasOrder) return;
+      exs.sort((a,b)=>{
+        const ao = typeof a._sortOrder === 'number' ? a._sortOrder : 9999;
+        const bo = typeof b._sortOrder === 'number' ? b._sortOrder : 9999;
+        return ao - bo;
+      });
+    });
+  }catch(e){ console.warn('loadProgramOverrides failed',e); }
 }
 
 function startLiveTimer(){
@@ -754,10 +930,18 @@ function switchView(v){
   document.getElementById('view-history').style.display=v==='history'?'':'none';
   document.getElementById('btn-log').classList.toggle('active',v==='log');
   document.getElementById('btn-history').classList.toggle('active',v==='history');
+  // Clear live timer when leaving log view
+  if(v!=='log' && liveTimer){ clearInterval(liveTimer); liveTimer=null; }
   if(v==='history') loadHistory();
   renderAll();
 }
-function selectDay(d){ currentDay=d; loadDraft(); renderAll(); }
+async function selectDay(d){
+  if(d===currentDay && currentView==='log') return;
+  currentDay=d;
+  draft={}; // clear stale draft immediately so we don't show prior day's data
+  renderAll();
+  await loadDraft();
+}
 function selectHistDay(d){ histDay=d; loadHistory(); renderAll(); }
 function toggleHist(i){
   const b=document.getElementById(`hbody-${i}`),c=document.getElementById(`hchev-${i}`);
@@ -1229,8 +1413,11 @@ function resetSwipe(id, si) {
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
-renderAll();
-loadDraft();
+(async () => {
+  await loadProgramOverrides();
+  renderAll();
+  await loadDraft();
+})();
 </script>
 
 </body>
