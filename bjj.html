@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -11,135 +10,133 @@
   body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;max-width:680px;margin:0 auto;padding-bottom:80px;}
   input,textarea,select{font-family:var(--font);}
 
-/* Header */
-.header{padding:14px 14px 10px;border-bottom:1px solid var(–border);display:flex;justify-content:space-between;align-items:center;}
-.title{font-size:14px;font-weight:800;letter-spacing:.22em;color:#f8fafc;}
-.sub{font-size:10px;color:var(–muted);margin-top:2px;}
-.dot{color:#22c55e;margin-left:8px;font-size:9px;}
+  /* Header */
+  .header{padding:14px 14px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .title{font-size:14px;font-weight:800;letter-spacing:.22em;color:#f8fafc;}
+  .sub{font-size:10px;color:var(--muted);margin-top:2px;}
+  .dot{color:#22c55e;margin-left:8px;font-size:9px;}
 
-/* Nav */
-.nav{display:flex;border-bottom:1px solid rgba(255,255,255,.05);padding:0 14px;}
-.nav-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(–muted);font-family:var(–font);font-size:11px;font-weight:700;letter-spacing:.08em;padding:10px 10px;cursor:pointer;}
-.nav-btn.active{color:#60a5fa;border-bottom-color:#60a5fa;}
+  /* Nav */
+  .nav{display:flex;border-bottom:1px solid rgba(255,255,255,.05);padding:0 14px;}
+  .nav-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.08em;padding:10px 10px;cursor:pointer;}
+  .nav-btn.active{color:#60a5fa;border-bottom-color:#60a5fa;}
 
-/* Private tracker */
-.priv-bar{margin:10px 14px;padding:10px 14px;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;}
-.priv-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-.priv-title{font-size:10px;font-weight:700;color:#4ade80;letter-spacing:.1em;}
-.priv-count{font-size:11px;color:var(–muted);}
-.priv-dots{display:flex;gap:4px;}
-.priv-dot{flex:1;height:6px;border-radius:3px;}
+  /* Private tracker */
+  .priv-bar{margin:10px 14px;padding:10px 14px;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;}
+  .priv-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .priv-title{font-size:10px;font-weight:700;color:#4ade80;letter-spacing:.1em;}
+  .priv-count{font-size:11px;color:var(--muted);}
+  .priv-dots{display:flex;gap:4px;}
+  .priv-dot{flex:1;height:6px;border-radius:3px;}
 
-/* Session cards */
-.sessions{padding:10px 14px;}
-.filter-row{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;}
-.filter-btn{background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 10px;font-family:var(–font);font-size:10px;font-weight:700;cursor:pointer;color:var(–muted);}
-.filter-btn.active{border-color:var(–ac);color:var(–ac);}
-.sess-card{background:var(–bg2);border:1px solid var(–border);border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer;border-left:3px solid var(–ac);}
-.sess-type{font-size:10px;font-weight:700;letter-spacing:.08em;margin-bottom:2px;}
-.sess-date{font-size:13px;font-weight:700;color:#f1f5f9;}
-.sess-tech{font-size:11px;color:#94a3b8;margin-top:2px;}
-.sess-instr{font-size:10px;color:var(–muted);margin-top:1px;}
-.sess-notes{font-size:10px;color:#64748b;margin-top:6px;line-height:1.5;border-top:1px solid rgba(255,255,255,.05);padding-top:6px;}
+  /* Session cards */
+  .sessions{padding:10px 14px;}
+  .filter-row{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;}
+  .filter-btn{background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 10px;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;color:var(--muted);}
+  .filter-btn.active{border-color:var(--ac);color:var(--ac);}
+  .sess-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer;border-left:3px solid var(--ac);}
+  .sess-type{font-size:10px;font-weight:700;letter-spacing:.08em;margin-bottom:2px;}
+  .sess-date{font-size:13px;font-weight:700;color:#f1f5f9;}
+  .sess-tech{font-size:11px;color:#94a3b8;margin-top:2px;}
+  .sess-instr{font-size:10px;color:var(--muted);margin-top:1px;}
+  .sess-notes{font-size:10px;color:#64748b;margin-top:6px;line-height:1.5;border-top:1px solid rgba(255,255,255,.05);padding-top:6px;}
 
-/* Belt badge */
-.belt-badge{font-weight:700;font-size:10px;border-radius:4px;padding:3px 8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none;}
+  /* Belt badge */
+  .belt-badge{font-weight:700;font-size:10px;border-radius:4px;padding:3px 8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none;}
 
-/* Log session button */
-.log-btn{background:#60a5fa;color:#0a0f1a;border:none;border-radius:7px;padding:6px 14px;font-family:var(–font);font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.08em;}
+  /* Log session button */
+  .log-btn{background:#60a5fa;color:#0a0f1a;border:none;border-radius:7px;padding:6px 14px;font-family:var(--font);font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.08em;}
 
-/* Modal */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:flex-end;justify-content:center;}
-.overlay.open{display:flex;}
-.modal{background:#0d1525;border:1px solid rgba(255,255,255,.09);border-radius:14px 14px 0 0;padding:20px 16px 36px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-.modal-title{font-size:13px;font-weight:700;color:#f1f5f9;}
-.close-btn{background:none;border:none;color:var(–muted);font-size:22px;cursor:pointer;line-height:1;}
-.field{margin-bottom:10px;}
-.field-label{font-size:10px;color:var(–muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
-.field input,.field textarea,.field select{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(–text);font-family:var(–font);font-size:12px;outline:none;resize:vertical;}
-.row2{display:flex;gap:8px;}
-.row2 .field{flex:1;}
-.type-row{display:flex;gap:6px;margin-bottom:10px;}
-.type-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:9px 4px;font-family:var(–font);font-size:11px;font-weight:700;cursor:pointer;color:var(–muted);}
-.type-btn.active{background:rgba(96,165,250,.18);border-color:#60a5fa;color:#60a5fa;}
-.type-btn.gi.active{background:rgba(96,165,250,.18);border-color:#60a5fa;color:#60a5fa;}
-.type-btn.nogi.active{background:rgba(251,146,60,.18);border-color:#fb923c;color:#fb923c;}
-.type-btn.private.active{background:rgba(74,222,128,.18);border-color:#4ade80;color:#4ade80;}
-.save-modal-btn{width:100%;background:#60a5fa;color:#0a0f1a;border:none;border-radius:8px;padding:11px;font-family:var(–font);font-size:12px;font-weight:800;cursor:pointer;margin-top:8px;letter-spacing:.1em;}
-.del-btn{width:100%;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);border-radius:8px;padding:9px;color:#f87171;font-family:var(–font);font-size:11px;font-weight:700;cursor:pointer;margin-top:12px;}
+  /* Modal */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:flex-end;justify-content:center;}
+  .overlay.open{display:flex;}
+  .modal{background:#0d1525;border:1px solid rgba(255,255,255,.09);border-radius:14px 14px 0 0;padding:20px 16px 36px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .modal-title{font-size:13px;font-weight:700;color:#f1f5f9;}
+  .close-btn{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;}
+  .field{margin-bottom:10px;}
+  .field-label{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+  .field input,.field textarea,.field select{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;resize:vertical;}
+  .row2{display:flex;gap:8px;}
+  .row2 .field{flex:1;}
+  .type-row{display:flex;gap:6px;margin-bottom:10px;}
+  .type-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:9px 4px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);}
+  .type-btn.active{background:rgba(96,165,250,.18);border-color:#60a5fa;color:#60a5fa;}
+  .type-btn.gi.active{background:rgba(96,165,250,.18);border-color:#60a5fa;color:#60a5fa;}
+  .type-btn.nogi.active{background:rgba(251,146,60,.18);border-color:#fb923c;color:#fb923c;}
+  .type-btn.private.active{background:rgba(74,222,128,.18);border-color:#4ade80;color:#4ade80;}
+  .save-modal-btn{width:100%;background:#60a5fa;color:#0a0f1a;border:none;border-radius:8px;padding:11px;font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer;margin-top:8px;letter-spacing:.1em;}
+  .del-btn{width:100%;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);border-radius:8px;padding:9px;color:#f87171;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;margin-top:12px;}
 
-/* Session detail */
-.detail-info{background:rgba(255,255,255,.03);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px;line-height:1.7;}
-.detail-info .tech{font-size:12px;font-weight:700;color:#f1f5f9;margin-bottom:4px;}
-.work-on{color:#fb923c;}
-.tip{color:#4ade80;}
+  /* Session detail */
+  .detail-info{background:rgba(255,255,255,.03);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px;line-height:1.7;}
+  .detail-info .tech{font-size:12px;font-weight:700;color:#f1f5f9;margin-bottom:4px;}
+  .work-on{color:#fb923c;}
+  .tip{color:#4ade80;}
 
-/* Rolls */
-.rolls-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.rolls-label{font-size:10px;color:var(–muted);letter-spacing:.1em;}
-.roll-stats{display:flex;gap:10px;font-size:11px;}
-.add-roll-btn{width:100%;background:none;border:1px dashed rgba(96,165,250,.4);border-radius:8px;padding:9px;color:#60a5fa;font-family:var(–font);font-size:11px;font-weight:700;cursor:pointer;margin-top:4px;}
-.roll-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:9px 11px;margin-bottom:6px;}
-.roll-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
-.roll-opp{font-size:12px;font-weight:700;color:#f1f5f9;}
-.roll-result{font-size:16px;font-weight:800;}
-.roll-score{font-size:11px;font-weight:700;}
-.roll-notes{font-size:10px;color:#64748b;line-height:1.5;}
-.roll-subs{font-size:10px;margin-top:2px;}
+  /* Rolls */
+  .rolls-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .rolls-label{font-size:10px;color:var(--muted);letter-spacing:.1em;}
+  .roll-stats{display:flex;gap:10px;font-size:11px;}
+  .add-roll-btn{width:100%;background:none;border:1px dashed rgba(96,165,250,.4);border-radius:8px;padding:9px;color:#60a5fa;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;margin-top:4px;}
+  .roll-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:9px 11px;margin-bottom:6px;}
+  .roll-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+  .roll-opp{font-size:12px;font-weight:700;color:#f1f5f9;}
+  .roll-result{font-size:16px;font-weight:800;}
+  .roll-score{font-size:11px;font-weight:700;}
+  .roll-notes{font-size:10px;color:#64748b;line-height:1.5;}
+  .roll-subs{font-size:10px;margin-top:2px;}
 
-/* Result buttons */
-.result-row{display:flex;gap:6px;}
-.result-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 4px;font-family:var(–font);font-size:11px;font-weight:700;cursor:pointer;color:var(–muted);}
-.result-btn.win.active{background:rgba(74,222,128,.2);border-color:#4ade80;color:#4ade80;}
-.result-btn.loss.active{background:rgba(248,113,113,.2);border-color:#f87171;color:#f87171;}
-.result-btn.draw.active{background:rgba(148,163,184,.15);border-color:#94a3b8;color:#94a3b8;}
+  /* Result buttons */
+  .result-row{display:flex;gap:6px;}
+  .result-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 4px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);}
+  .result-btn.win.active{background:rgba(74,222,128,.2);border-color:#4ade80;color:#4ade80;}
+  .result-btn.loss.active{background:rgba(248,113,113,.2);border-color:#f87171;color:#f87171;}
+  .result-btn.draw.active{background:rgba(148,163,184,.15);border-color:#94a3b8;color:#94a3b8;}
 
-/* Score row */
-.score-row{display:flex;gap:4px;}
-.score-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 2px;font-family:var(–font);font-size:11px;font-weight:700;cursor:pointer;color:var(–muted);}
-.score-btn.pos.active{background:rgba(74,222,128,.2);border-color:#4ade80;color:#4ade80;}
-.score-btn.neg.active{background:rgba(248,113,113,.2);border-color:#f87171;color:#f87171;}
-.score-btn.neu.active{background:rgba(148,163,184,.15);border-color:#94a3b8;color:#94a3b8;}
+  /* Score row */
+  .score-row{display:flex;gap:4px;}
+  .score-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 2px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);}
+  .score-btn.pos.active{background:rgba(74,222,128,.2);border-color:#4ade80;color:#4ade80;}
+  .score-btn.neg.active{background:rgba(248,113,113,.2);border-color:#f87171;color:#f87171;}
+  .score-btn.neu.active{background:rgba(148,163,184,.15);border-color:#94a3b8;color:#94a3b8;}
 
-/* Belt modal */
-.belt-row{display:flex;gap:5px;flex-wrap:wrap;}
-.belt-btn{flex:1;min-width:60px;border:2px solid transparent;border-radius:7px;padding:8px 4px;font-family:var(–font);font-size:11px;font-weight:800;cursor:pointer;text-transform:capitalize;}
-.stripe-row{display:flex;gap:6px;}
-.stripe-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;font-family:var(–font);font-size:12px;font-weight:700;cursor:pointer;color:var(–muted);}
-.stripe-btn.active{background:rgba(192,132,252,.25);border-color:#c084fc;color:#c084fc;}
+  /* Belt modal */
+  .belt-row{display:flex;gap:5px;flex-wrap:wrap;}
+  .belt-btn{flex:1;min-width:60px;border:2px solid transparent;border-radius:7px;padding:8px 4px;font-family:var(--font);font-size:11px;font-weight:800;cursor:pointer;text-transform:capitalize;}
+  .stripe-row{display:flex;gap:6px;}
+  .stripe-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);}
+  .stripe-btn.active{background:rgba(192,132,252,.25);border-color:#c084fc;color:#c084fc;}
 
-/* Stats */
-.stats{padding:12px 14px;}
-.stat-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
-.stat-card{background:var(–bg2);border:1px solid var(–border);border-radius:10px;padding:12px 14px;flex:1;min-width:100px;}
-.stat-label{font-size:9px;color:var(–muted);letter-spacing:.08em;margin-bottom:4px;}
-.stat-val{font-size:22px;font-weight:800;}
-.stat-sub{font-size:10px;color:var(–dim);margin-top:2px;}
-.section-title{font-size:10px;color:var(–muted);letter-spacing:.1em;margin-bottom:8px;}
-.chart-bar-row{display:flex;align-items:flex-end;gap:5px;height:80px;margin-bottom:4px;}
-.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.chart-bar{width:100%;border-radius:3px 3px 0 0;}
-.chart-label{font-size:8px;color:var(–muted);}
-.chart-val{font-size:9px;color:#60a5fa;font-weight:700;}
-.opp-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);}
-.opp-name{font-size:12px;color:#f1f5f9;}
-.opp-wld{display:flex;gap:8px;font-size:11px;}
-.empty{color:var(–dim);text-align:center;padding:40px;font-size:13px;}
+  /* Stats */
+  .stats{padding:12px 14px;}
+  .stat-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;flex:1;min-width:100px;}
+  .stat-label{font-size:9px;color:var(--muted);letter-spacing:.08em;margin-bottom:4px;}
+  .stat-val{font-size:22px;font-weight:800;}
+  .stat-sub{font-size:10px;color:var(--dim);margin-top:2px;}
+  .section-title{font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:8px;}
+  .chart-bar-row{display:flex;align-items:flex-end;gap:5px;height:80px;margin-bottom:4px;}
+  .chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .chart-bar{width:100%;border-radius:3px 3px 0 0;}
+  .chart-label{font-size:8px;color:var(--muted);}
+  .chart-val{font-size:9px;color:#60a5fa;font-weight:700;}
+  .opp-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+  .opp-name{font-size:12px;color:#f1f5f9;}
+  .opp-wld{display:flex;gap:8px;font-size:11px;}
+  .empty{color:var(--dim);text-align:center;padding:40px;font-size:13px;}
 
-/* Toast */
-.toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(8,13,24,.95);border:1px solid #4ade80;color:#4ade80;padding:10px 20px;border-radius:10px;font-size:12px;font-weight:700;z-index:999;white-space:nowrap;}
-.toast.show{display:block;}
+  /* Toast */
+  .toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(8,13,24,.95);border:1px solid #4ade80;color:#4ade80;padding:10px 20px;border-radius:10px;font-size:12px;font-weight:700;z-index:999;white-space:nowrap;}
+  .toast.show{display:block;}
 
-/* Opp dropdown */
-.opp-create{background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:10px;margin-top:6px;}
+  /* Opp dropdown */
+  .opp-create{background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:10px;margin-top:6px;}
 </style>
-
 </head>
 <body>
 
 <!-- Header -->
-
 <div class="header">
   <div>
     <div class="title">BJJ LOG</div>
@@ -152,7 +149,6 @@
 </div>
 
 <!-- Private tracker -->
-
 <div class="priv-bar">
   <div class="priv-label">
     <span class="priv-title">🎯 PRIVATE CLASSES</span>
@@ -162,7 +158,6 @@
 </div>
 
 <!-- Nav -->
-
 <div class="nav">
   <button class="nav-btn active" onclick="switchView('log')" id="nav-log">📋 LOG</button>
   <button class="nav-btn" onclick="switchView('history')" id="nav-history">🗂 HISTORY</button>
@@ -170,7 +165,6 @@
 </div>
 
 <!-- Log view -->
-
 <div id="view-log" class="sessions">
   <div class="filter-row">
     <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">ALL</button>
@@ -182,14 +176,12 @@
 </div>
 
 <!-- History view -->
-
 <div id="view-history" style="display:none;padding:12px 14px">
   <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:10px" id="history-label">ALL SESSIONS</div>
   <div id="hist-list"></div>
 </div>
 
 <!-- Stats view -->
-
 <div id="view-stats" style="display:none" class="stats">
   <div id="stats-content"><div class="empty">Loading stats...</div></div>
 </div>
@@ -197,7 +189,6 @@
 <div class="toast" id="toast"></div>
 
 <!-- ── NEW SESSION MODAL ── -->
-
 <div class="overlay" id="overlay-new" onclick="closeIfOutside(event,'overlay-new')">
   <div class="modal">
     <div class="modal-header">
@@ -224,7 +215,6 @@
 </div>
 
 <!-- ── SESSION DETAIL MODAL ── -->
-
 <div class="overlay" id="overlay-detail" onclick="closeIfOutside(event,'overlay-detail')">
   <div class="modal">
     <div class="modal-header">
@@ -242,7 +232,6 @@
 </div>
 
 <!-- ── EDIT SESSION MODAL ── -->
-
 <div class="overlay" id="overlay-edit" onclick="closeIfOutside(event,'overlay-edit')">
   <div class="modal">
     <div class="modal-header">
@@ -268,7 +257,6 @@
 </div>
 
 <!-- ── BELT MODAL ── -->
-
 <div class="overlay" id="overlay-belt" onclick="closeIfOutside(event,'overlay-belt')">
   <div class="modal">
     <div class="modal-header">
@@ -646,242 +634,282 @@ function renderRollForm() {
     <div class="field"><div class="field-label">My Submissions</div><input type="text" id="roll-mysubs" placeholder="Triangle, armbar..." style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none"></div>
     <div class="field"><div class="field-label">Their Submissions</div><input type="text" id="roll-theirsubs" placeholder="Rear naked..." style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none"></div>
     <div class="field"><div class="field-label">Notes</div><textarea id="roll-notes" rows="2" placeholder="What worked, key moments..." style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none;resize:vertical"></textarea></div>
-
-```
-<div style="display:flex;gap:8px;margin-top:8px">
-  <button onclick="saveRoll()" style="flex:2;background:#60a5fa;color:#0a0f1a;border:none;border-radius:8px;padding:10px;font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer">Save Roll</button>
-  <button onclick="closeRollForm()" style="flex:1;background:rgba(255,255,255,.06);color:#94a3b8;border:none;border-radius:8px;padding:10px;font-family:var(--font);font-size:12px;cursor:pointer">Cancel</button>
-</div>
-```
-
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button onclick="saveRoll()" style="flex:2;background:#60a5fa;color:#0a0f1a;border:none;border-radius:8px;padding:10px;font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer">Save Roll</button>
+      <button onclick="closeRollForm()" style="flex:1;background:rgba(255,255,255,.06);color:#94a3b8;border:none;border-radius:8px;padding:10px;font-family:var(--font);font-size:12px;cursor:pointer">Cancel</button>
+    </div>
   </div>`;
 }
 
 function openRollForm()   { showRollForm=true;  renderRolls(); }
 function closeRollForm()  { showRollForm=false; editingRoll=null; renderRolls(); }
-function selResult(r)     { selectedResult=r; document.querySelectorAll(’.result-btn’).forEach(b=>b.classList.toggle(‘active’,b.dataset.result===r)); }
-function selScore(s)      { selectedScore=s; document.querySelectorAll(’.score-btn’).forEach(b=>b.classList.toggle(‘active’,parseInt(b.dataset.score)===s)); }
+function selResult(r)     { selectedResult=r; document.querySelectorAll('.result-btn').forEach(b=>b.classList.toggle('active',b.dataset.result===r)); }
+function selScore(s)      { selectedScore=s; document.querySelectorAll('.score-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.score)===s)); }
 function toggleCreateOpp(v){ creatingOpp=v; renderRolls(); }
 
 async function createOpp() {
-const name = document.getElementById(‘new-opp-name’)?.value?.trim();
-const belt = document.getElementById(‘new-opp-belt’)?.value;
-if (!name) return;
-try {
-const opp = await POST(‘add_opponent’,{name,belt});
-opponents.push(opp);
-creatingOpp=false; renderRolls();
-setTimeout(()=>{ const sel=document.getElementById(‘roll-opp’); if(sel) sel.value=opp.id; },100);
-toast(‘Opponent added!’);
-} catch(e) { toast(‘Failed’,’#f87171’); }
+  const name = document.getElementById('new-opp-name')?.value?.trim();
+  const belt = document.getElementById('new-opp-belt')?.value;
+  if (!name) return;
+  try {
+    const opp = await POST('add_opponent',{name,belt});
+    opponents.push(opp);
+    creatingOpp=false; renderRolls();
+    setTimeout(()=>{ const sel=document.getElementById('roll-opp'); if(sel) sel.value=opp.id; },100);
+    toast('Opponent added!');
+  } catch(e) { toast('Failed','#f87171'); }
 }
 
 async function saveRoll() {
-if (!selectedResult) { toast(‘Select a result’,’#fb923c’); return; }
-const oppId = document.getElementById(‘roll-opp’)?.value||null;
-const opp = opponents.find(o=>o.id===oppId);
-try {
-const payload = {
-session_id: detailSession.id,
-date: detailSession.date,
-opponent_id: oppId||null,
-opponent_belt: opp?.belt||null,
-result: selectedResult,
-score: selectedScore,
-duration_min: parseInt(document.getElementById(‘roll-dur’)?.value)||null,
-my_submissions: document.getElementById(‘roll-mysubs’)?.value||null,
-their_submissions: document.getElementById(‘roll-theirsubs’)?.value||null,
-notes: document.getElementById(‘roll-notes’)?.value||null,
-};
-if (editingRoll) payload.id = editingRoll.id;
-const roll = await POST(‘save_roll’, payload);
-if (editingRoll) {
-const idx = detailRolls.findIndex(r => r.id === editingRoll.id);
-if (idx >= 0) detailRolls[idx] = roll;
-editingRoll = null;
-toast(‘Roll updated!’);
-} else {
-detailRolls.push(roll);
-toast(‘Roll saved!’);
-}
-showRollForm = false; renderRolls();
-} catch(e) { toast(‘Save failed: ‘+e.message,’#f87171’); }
+  if (!selectedResult) { toast('Select a result','#fb923c'); return; }
+  const oppId = document.getElementById('roll-opp')?.value||null;
+  const opp = opponents.find(o=>o.id===oppId);
+  try {
+    const payload = {
+      session_id: detailSession.id,
+      date: detailSession.date,
+      opponent_id: oppId||null,
+      opponent_belt: opp?.belt||null,
+      result: selectedResult,
+      score: selectedScore,
+      duration_min: parseInt(document.getElementById('roll-dur')?.value)||null,
+      my_submissions: document.getElementById('roll-mysubs')?.value||null,
+      their_submissions: document.getElementById('roll-theirsubs')?.value||null,
+      notes: document.getElementById('roll-notes')?.value||null,
+    };
+    if (editingRoll) payload.id = editingRoll.id;
+    const roll = await POST('save_roll', payload);
+    if (editingRoll) {
+      const idx = detailRolls.findIndex(r => r.id === editingRoll.id);
+      if (idx >= 0) detailRolls[idx] = roll;
+      editingRoll = null;
+      toast('Roll updated!');
+    } else {
+      detailRolls.push(roll);
+      toast('Roll saved!');
+    }
+    showRollForm = false; renderRolls();
+  } catch(e) { toast('Save failed: '+e.message,'#f87171'); }
 }
 
 async function deleteRoll(id) {
-if (!confirm(‘Delete this roll?’)) return;
-try {
-await POST(‘delete_roll’,{id});
-detailRolls = detailRolls.filter(r=>r.id!==id); renderRolls(); toast(‘Roll deleted’,’#f87171’);
-} catch(e) { toast(‘Delete failed’,’#f87171’); }
+  if (!confirm('Delete this roll?')) return;
+  try {
+    await POST('delete_roll',{id});
+    detailRolls = detailRolls.filter(r=>r.id!==id); renderRolls(); toast('Roll deleted','#f87171');
+  } catch(e) { toast('Delete failed','#f87171'); }
 }
 
 async function deleteSession() {
-if (!detailSession || !confirm(‘Delete this session and all its rolls?’)) return;
-try {
-await POST(‘delete_session’,{id:detailSession.id});
-sessions = sessions.filter(s=>s.id!==detailSession.id);
-renderPrivBar(); renderSessions(); renderHistory();
-closeModal(‘overlay-detail’); toast(‘Session deleted’,’#f87171’);
-} catch(e) { toast(‘Delete failed’,’#f87171’); }
+  if (!detailSession || !confirm('Delete this session and all its rolls?')) return;
+  try {
+    await POST('delete_session',{id:detailSession.id});
+    sessions = sessions.filter(s=>s.id!==detailSession.id);
+    renderPrivBar(); renderSessions(); renderHistory();
+    closeModal('overlay-detail'); toast('Session deleted','#f87171');
+  } catch(e) { toast('Delete failed','#f87171'); }
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 async function loadStats() {
-try {
-const s = await GET(‘get_stats’);
-renderStats(s);
-} catch(e) { toast(‘Stats failed’,’#f87171’); }
+  try {
+    const s = await GET('get_stats');
+    renderStats(s);
+  } catch(e) { toast('Stats failed','#f87171'); }
 }
 
 function renderStats({sessions:S, rolls:R, opponents:O}) {
-const total=S.length, gi=S.filter(x=>x.type===‘gi’).length, nogi=S.filter(x=>x.type===‘nogi’).length, priv=S.filter(x=>x.type===‘private’).length;
-const wins=R.filter(r=>r.result===‘win’).length, losses=R.filter(r=>r.result===‘loss’).length, draws=R.filter(r=>r.result===‘draw’).length;
-const wr=R.length?Math.round(wins/R.length*100):0;
-const avgRolls=S.length?Math.round(R.length/S.length*10)/10:0;
+  const total=S.length, gi=S.filter(x=>x.type==='gi').length, nogi=S.filter(x=>x.type==='nogi').length, priv=S.filter(x=>x.type==='private').length;
+  const wins=R.filter(r=>r.result==='win').length, losses=R.filter(r=>r.result==='loss').length, draws=R.filter(r=>r.result==='draw').length;
+  const wr=R.length?Math.round(wins/R.length*100):0;
+  const avgRolls=S.length?Math.round(R.length/S.length*10)/10:0;
 
-// Monthly chart
-const mmap={};
-S.forEach(s=>{ const m=s.date.slice(0,7); mmap[m]=(mmap[m]||0)+1; });
-const months=Object.entries(mmap).sort().slice(-6);
-const maxM=Math.max(…months.map(x=>x[1]),1);
+  // Monthly chart
+  const mmap={};
+  S.forEach(s=>{ const m=s.date.slice(0,7); mmap[m]=(mmap[m]||0)+1; });
+  const months=Object.entries(mmap).sort().slice(-6);
+  const maxM=Math.max(...months.map(x=>x[1]),1);
 
-// Top partners
-const oppmap={};
-R.forEach(r=>{ const n=r.bjj_opponents?.name||‘Unknown’; oppmap[n]=(oppmap[n]||0)+1; });
-const topOpps=Object.entries(oppmap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  // Top partners
+  const oppmap={};
+  R.forEach(r=>{ const n=r.bjj_opponents?.name||'Unknown'; oppmap[n]=(oppmap[n]||0)+1; });
+  const topOpps=Object.entries(oppmap).sort((a,b)=>b[1]-a[1]).slice(0,5);
 
-// W/L per opp
-const oppWL = O.filter(o=>R.some(r=>r.opponent_id===o.id)).map(o=>{
-const or=R.filter(r=>r.opponent_id===o.id);
-return {name:o.name,belt:o.belt,w:or.filter(r=>r.result===‘win’).length,l:or.filter(r=>r.result===‘loss’).length,d:or.filter(r=>r.result===‘draw’).length};
-});
+  // W/L per opp
+  const oppWL = O.filter(o=>R.some(r=>r.opponent_id===o.id)).map(o=>{
+    const or=R.filter(r=>r.opponent_id===o.id);
+    return {name:o.name,belt:o.belt,w:or.filter(r=>r.result==='win').length,l:or.filter(r=>r.result==='loss').length,d:or.filter(r=>r.result==='draw').length};
+  });
 
-document.getElementById(‘stats-content’).innerHTML = ` ${belt?`<div style="text-align:center;margin-bottom:16px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px">
-<div class="section-title" style="margin-bottom:8px">CURRENT RANK</div>
-${beltBadge(belt.belt,belt.stripes,‘lg’)}
-${belt.achieved_on?`<div style="font-size:10px;color:var(--muted);margin-top:8px">Since ${fmtDate(belt.achieved_on)}</div>`:’’}
-</div>`:''} <div class="section-title">TRAINING VOLUME</div> <div class="stat-grid"> <div class="stat-card"><div class="stat-label">TOTAL CLASSES</div><div class="stat-val">${total}</div></div> <div class="stat-card"><div class="stat-label">GI</div><div class="stat-val" style="color:#60a5fa">${gi}</div></div> <div class="stat-card"><div class="stat-label">NO-GI</div><div class="stat-val" style="color:#fb923c">${nogi}</div></div> <div class="stat-card"><div class="stat-label">PRIVATES</div><div class="stat-val" style="color:#4ade80">${priv}/${PRIVATES_TOTAL}</div><div class="stat-sub">${PRIVATES_TOTAL-priv} left</div></div> </div> <div class="section-title">ROLLING</div> <div class="stat-grid"> <div class="stat-card"><div class="stat-label">TOTAL ROLLS</div><div class="stat-val">${R.length}</div></div> <div class="stat-card"><div class="stat-label">WIN RATE</div><div class="stat-val" style="color:#4ade80">${wr}%</div><div class="stat-sub">${wins}W ${losses}L ${draws}D</div></div> <div class="stat-card"><div class="stat-label">AVG / CLASS</div><div class="stat-val" style="color:#60a5fa">${avgRolls}</div></div> </div> ${months.length?`
-<div class="section-title">SESSIONS / MONTH</div>
-<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
-<div class="chart-bar-row">
-${months.map(([m,c])=>`<div class="chart-bar-wrap"> <div class="chart-val">${c}</div> <div class="chart-bar" style="height:${Math.round(c/maxM*64)+8}px;background:rgba(96,165,250,.5)"></div> <div class="chart-label">${m.slice(5)}</div> </div>`).join(’’)}
-</div>
-</div>`:''} ${topOpps.length?`
-<div class="section-title">TOP TRAINING PARTNERS</div>
-<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px">
-${topOpps.map(([name,count],i)=>`<div class="opp-row"> <div style="display:flex;align-items:center;gap:8px"> <span style="font-size:10px;color:var(--dim);font-weight:700;width:18px">#${i+1}</span> <span class="opp-name">${name}</span> </div> <span style="font-size:11px;color:#60a5fa;font-weight:700">${count} rolls</span> </div>`).join(’’)}
-</div>`:''} ${oppWL.length?`
-<div class="section-title">W/L vs PARTNERS</div>
-<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px">
-${oppWL.map((o,i,arr)=>`<div class="opp-row" ${i===arr.length-1?'style="border:none"':''}> <div style="display:flex;align-items:center;gap:8px"> <span class="opp-name">${o.name}</span> ${o.belt?beltBadge(o.belt):''} </div> <div class="opp-wld"> <span style="color:#4ade80">${o.w}W</span> <span style="color:#f87171">${o.l}L</span> <span style="color:#94a3b8">${o.d}D</span> </div> </div>`).join(’’)}
-</div>`:''} `;
+  document.getElementById('stats-content').innerHTML = `
+    ${belt?`<div style="text-align:center;margin-bottom:16px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px">
+      <div class="section-title" style="margin-bottom:8px">CURRENT RANK</div>
+      ${beltBadge(belt.belt,belt.stripes,'lg')}
+      ${belt.achieved_on?`<div style="font-size:10px;color:var(--muted);margin-top:8px">Since ${fmtDate(belt.achieved_on)}</div>`:''}
+    </div>`:''}
+    <div class="section-title">TRAINING VOLUME</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">TOTAL CLASSES</div><div class="stat-val">${total}</div></div>
+      <div class="stat-card"><div class="stat-label">GI</div><div class="stat-val" style="color:#60a5fa">${gi}</div></div>
+      <div class="stat-card"><div class="stat-label">NO-GI</div><div class="stat-val" style="color:#fb923c">${nogi}</div></div>
+      <div class="stat-card"><div class="stat-label">PRIVATES</div><div class="stat-val" style="color:#4ade80">${priv}/${PRIVATES_TOTAL}</div><div class="stat-sub">${PRIVATES_TOTAL-priv} left</div></div>
+    </div>
+    <div class="section-title">ROLLING</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">TOTAL ROLLS</div><div class="stat-val">${R.length}</div></div>
+      <div class="stat-card"><div class="stat-label">WIN RATE</div><div class="stat-val" style="color:#4ade80">${wr}%</div><div class="stat-sub">${wins}W ${losses}L ${draws}D</div></div>
+      <div class="stat-card"><div class="stat-label">AVG / CLASS</div><div class="stat-val" style="color:#60a5fa">${avgRolls}</div></div>
+    </div>
+    ${months.length?`
+    <div class="section-title">SESSIONS / MONTH</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div class="chart-bar-row">
+        ${months.map(([m,c])=>`<div class="chart-bar-wrap">
+          <div class="chart-val">${c}</div>
+          <div class="chart-bar" style="height:${Math.round(c/maxM*64)+8}px;background:rgba(96,165,250,.5)"></div>
+          <div class="chart-label">${m.slice(5)}</div>
+        </div>`).join('')}
+      </div>
+    </div>`:''}
+    ${topOpps.length?`
+    <div class="section-title">TOP TRAINING PARTNERS</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px">
+      ${topOpps.map(([name,count],i)=>`<div class="opp-row">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:10px;color:var(--dim);font-weight:700;width:18px">#${i+1}</span>
+          <span class="opp-name">${name}</span>
+        </div>
+        <span style="font-size:11px;color:#60a5fa;font-weight:700">${count} rolls</span>
+      </div>`).join('')}
+    </div>`:''}
+    ${oppWL.length?`
+    <div class="section-title">W/L vs PARTNERS</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px">
+      ${oppWL.map((o,i,arr)=>`<div class="opp-row" ${i===arr.length-1?'style="border:none"':''}>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="opp-name">${o.name}</span>
+          ${o.belt?beltBadge(o.belt):''}
+        </div>
+        <div class="opp-wld">
+          <span style="color:#4ade80">${o.w}W</span>
+          <span style="color:#f87171">${o.l}L</span>
+          <span style="color:#94a3b8">${o.d}D</span>
+        </div>
+      </div>`).join('')}
+    </div>`:''}
+  `;
 }
 
 // ── View switching ────────────────────────────────────────────────────────────
 function switchView(v) {
-currentView = v;
-[‘log’,‘history’,‘stats’].forEach(x => {
-document.getElementById(‘view-’+x).style.display = x===v?’’:‘none’;
-document.getElementById(‘nav-’+x).classList.toggle(‘active’, x===v);
-});
-if (v===‘stats’) loadStats();
+  currentView = v;
+  ['log','history','stats'].forEach(x => {
+    document.getElementById('view-'+x).style.display = x===v?'':'none';
+    document.getElementById('nav-'+x).classList.toggle('active', x===v);
+  });
+  if (v==='stats') loadStats();
 }
 
 // ── Edit session ──────────────────────────────────────────────────────────────
-let editSessionType = ‘gi’;
+let editSessionType = 'gi';
 
 function setEditType(t) {
-editSessionType = t;
-[‘gi’,‘nogi’,‘private’].forEach(x => {
-const el = document.getElementById(‘edit-type-’+x);
-el.className = `type-btn ${x}${t===x?' active':''}`;
-});
-document.getElementById(‘es-workon-wrap’).style.display = t===‘private’?‘none’:’’;
-document.getElementById(‘es-tips-wrap’).style.display = t===‘private’?’’:‘none’;
-document.getElementById(‘es-save-btn’).style.background = TYPE_AC[t];
+  editSessionType = t;
+  ['gi','nogi','private'].forEach(x => {
+    const el = document.getElementById('edit-type-'+x);
+    el.className = `type-btn ${x}${t===x?' active':''}`;
+  });
+  document.getElementById('es-workon-wrap').style.display = t==='private'?'none':'';
+  document.getElementById('es-tips-wrap').style.display = t==='private'?'':'none';
+  document.getElementById('es-save-btn').style.background = TYPE_AC[t];
 }
 
 function openEditSession() {
-const s = detailSession; if (!s) return;
-editSessionType = s.type;
-setEditType(s.type);
-document.getElementById(‘es-date’).value = s.date || todayKey();
-document.getElementById(‘es-dur’).value = s.duration_min || ‘’;
-document.getElementById(‘es-tech’).value = s.technique || ‘’;
-document.getElementById(‘es-instr’).value = s.instructor || ‘’;
-document.getElementById(‘es-notes’).value = s.notes || ‘’;
-document.getElementById(‘es-workon’).value = s.what_to_work_on || ‘’;
-document.getElementById(‘es-tips’).value = s.private_tips || ‘’;
-document.getElementById(‘overlay-edit’).classList.add(‘open’);
+  const s = detailSession; if (!s) return;
+  editSessionType = s.type;
+  setEditType(s.type);
+  document.getElementById('es-date').value = s.date || todayKey();
+  document.getElementById('es-dur').value = s.duration_min || '';
+  document.getElementById('es-tech').value = s.technique || '';
+  document.getElementById('es-instr').value = s.instructor || '';
+  document.getElementById('es-notes').value = s.notes || '';
+  document.getElementById('es-workon').value = s.what_to_work_on || '';
+  document.getElementById('es-tips').value = s.private_tips || '';
+  document.getElementById('overlay-edit').classList.add('open');
 }
 
 async function saveEditSession() {
-const btn = document.getElementById(‘es-save-btn’);
-btn.textContent = ‘Saving…’; btn.disabled = true;
-try {
-const payload = {
-id: detailSession.id,
-type: editSessionType,
-date: document.getElementById(‘es-date’).value || detailSession.date,
-technique: document.getElementById(‘es-tech’).value || null,
-instructor: document.getElementById(‘es-instr’).value || null,
-duration_min: parseInt(document.getElementById(‘es-dur’).value) || null,
-notes: document.getElementById(‘es-notes’).value || null,
-what_to_work_on: editSessionType !== ‘private’ ? (document.getElementById(‘es-workon’).value || null) : null,
-private_tips: editSessionType === ‘private’ ? (document.getElementById(‘es-tips’).value || null) : null,
-};
-const updated = await POST(‘save_session’, payload);
-// Update in local array
-const idx = sessions.findIndex(s => s.id === detailSession.id);
-if (idx >= 0) sessions[idx] = updated;
-detailSession = updated;
-closeModal(‘overlay-edit’);
-renderPrivBar(); renderSessions(); renderHistory();
-// Refresh detail view
-const ac = TYPE_AC[updated.type] || ‘#60a5fa’;
-document.getElementById(‘detail-title’).textContent = `${TYPE_EM[updated.type]} ${updated.type.toUpperCase()} — ${fmtDate(updated.date)}`;
-document.getElementById(‘detail-info’).innerHTML = `${updated.technique ?`<div class="tech">📌 ${updated.technique}</div>`: ''} ${updated.instructor ?`<div style="color:#94a3b8">👤 ${updated.instructor}</div>`: ''} ${updated.duration_min ?`<div style="color:var(--muted)">⏱ ${updated.duration_min} min</div>`: ''} ${updated.notes ?`<div style="color:#64748b;margin-top:4px;line-height:1.6">${updated.notes}</div>`: ''} ${updated.what_to_work_on ?`<div class="work-on" style="margin-top:6px">⚠ Work on: ${updated.what_to_work_on}</div>`: ''} ${updated.private_tips ?`<div class="tip" style="margin-top:6px;line-height:1.6">💡 Tips: ${updated.private_tips}</div>`: ''}`;
-toast(‘Session updated!’);
-} catch(e) { toast(’Update failed: ’ + e.message, ‘#f87171’); }
-btn.textContent = ‘Update Session’; btn.disabled = false;
+  const btn = document.getElementById('es-save-btn');
+  btn.textContent = 'Saving...'; btn.disabled = true;
+  try {
+    const payload = {
+      id: detailSession.id,
+      type: editSessionType,
+      date: document.getElementById('es-date').value || detailSession.date,
+      technique: document.getElementById('es-tech').value || null,
+      instructor: document.getElementById('es-instr').value || null,
+      duration_min: parseInt(document.getElementById('es-dur').value) || null,
+      notes: document.getElementById('es-notes').value || null,
+      what_to_work_on: editSessionType !== 'private' ? (document.getElementById('es-workon').value || null) : null,
+      private_tips: editSessionType === 'private' ? (document.getElementById('es-tips').value || null) : null,
+    };
+    const updated = await POST('save_session', payload);
+    // Update in local array
+    const idx = sessions.findIndex(s => s.id === detailSession.id);
+    if (idx >= 0) sessions[idx] = updated;
+    detailSession = updated;
+    closeModal('overlay-edit');
+    renderPrivBar(); renderSessions(); renderHistory();
+    // Refresh detail view
+    const ac = TYPE_AC[updated.type] || '#60a5fa';
+    document.getElementById('detail-title').textContent = `${TYPE_EM[updated.type]} ${updated.type.toUpperCase()} — ${fmtDate(updated.date)}`;
+    document.getElementById('detail-info').innerHTML = `
+      ${updated.technique ? `<div class="tech">📌 ${updated.technique}</div>` : ''}
+      ${updated.instructor ? `<div style="color:#94a3b8">👤 ${updated.instructor}</div>` : ''}
+      ${updated.duration_min ? `<div style="color:var(--muted)">⏱ ${updated.duration_min} min</div>` : ''}
+      ${updated.notes ? `<div style="color:#64748b;margin-top:4px;line-height:1.6">${updated.notes}</div>` : ''}
+      ${updated.what_to_work_on ? `<div class="work-on" style="margin-top:6px">⚠ Work on: ${updated.what_to_work_on}</div>` : ''}
+      ${updated.private_tips ? `<div class="tip" style="margin-top:6px;line-height:1.6">💡 Tips: ${updated.private_tips}</div>` : ''}
+    `;
+    toast('Session updated!');
+  } catch(e) { toast('Update failed: ' + e.message, '#f87171'); }
+  btn.textContent = 'Update Session'; btn.disabled = false;
 }
 
 // ── Edit roll ─────────────────────────────────────────────────────────────────
 let editingRoll = null;
 
 function openEditRoll(roll) {
-if (typeof roll === ‘string’) {
-roll = decodeObj(roll) || (() => { try { return JSON.parse(roll); } catch { return null; } })();
-if (!roll) return;
-}
-editingRoll = roll;
-selectedResult = roll.result || ‘’;
-selectedScore = roll.score ?? 0;
-showRollForm = true;
-renderRolls();
-// Pre-fill the form after render
-setTimeout(() => {
-const oppSel = document.getElementById(‘roll-opp’);
-if (oppSel && roll.opponent_id) oppSel.value = roll.opponent_id;
-const durEl = document.getElementById(‘roll-dur’);
-if (durEl) durEl.value = roll.duration_min || 5;
-const mySubsEl = document.getElementById(‘roll-mysubs’);
-if (mySubsEl) mySubsEl.value = roll.my_submissions || ‘’;
-const theirSubsEl = document.getElementById(‘roll-theirsubs’);
-if (theirSubsEl) theirSubsEl.value = roll.their_submissions || ‘’;
-const notesEl = document.getElementById(‘roll-notes’);
-if (notesEl) notesEl.value = roll.notes || ‘’;
-// Highlight result
-document.querySelectorAll(’.result-btn’).forEach(b => b.classList.toggle(‘active’, b.dataset.result === roll.result));
-// Highlight score
-document.querySelectorAll(’.score-btn’).forEach(b => b.classList.toggle(‘active’, parseInt(b.dataset.score) === roll.score));
-}, 50);
+  if (typeof roll === 'string') {
+    roll = decodeObj(roll) || (() => { try { return JSON.parse(roll); } catch { return null; } })();
+    if (!roll) return;
+  }
+  editingRoll = roll;
+  selectedResult = roll.result || '';
+  selectedScore = roll.score ?? 0;
+  showRollForm = true;
+  renderRolls();
+  // Pre-fill the form after render
+  setTimeout(() => {
+    const oppSel = document.getElementById('roll-opp');
+    if (oppSel && roll.opponent_id) oppSel.value = roll.opponent_id;
+    const durEl = document.getElementById('roll-dur');
+    if (durEl) durEl.value = roll.duration_min || 5;
+    const mySubsEl = document.getElementById('roll-mysubs');
+    if (mySubsEl) mySubsEl.value = roll.my_submissions || '';
+    const theirSubsEl = document.getElementById('roll-theirsubs');
+    if (theirSubsEl) theirSubsEl.value = roll.their_submissions || '';
+    const notesEl = document.getElementById('roll-notes');
+    if (notesEl) notesEl.value = roll.notes || '';
+    // Highlight result
+    document.querySelectorAll('.result-btn').forEach(b => b.classList.toggle('active', b.dataset.result === roll.result));
+    // Highlight score
+    document.querySelectorAll('.score-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.score) === roll.score));
+  }, 50);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 init();
 </script>
-
 </body>
 </html>
