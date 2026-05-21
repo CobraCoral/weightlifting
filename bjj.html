@@ -132,6 +132,21 @@
 
   /* Opp dropdown */
   .opp-create{background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:10px;margin-top:6px;}
+
+  /* Private actions */
+  .priv-actions{display:flex;gap:6px;margin-top:8px;}
+  .priv-action-btn{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;color:var(--muted);letter-spacing:.04em;}
+  .priv-action-btn:hover{background:rgba(74,222,128,.08);border-color:#4ade80;color:#4ade80;}
+
+  /* Purchase row */
+  .purchase-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-left:2px solid #4ade80;border-radius:8px;margin-bottom:6px;}
+  .purchase-info{flex:1;}
+  .purchase-date{font-size:11px;color:#4ade80;font-weight:700;}
+  .purchase-meta{font-size:10px;color:var(--muted);margin-top:2px;}
+  .purchase-cost{font-size:13px;color:#f1f5f9;font-weight:700;}
+  .purchase-perclass{font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:.04em;}
+  .purchase-del{background:none;border:none;color:#f87171;cursor:pointer;font-size:14px;padding:4px 8px;margin-left:8px;}
+  .purchase-summary{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);border-radius:8px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;font-size:11px;color:#4ade80;font-weight:700;letter-spacing:.04em;}
 </style>
 </head>
 <body>
@@ -155,6 +170,10 @@
     <span class="priv-count" id="priv-count">0/10 used</span>
   </div>
   <div class="priv-dots" id="priv-dots"></div>
+  <div class="priv-actions">
+    <button class="priv-action-btn" onclick="openBuyModal()">💳 Buy Classes</button>
+    <button class="priv-action-btn" onclick="openPurchasesModal()">📋 History</button>
+  </div>
 </div>
 
 <!-- Nav -->
@@ -206,7 +225,7 @@
       <div class="field"><div class="field-label">Duration (min)</div><input type="number" id="ns-dur" placeholder="90"></div>
     </div>
     <div class="field"><div class="field-label">Technique / Focus</div><input type="text" id="ns-tech" placeholder="e.g. Butterfly guard sweeps"></div>
-    <div class="field"><div class="field-label">Instructor</div><input type="text" id="ns-instr" placeholder="Professor name"></div>
+    <div class="field"><div class="field-label">Instructor</div><input type="text" id="ns-instr" list="instructors-list" placeholder="Professor name"></div>
     <div class="field"><div class="field-label">Notes</div><textarea id="ns-notes" rows="2" placeholder="What happened, what you drilled..."></textarea></div>
     <div class="field" id="ns-workon-wrap"><div class="field-label">What to Work On</div><textarea id="ns-workon" rows="2" placeholder="Guard passing, not giving up back..."></textarea></div>
     <div class="field" id="ns-tips-wrap" style="display:none"><div class="field-label">💡 Instructor Tips / Key Points</div><textarea id="ns-tips" rows="3" placeholder="Key details the instructor mentioned..."></textarea></div>
@@ -248,11 +267,44 @@
       <div class="field"><div class="field-label">Duration (min)</div><input type="number" id="es-dur" placeholder="90"></div>
     </div>
     <div class="field"><div class="field-label">Technique / Focus</div><input type="text" id="es-tech" placeholder="e.g. Butterfly guard sweeps"></div>
-    <div class="field"><div class="field-label">Instructor</div><input type="text" id="es-instr" placeholder="Professor name"></div>
+    <div class="field"><div class="field-label">Instructor</div><input type="text" id="es-instr" list="instructors-list" placeholder="Professor name"></div>
     <div class="field"><div class="field-label">Notes</div><textarea id="es-notes" rows="2" placeholder="What happened, what you drilled..."></textarea></div>
     <div class="field" id="es-workon-wrap"><div class="field-label">What to Work On</div><textarea id="es-workon" rows="2" placeholder="Guard passing, not giving up back..."></textarea></div>
     <div class="field" id="es-tips-wrap" style="display:none"><div class="field-label">💡 Instructor Tips</div><textarea id="es-tips" rows="3" placeholder="Key details the instructor mentioned..."></textarea></div>
     <button class="save-modal-btn" id="es-save-btn" onclick="saveEditSession()">Update Session</button>
+  </div>
+</div>
+
+<!-- ── BUY CLASSES MODAL ── -->
+<div class="overlay" id="overlay-buy" onclick="closeIfOutside(event,'overlay-buy')">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 class="modal-title">💳 Buy Private Classes</h3>
+      <button class="modal-close" onclick="closeModal('overlay-buy')">×</button>
+    </div>
+    <div id="buy-summary" style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:11px;color:#4ade80;letter-spacing:.04em"></div>
+    <div class="grid-2">
+      <div class="field"><div class="field-label">Date</div><input type="date" id="buy-date"></div>
+      <div class="field"><div class="field-label"># Classes</div><input type="number" id="buy-classes" placeholder="10" min="1"></div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><div class="field-label">Cost (USD)</div><input type="number" id="buy-cost" placeholder="1000" min="0" step="any"></div>
+      <div class="field"><div class="field-label">Teacher</div><input type="text" id="buy-teacher" placeholder="Angelo" value="Angelo"></div>
+    </div>
+    <div class="field"><div class="field-label">Gym</div><input type="text" id="buy-gym" placeholder="FightSportsClub" value="FightSportsClub"></div>
+    <div class="field"><div class="field-label">Notes (optional)</div><textarea id="buy-notes" rows="2" placeholder="Package details..."></textarea></div>
+    <button class="save-modal-btn" id="buy-save-btn" onclick="saveBuy()">Save Purchase</button>
+  </div>
+</div>
+
+<!-- ── PURCHASE HISTORY MODAL ── -->
+<div class="overlay" id="overlay-purchases" onclick="closeIfOutside(event,'overlay-purchases')">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 class="modal-title">📋 Purchase History</h3>
+      <button class="modal-close" onclick="closeModal('overlay-purchases')">×</button>
+    </div>
+    <div id="purchases-list"></div>
   </div>
 </div>
 
@@ -278,13 +330,20 @@
   </div>
 </div>
 
+<!-- Datalist for instructor suggestions (populated from purchases) -->
+<datalist id="instructors-list"></datalist>
+
 <script>
 // ── Config ────────────────────────────────────────────────────────────────────
 const SB_URL = 'https://skfuygyygrapnrkwzsmj.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrZnV5Z3l5Z3JhcG5ya3d6c21qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDc0NzYsImV4cCI6MjA5MDM4MzQ3Nn0.jl0FHAFzmWl8wLeWuKS0N8S_qFC92_WSHszdQhWYxCo';
 const EDGE = `${SB_URL}/functions/v1/bjj`;
 const HDRS = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`};
-const PRIVATES_TOTAL = 10;
+// PRIVATES_TOTAL is now derived from sum of purchases (see privatesTotal()).
+// Kept the name for backwards compatibility in existing call sites.
+function privatesTotal() {
+  return purchases.reduce((sum, p) => sum + (p.classes_purchased || 0), 0) || 10;
+}
 
 async function GET(action, params={}) {
   const qs = new URLSearchParams({action,...params}).toString();
@@ -303,6 +362,7 @@ let currentView = 'log';
 let currentFilter = 'all';
 let sessions = [];
 let opponents = [];
+let purchases = [];
 let belt = null;
 let detailSession = null;
 let detailRolls = [];
@@ -358,10 +418,26 @@ async function init() {
   setType('gi');
   renderBeltModal();
   try {
-    const [b, s, o] = await Promise.all([GET('get_belt'), GET('get_sessions',{limit:'100'}), GET('get_opponents')]);
-    belt = b; sessions = s||[]; opponents = o||[];
+    const [b, s, o, p] = await Promise.all([
+      GET('get_belt'),
+      GET('get_sessions',{limit:'100'}),
+      GET('get_opponents'),
+      GET('get_purchases'),
+    ]);
+    belt = b; sessions = s||[]; opponents = o||[]; purchases = p||[];
     renderBelt(); renderPrivBar(); renderSessions(); renderHistory();
+    refreshInstructorsList();
   } catch(e) { toast('Load failed: '+e.message,'#f87171'); }
+}
+
+// Populate the <datalist> with unique instructors from purchases (and sessions, for legacy)
+function refreshInstructorsList() {
+  const dl = document.getElementById('instructors-list');
+  if (!dl) return;
+  const names = new Set();
+  purchases.forEach(p => { if (p.teacher) names.add(p.teacher); });
+  sessions.forEach(s => { if (s.instructor) names.add(s.instructor); });
+  dl.innerHTML = [...names].sort().map(n => `<option value="${n.replace(/"/g,'&quot;')}">`).join('');
 }
 
 // ── Belt ──────────────────────────────────────────────────────────────────────
@@ -402,12 +478,121 @@ async function saveBelt() {
 
 // ── Private bar ───────────────────────────────────────────────────────────────
 function renderPrivBar() {
+  const total = privatesTotal();
   const used = sessions.filter(s=>s.type==='private').length;
-  const left = PRIVATES_TOTAL - used;
-  document.getElementById('priv-count').innerHTML = `${used}/${PRIVATES_TOTAL} used · <span style="color:${left<=3?'#f87171':'#4ade80'}">${left} remaining</span>`;
-  document.getElementById('priv-dots').innerHTML = Array.from({length:PRIVATES_TOTAL},(_,i)=>
+  const left = total - used;
+  document.getElementById('priv-count').innerHTML = `${used}/${total} used · <span style="color:${left<=3?'#f87171':'#4ade80'}">${left} remaining</span>`;
+  document.getElementById('priv-dots').innerHTML = Array.from({length:total},(_,i)=>
     `<div class="priv-dot" style="background:${i<used?'#4ade80':'rgba(255,255,255,.08)'}"></div>`
   ).join('');
+}
+
+// ── Purchases (Buy Classes + History) ─────────────────────────────────────────
+// Purchase total helpers
+function totalPurchased() { return purchases.reduce((s,p)=>s+(p.classes_purchased||0), 0); }
+function totalUsed()      { return sessions.filter(s=>s.type==='private').length; }
+function totalRemaining() { return totalPurchased() - totalUsed(); }
+function totalSpent()     { return purchases.reduce((s,p)=>s+(parseFloat(p.cost_usd)||0), 0); }
+
+function openBuyModal() {
+  document.getElementById('buy-date').value = todayKey();
+  document.getElementById('buy-classes').value = '';
+  document.getElementById('buy-cost').value = '';
+  const last = purchases[0];
+  document.getElementById('buy-teacher').value = last?.teacher || 'Angelo';
+  document.getElementById('buy-gym').value = last?.gym || 'FightSportsClub';
+  document.getElementById('buy-notes').value = '';
+  // Populate current state summary
+  const used = totalUsed(), bought = totalPurchased(), left = totalRemaining(), spent = totalSpent();
+  document.getElementById('buy-summary').innerHTML =
+    `Currently: <strong>${used}</strong> used · <strong>${left}</strong> remaining of ${bought} bought` +
+    (spent>0 ? ` · <strong>$${spent.toFixed(2)}</strong> spent` : '');
+  document.getElementById('overlay-buy').classList.add('open');
+}
+
+async function saveBuy() {
+  const btn = document.getElementById('buy-save-btn');
+  const payload = {
+    date: document.getElementById('buy-date').value || todayKey(),
+    classes_purchased: parseInt(document.getElementById('buy-classes').value) || 0,
+    cost_usd: parseFloat(document.getElementById('buy-cost').value) || null,
+    teacher: document.getElementById('buy-teacher').value.trim() || 'Angelo',
+    gym: document.getElementById('buy-gym').value.trim() || 'FightSportsClub',
+    notes: document.getElementById('buy-notes').value.trim() || null,
+  };
+  if (payload.classes_purchased <= 0) {
+    toast('Enter # of classes','#f87171');
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const saved = await POST('save_purchase', payload);
+    purchases.unshift(saved);
+    renderPrivBar();
+    refreshInstructorsList();
+    closeModal('overlay-buy');
+    toast(`Bought ${payload.classes_purchased} classes`,'#4ade80');
+  } catch(e) {
+    toast('Save failed: '+e.message,'#f87171');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save Purchase';
+  }
+}
+
+function openPurchasesModal() {
+  renderPurchasesList();
+  document.getElementById('overlay-purchases').classList.add('open');
+}
+
+function renderPurchasesList() {
+  const totalClasses = totalPurchased();
+  const totalCost = totalSpent();
+  const used = totalUsed();
+  const left = totalRemaining();
+
+  let html = `<div class="purchase-summary">
+    <span>${purchases.length} purchase${purchases.length===1?'':'s'} · ${totalClasses} classes</span>
+    <span>${used} used · ${left} left · $${totalCost.toFixed(2)}</span>
+  </div>`;
+
+  if (!purchases.length) {
+    html += '<div class="empty">No purchases yet. Tap 💳 Buy Classes to add one.</div>';
+  } else {
+    html += purchases.map(p => {
+      const cost = p.cost_usd ? `$${parseFloat(p.cost_usd).toFixed(2)}` : '';
+      const perClass = (p.cost_usd && p.classes_purchased)
+        ? `<div class="purchase-perclass">$${(parseFloat(p.cost_usd)/p.classes_purchased).toFixed(0)}/class</div>`
+        : '';
+      return `<div class="purchase-row">
+        <div class="purchase-info">
+          <div class="purchase-date">${fmtDate(p.date)} · ${p.classes_purchased} classes</div>
+          <div class="purchase-meta">👤 ${p.teacher} · 🏠 ${p.gym}${p.notes?' · '+p.notes:''}</div>
+        </div>
+        <div style="text-align:right">
+          ${cost?`<div class="purchase-cost">${cost}</div>`:''}
+          ${perClass}
+        </div>
+        <button class="purchase-del" onclick="deletePurchase('${p.id}')" title="Delete">🗑</button>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('purchases-list').innerHTML = html;
+}
+
+async function deletePurchase(id) {
+  const p = purchases.find(x => x.id === id);
+  if (!p) return;
+  if (!confirm(`Delete the ${p.classes_purchased}-class purchase from ${fmtDate(p.date)}?`)) return;
+  try {
+    await POST('delete_purchase', { id });
+    purchases = purchases.filter(x => x.id !== id);
+    renderPrivBar();
+    renderPurchasesList();
+    refreshInstructorsList();
+    toast('Purchase deleted','#f87171');
+  } catch(e) {
+    toast('Delete failed: '+e.message,'#f87171');
+  }
 }
 
 // ── New session ───────────────────────────────────────────────────────────────
@@ -421,7 +606,7 @@ function setType(t) {
   const notice = document.getElementById('priv-notice');
   if (t==='private') {
     notice.style.display='block';
-    notice.textContent = `Private #${used+1} of ${PRIVATES_TOTAL} — ${PRIVATES_TOTAL-used-1} remaining after this`;
+    notice.textContent = `Private #${used+1} of ${privatesTotal()} — ${privatesTotal()-used-1} remaining after this`;
   } else { notice.style.display='none'; }
   document.getElementById('ns-workon-wrap').style.display = t==='private'?'none':'';
   document.getElementById('ns-tips-wrap').style.display = t==='private'?'':'none';
@@ -752,7 +937,7 @@ function renderStats({sessions:S, rolls:R, opponents:O}) {
       <div class="stat-card"><div class="stat-label">TOTAL CLASSES</div><div class="stat-val">${total}</div></div>
       <div class="stat-card"><div class="stat-label">GI</div><div class="stat-val" style="color:#60a5fa">${gi}</div></div>
       <div class="stat-card"><div class="stat-label">NO-GI</div><div class="stat-val" style="color:#fb923c">${nogi}</div></div>
-      <div class="stat-card"><div class="stat-label">PRIVATES</div><div class="stat-val" style="color:#4ade80">${priv}/${PRIVATES_TOTAL}</div><div class="stat-sub">${PRIVATES_TOTAL-priv} left</div></div>
+      <div class="stat-card"><div class="stat-label">PRIVATES</div><div class="stat-val" style="color:#4ade80">${priv}/${privatesTotal()}</div><div class="stat-sub">${privatesTotal()-priv} left</div></div>
     </div>
     <div class="section-title">ROLLING</div>
     <div class="stat-grid">
