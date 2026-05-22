@@ -145,6 +145,16 @@
   .purchase-meta{font-size:10px;color:var(--muted);margin-top:2px;}
   .purchase-cost{font-size:13px;color:#f1f5f9;font-weight:700;}
   .purchase-perclass{font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:.04em;}
+
+  /* Instructor row */
+  .instr-row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-left:2px solid #60a5fa;border-radius:8px;margin-bottom:5px;}
+  .instr-info{flex:1;}
+  .instr-name{font-size:12px;color:#f1f5f9;font-weight:700;}
+  .instr-meta{font-size:10px;color:var(--muted);margin-top:2px;}
+  .instr-actions{display:flex;gap:4px;}
+  .instr-btn{background:none;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:3px 8px;color:var(--muted);font-family:var(--font);font-size:11px;cursor:pointer;}
+  .instr-btn:hover{border-color:#60a5fa;color:#60a5fa;}
+  .instr-btn.del:hover{border-color:#f87171;color:#f87171;}
   .purchase-del{background:none;border:none;color:#f87171;cursor:pointer;font-size:14px;padding:4px 8px;margin-left:8px;}
   .purchase-summary{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);border-radius:8px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;font-size:11px;color:#4ade80;font-weight:700;letter-spacing:.04em;}
 </style>
@@ -225,7 +235,12 @@
       <div class="field"><div class="field-label">Duration (min)</div><input type="number" id="ns-dur" placeholder="90"></div>
     </div>
     <div class="field"><div class="field-label">Technique / Focus</div><input type="text" id="ns-tech" placeholder="e.g. Butterfly guard sweeps"></div>
-    <div class="field"><div class="field-label">Instructor</div><input type="text" id="ns-instr" list="instructors-list" placeholder="Professor name"></div>
+    <div class="field"><div class="field-label">Instructor</div>
+      <div style="display:flex;gap:6px">
+        <select id="ns-instr" style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none"></select>
+        <button type="button" onclick="openInstructorsModal()" style="background:none;border:1px solid rgba(96,165,250,.3);border-radius:6px;padding:8px 10px;color:#60a5fa;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">👤 Manage</button>
+      </div>
+    </div>
     <div class="field"><div class="field-label">Notes</div><textarea id="ns-notes" rows="2" placeholder="What happened, what you drilled..."></textarea></div>
     <div class="field" id="ns-workon-wrap"><div class="field-label">What to Work On</div><textarea id="ns-workon" rows="2" placeholder="Guard passing, not giving up back..."></textarea></div>
     <div class="field" id="ns-tips-wrap" style="display:none"><div class="field-label">💡 Instructor Tips / Key Points</div><textarea id="ns-tips" rows="3" placeholder="Key details the instructor mentioned..."></textarea></div>
@@ -267,7 +282,12 @@
       <div class="field"><div class="field-label">Duration (min)</div><input type="number" id="es-dur" placeholder="90"></div>
     </div>
     <div class="field"><div class="field-label">Technique / Focus</div><input type="text" id="es-tech" placeholder="e.g. Butterfly guard sweeps"></div>
-    <div class="field"><div class="field-label">Instructor</div><input type="text" id="es-instr" list="instructors-list" placeholder="Professor name"></div>
+    <div class="field"><div class="field-label">Instructor</div>
+      <div style="display:flex;gap:6px">
+        <select id="es-instr" style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none"></select>
+        <button type="button" onclick="openInstructorsModal()" style="background:none;border:1px solid rgba(96,165,250,.3);border-radius:6px;padding:8px 10px;color:#60a5fa;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">👤 Manage</button>
+      </div>
+    </div>
     <div class="field"><div class="field-label">Notes</div><textarea id="es-notes" rows="2" placeholder="What happened, what you drilled..."></textarea></div>
     <div class="field" id="es-workon-wrap"><div class="field-label">What to Work On</div><textarea id="es-workon" rows="2" placeholder="Guard passing, not giving up back..."></textarea></div>
     <div class="field" id="es-tips-wrap" style="display:none"><div class="field-label">💡 Instructor Tips</div><textarea id="es-tips" rows="3" placeholder="Key details the instructor mentioned..."></textarea></div>
@@ -289,7 +309,12 @@
     </div>
     <div class="grid-2">
       <div class="field"><div class="field-label">Cost (USD)</div><input type="number" id="buy-cost" placeholder="1000" min="0" step="any"></div>
-      <div class="field"><div class="field-label">Teacher</div><input type="text" id="buy-teacher" placeholder="Angelo" value="Angelo"></div>
+      <div class="field"><div class="field-label">Teacher</div>
+        <div style="display:flex;gap:6px">
+          <select id="buy-teacher" style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none"></select>
+          <button type="button" onclick="openInstructorsModal()" style="background:none;border:1px solid rgba(96,165,250,.3);border-radius:6px;padding:8px 10px;color:#60a5fa;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">👤</button>
+        </div>
+      </div>
     </div>
     <div class="field"><div class="field-label">Gym</div><input type="text" id="buy-gym" placeholder="FightSportsClub" value="FightSportsClub"></div>
     <div class="field"><div class="field-label">Notes (optional)</div><textarea id="buy-notes" rows="2" placeholder="Package details..."></textarea></div>
@@ -330,8 +355,32 @@
   </div>
 </div>
 
-<!-- Datalist for instructor suggestions (populated from purchases) -->
-<datalist id="instructors-list"></datalist>
+<!-- ── INSTRUCTORS MANAGER MODAL ── -->
+<div class="overlay" id="overlay-instructors" onclick="closeIfOutside(event,'overlay-instructors')">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 class="modal-title">👤 Instructors</h3>
+      <button class="modal-close" onclick="closeModal('overlay-instructors')">×</button>
+    </div>
+
+    <!-- Add / edit form -->
+    <div style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:10px;padding:12px;margin-bottom:12px">
+      <div style="font-size:10px;color:#60a5fa;font-weight:700;letter-spacing:.1em;margin-bottom:8px" id="instr-form-title">+ NEW INSTRUCTOR</div>
+      <div class="grid-2">
+        <div class="field"><div class="field-label">Name</div><input type="text" id="instr-name" placeholder="e.g. Angelo Andriani"></div>
+        <div class="field"><div class="field-label">Gym</div><input type="text" id="instr-gym" placeholder="e.g. FightSportsClub"></div>
+      </div>
+      <div class="field"><div class="field-label">Notes (optional)</div><input type="text" id="instr-notes" placeholder="Black belt, head coach, etc."></div>
+      <div style="display:flex;gap:6px">
+        <button onclick="saveInstructor()" id="instr-save-btn" style="flex:2;background:#60a5fa;color:#0a0f1a;border:none;border-radius:6px;padding:9px;font-family:var(--font);font-size:11px;font-weight:800;cursor:pointer">Save Instructor</button>
+        <button onclick="resetInstructorForm()" style="flex:1;background:rgba(255,255,255,.06);color:#94a3b8;border:none;border-radius:6px;padding:9px;font-family:var(--font);font-size:11px;cursor:pointer">Clear</button>
+      </div>
+    </div>
+
+    <!-- List -->
+    <div id="instructors-list-rendered"></div>
+  </div>
+</div>
 
 <script>
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -363,6 +412,8 @@ let currentFilter = 'all';
 let sessions = [];
 let opponents = [];
 let purchases = [];
+let instructors = [];
+let editingInstructorId = null;
 let belt = null;
 let detailSession = null;
 let detailRolls = [];
@@ -415,29 +466,145 @@ async function init() {
     '<span class="dot">● SUPABASE</span>';
   document.getElementById('ns-date').value = todayKey();
   document.getElementById('belt-date').value = todayKey();
-  setType('gi');
   renderBeltModal();
   try {
-    const [b, s, o, p] = await Promise.all([
+    const [b, s, o, p, i] = await Promise.all([
       GET('get_belt'),
       GET('get_sessions',{limit:'100'}),
       GET('get_opponents'),
       GET('get_purchases'),
+      GET('get_instructors'),
     ]);
-    belt = b; sessions = s||[]; opponents = o||[]; purchases = p||[];
+    belt = b; sessions = s||[]; opponents = o||[]; purchases = p||[]; instructors = i||[];
     renderBelt(); renderPrivBar(); renderSessions(); renderHistory();
-    refreshInstructorsList();
+    refreshInstructorDropdowns();
+    setType('gi'); // sets initial save-btn color; must run after dropdowns are populated
   } catch(e) { toast('Load failed: '+e.message,'#f87171'); }
 }
 
-// Populate the <datalist> with unique instructors from purchases (and sessions, for legacy)
-function refreshInstructorsList() {
-  const dl = document.getElementById('instructors-list');
-  if (!dl) return;
-  const names = new Set();
-  purchases.forEach(p => { if (p.teacher) names.add(p.teacher); });
-  sessions.forEach(s => { if (s.instructor) names.add(s.instructor); });
-  dl.innerHTML = [...names].sort().map(n => `<option value="${n.replace(/"/g,'&quot;')}">`).join('');
+// Populate every <select> tied to instructors. Uses instructor_id (integer) as value.
+// Falls back to looking up by name for sessions/purchases that don't yet have instructor_id.
+function refreshInstructorDropdowns() {
+  const opts = '<option value="">— No instructor —</option>' +
+    instructors.map(i => `<option value="${i.id}">${escapeHtml(i.name)}${i.gym?' · '+escapeHtml(i.gym):''}</option>`).join('');
+  ['ns-instr','es-instr','buy-teacher'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const prev = el.value;
+    el.innerHTML = opts;
+    if (prev) el.value = prev; // preserve current selection
+  });
+}
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// Map an instructor name to its id (handles current + historical names)
+function instructorIdByName(name) {
+  if (!name) return null;
+  const trimmed = String(name).trim();
+  if (!trimmed) return null;
+  const hit = instructors.find(i => i.name === trimmed || (Array.isArray(i.historical_names) && i.historical_names.includes(trimmed)));
+  return hit ? hit.id : null;
+}
+function instructorById(id) {
+  if (id == null) return null;
+  return instructors.find(i => i.id === Number(id)) || null;
+}
+
+// ── Instructor Manager Modal ──────────────────────────────────────────────────
+function openInstructorsModal() {
+  resetInstructorForm();
+  renderInstructorsList();
+  document.getElementById('overlay-instructors').classList.add('open');
+}
+
+function resetInstructorForm() {
+  editingInstructorId = null;
+  document.getElementById('instr-form-title').textContent = '+ NEW INSTRUCTOR';
+  document.getElementById('instr-name').value = '';
+  document.getElementById('instr-gym').value = '';
+  document.getElementById('instr-notes').value = '';
+  document.getElementById('instr-save-btn').textContent = 'Save Instructor';
+}
+
+function editInstructor(id) {
+  const i = instructorById(id);
+  if (!i) return;
+  editingInstructorId = i.id;
+  document.getElementById('instr-form-title').textContent = '✏️ EDIT: ' + i.name;
+  document.getElementById('instr-name').value = i.name;
+  document.getElementById('instr-gym').value = i.gym || '';
+  document.getElementById('instr-notes').value = i.notes || '';
+  document.getElementById('instr-save-btn').textContent = 'Update Instructor';
+}
+
+async function saveInstructor() {
+  const name  = document.getElementById('instr-name').value.trim();
+  const gym   = document.getElementById('instr-gym').value.trim();
+  const notes = document.getElementById('instr-notes').value.trim();
+  if (!name) { toast('Name required','#f87171'); return; }
+  const btn = document.getElementById('instr-save-btn');
+  btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Saving...';
+  try {
+    const payload = { name, gym: gym || null, notes: notes || null };
+    if (editingInstructorId) payload.id = editingInstructorId;
+    const saved = await POST('save_instructor', payload);
+    // Update local cache
+    const idx = instructors.findIndex(i => i.id === saved.id);
+    if (idx >= 0) instructors[idx] = saved; else instructors.push(saved);
+    instructors.sort((a,b)=>a.name.localeCompare(b.name));
+    refreshInstructorDropdowns();
+    renderInstructorsList();
+    resetInstructorForm();
+    toast(editingInstructorId ? 'Instructor updated!' : 'Instructor added!');
+  } catch(e) {
+    toast('Save failed: '+e.message,'#f87171');
+  } finally {
+    btn.disabled = false; btn.textContent = orig;
+  }
+}
+
+async function deleteInstructor(id) {
+  const i = instructorById(id);
+  if (!i) return;
+  // Count usages before deleting so the user knows the impact
+  const sUsage = sessions.filter(s => s.instructor_id === id || s.instructor === i.name).length;
+  const pUsage = purchases.filter(p => p.instructor_id === id || p.teacher === i.name).length;
+  const usageNote = (sUsage || pUsage)
+    ? `\n\nUsed in ${sUsage} session${sUsage===1?'':'s'} and ${pUsage} purchase${pUsage===1?'':'s'}. History will keep referencing this name (soft delete).`
+    : '';
+  if (!confirm(`Delete instructor "${i.name}"?${usageNote}`)) return;
+  try {
+    await POST('delete_instructor', { id });
+    instructors = instructors.filter(x => x.id !== id);
+    refreshInstructorDropdowns();
+    renderInstructorsList();
+    toast('Instructor deleted','#f87171');
+  } catch(e) {
+    toast('Delete failed: '+e.message,'#f87171');
+  }
+}
+
+function renderInstructorsList() {
+  const el = document.getElementById('instructors-list-rendered');
+  if (!instructors.length) {
+    el.innerHTML = '<div class="empty">No instructors yet. Add one above.</div>';
+    return;
+  }
+  el.innerHTML = instructors.map(i => {
+    const sUsage = sessions.filter(s => s.instructor_id === i.id || s.instructor === i.name).length;
+    const pUsage = purchases.filter(p => p.instructor_id === i.id || p.teacher === i.name).length;
+    return `<div class="instr-row">
+      <div class="instr-info">
+        <div class="instr-name">${escapeHtml(i.name)}</div>
+        <div class="instr-meta">${i.gym?'🏠 '+escapeHtml(i.gym):''}${i.notes?(i.gym?' · ':'')+escapeHtml(i.notes):''}${(sUsage||pUsage)?` · ${sUsage} sess · ${pUsage} purch`:''}</div>
+      </div>
+      <div class="instr-actions">
+        <button class="instr-btn" onclick="editInstructor(${i.id})">✏️</button>
+        <button class="instr-btn del" onclick="deleteInstructor(${i.id})">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ── Belt ──────────────────────────────────────────────────────────────────────
@@ -498,8 +665,10 @@ function openBuyModal() {
   document.getElementById('buy-date').value = todayKey();
   document.getElementById('buy-classes').value = '';
   document.getElementById('buy-cost').value = '';
+  // Pre-select last-used instructor (by id), fallback to first instructor
   const last = purchases[0];
-  document.getElementById('buy-teacher').value = last?.teacher || 'Angelo';
+  const preselectId = last?.instructor_id ?? instructorIdByName(last?.teacher) ?? (instructors[0]?.id);
+  document.getElementById('buy-teacher').value = preselectId ? String(preselectId) : '';
   document.getElementById('buy-gym').value = last?.gym || 'FightSportsClub';
   document.getElementById('buy-notes').value = '';
   // Populate current state summary
@@ -512,24 +681,24 @@ function openBuyModal() {
 
 async function saveBuy() {
   const btn = document.getElementById('buy-save-btn');
+  const instrId = parseInt(document.getElementById('buy-teacher').value) || null;
+  const instr = instructorById(instrId);
   const payload = {
     date: document.getElementById('buy-date').value || todayKey(),
     classes_purchased: parseInt(document.getElementById('buy-classes').value) || 0,
     cost_usd: parseFloat(document.getElementById('buy-cost').value) || null,
-    teacher: document.getElementById('buy-teacher').value.trim() || 'Angelo',
+    instructor_id: instrId,
+    teacher: instr?.name || null,  // keep human-readable column in sync
     gym: document.getElementById('buy-gym').value.trim() || 'FightSportsClub',
     notes: document.getElementById('buy-notes').value.trim() || null,
   };
-  if (payload.classes_purchased <= 0) {
-    toast('Enter # of classes','#f87171');
-    return;
-  }
+  if (payload.classes_purchased <= 0) { toast('Enter # of classes','#f87171'); return; }
+  if (!payload.instructor_id) { toast('Pick an instructor','#f87171'); return; }
   btn.disabled = true; btn.textContent = 'Saving...';
   try {
     const saved = await POST('save_purchase', payload);
     purchases.unshift(saved);
     renderPrivBar();
-    refreshInstructorsList();
     closeModal('overlay-buy');
     toast(`Bought ${payload.classes_purchased} classes`,'#4ade80');
   } catch(e) {
@@ -588,7 +757,6 @@ async function deletePurchase(id) {
     purchases = purchases.filter(x => x.id !== id);
     renderPrivBar();
     renderPurchasesList();
-    refreshInstructorsList();
     toast('Purchase deleted','#f87171');
   } catch(e) {
     toast('Delete failed: '+e.message,'#f87171');
@@ -618,7 +786,7 @@ function openNewSession() {
   document.getElementById('ns-date').value = todayKey();
   document.getElementById('ns-dur').value = '90';
   document.getElementById('ns-tech').value = '';
-  document.getElementById('ns-instr').value = '';
+  document.getElementById('ns-instr').value = ''; // empty = "— No instructor —"
   document.getElementById('ns-notes').value = '';
   document.getElementById('ns-workon').value = '';
   document.getElementById('ns-tips').value = '';
@@ -630,11 +798,14 @@ async function saveNewSession() {
   const btn = document.getElementById('ns-save-btn');
   btn.textContent='Saving...'; btn.disabled=true;
   try {
+    const instrId = parseInt(document.getElementById('ns-instr').value) || null;
+    const instr = instructorById(instrId);
     const payload = {
       type: newSessionType,
       date: document.getElementById('ns-date').value || todayKey(),
       technique: document.getElementById('ns-tech').value||null,
-      instructor: document.getElementById('ns-instr').value||null,
+      instructor_id: instrId,
+      instructor: instr?.name || null, // human-readable mirror
       duration_min: parseInt(document.getElementById('ns-dur').value)||null,
       notes: document.getElementById('ns-notes').value||null,
       what_to_work_on: newSessionType!=='private'?(document.getElementById('ns-workon').value||null):null,
@@ -1016,7 +1187,9 @@ function openEditSession() {
   document.getElementById('es-date').value = s.date || todayKey();
   document.getElementById('es-dur').value = s.duration_min || '';
   document.getElementById('es-tech').value = s.technique || '';
-  document.getElementById('es-instr').value = s.instructor || '';
+  // Resolve instructor: prefer instructor_id, fall back to looking up legacy name
+  const iid = s.instructor_id ?? instructorIdByName(s.instructor);
+  document.getElementById('es-instr').value = iid ? String(iid) : '';
   document.getElementById('es-notes').value = s.notes || '';
   document.getElementById('es-workon').value = s.what_to_work_on || '';
   document.getElementById('es-tips').value = s.private_tips || '';
@@ -1027,12 +1200,15 @@ async function saveEditSession() {
   const btn = document.getElementById('es-save-btn');
   btn.textContent = 'Saving...'; btn.disabled = true;
   try {
+    const instrId = parseInt(document.getElementById('es-instr').value) || null;
+    const instr = instructorById(instrId);
     const payload = {
       id: detailSession.id,
       type: editSessionType,
       date: document.getElementById('es-date').value || detailSession.date,
       technique: document.getElementById('es-tech').value || null,
-      instructor: document.getElementById('es-instr').value || null,
+      instructor_id: instrId,
+      instructor: instr?.name || null,
       duration_min: parseInt(document.getElementById('es-dur').value) || null,
       notes: document.getElementById('es-notes').value || null,
       what_to_work_on: editSessionType !== 'private' ? (document.getElementById('es-workon').value || null) : null,
