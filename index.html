@@ -3,7 +3,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#080d18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Iron Log">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAMAAABlApw1AAAAP1BMVEUIDRj7kjwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACXCHHwAAAAEHRSTlP//wAAAAAAAAAAAAAAAAAADwvvhgAAAipJREFUeNrtnEuWwyAMBKX7X3p22fiNjUGg7qRqPdHrivkZyEQAAAAAAAAAAAAAAADAd5Ef7AVMJfKCvYCqQ74QEJT4N5GHwE0kh/y3mfQFHkI55XcUeE6lLTAQSzn/UC5hgbFgXvmdBNJc4HF+yhuE8+dzegmB23CZs/lTwiCnBY4+m8xyh8Otq9zgeP/IWoWGHp6VCi1jVKFB0yibVQpt80SRQeNEV2LQOlUXGDQvNnIL7vnPGaS5QKa3QZoLZJobuAtkmht4CeTx/MUGN28gHg3oUtWs/V8qu/XexyX8wj7dkcHn9ebVZJ8RGjFnqggN+XN1dARmC6kITFfSz/9QS0NgpZiCwFI1AYHV4xH9B9DwCMrXMQjsE1iuiMCPC6yXRKBbIBHoFugVQqC7UyPQPqxadAEElAWyOD8CWwz6z8m+WiAr8/ds1R3epNmwPtXPv7BLrnLWvel8QOfEY/dByYFXtJmPnfnx7uzXN/gBnffj9+fElz/uPmqab/A7r0ucumGw4bbK6esp6fz9t/fe37siFwj0GoS5QIS3QZgLRHgbRK9AmBtEeBsUtaw2gbK+0WRQ2L1bDEoHqAaD4kH2uEH5NHHYYMNEd9Rgy2R90GB+tdFwabF8z1Q4/9jZjVv+Uc0wFwhzAd38Yxvt4S0QyvkH5uzwFojwFpDPf/8/JCOsBcIhf75e0ZoIhCK6a4TFva+wlghP7AXEeysAAAAAAAAAAAAAAEAjf+YGIC99Q+niAAAAAElFTkSuQmCC">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Iron%20Log%22%2C%22short_name%22%3A%22Iron%20Log%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%23080d18%22%2C%22theme_color%22%3A%22%23080d18%22%2C%22start_url%22%3A%22.%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage/png%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAMAAAADACAMAAABlApw1AAAAP1BMVEUIDRj7kjwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACXCHHwAAAAEHRSTlP//wAAAAAAAAAAAAAAAAAADwvvhgAAAipJREFUeNrtnEuWwyAMBKX7X3p22fiNjUGg7qRqPdHrivkZyEQAAAAAAAAAAAAAAADAd5Ef7AVMJfKCvYCqQ74QEJT4N5GHwE0kh/y3mfQFHkI55XcUeE6lLTAQSzn/UC5hgbFgXvmdBNJc4HF%2ByhuE8%2BdzegmB23CZs/lTwiCnBY4%2Bm8xyh8Otq9zgeP/IWoWGHp6VCi1jVKFB0yibVQpt80SRQeNEV2LQOlUXGDQvNnIL7vnPGaS5QKa3QZoLZJobuAtkmht4CeTx/MUGN28gHg3oUtWs/V8qu/XexyX8wj7dkcHn9ebVZJ8RGjFnqggN%2BXN1dARmC6kITFfSz/9QS0NgpZiCwFI1AYHV4xH9B9DwCMrXMQjsE1iuiMCPC6yXRKBbIBHoFugVQqC7UyPQPqxadAEElAWyOD8CWwz6z8m%2BWiAr8/ds1R3epNmwPtXPv7BLrnLWvel8QOfEY/dByYFXtJmPnfnx7uzXN/gBnffj9%2BfElz/uPmqab/A7r0ucumGw4bbK6esp6fz9t/fe37siFwj0GoS5QIS3QZgLRHgbRK9AmBtEeBsUtaw2gbK%2B0WRQ2L1bDEoHqAaD4kH2uEH5NHHYYMNEd9Rgy2R90GB%2BtdFwabF8z1Q4/9jZjVv%2BUc0wFwhzAd38Yxvt4S0QyvkH5uzwFojwFpDPf/8/JCOsBcIhf75e0ZoIhCK6a4TFva%2BwlghP7AXEeysAAAAAAAAAAAAAAEAjf%2BYGIC99Q%2BniAAAAAElFTkSuQmCC%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image/png%22%7D%5D%7D">
 <title>IRON LOG</title>
 <style>
   :root {
@@ -296,35 +303,44 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const EDGE   = `${SB_URL}/functions/v1/workouts`;
 const HDRS   = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`};
 
-async function apiGet(p)    { const r=await fetch(`${EDGE}?${new URLSearchParams(p)}`,{method:'GET',headers:HDRS}); if(!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text().catch(()=>'')}`); return r.json(); }
-async function apiPost(p,b) { const r=await fetch(`${EDGE}?${new URLSearchParams(p)}`,{method:'POST',headers:HDRS,body:JSON.stringify(b)}); if(!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text().catch(()=>'')}`); return r.json(); }
+async function fetchWithTimeout(url,opts={},ms=15000){
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),ms);
+  try{ return await fetch(url,{...opts,signal:ctrl.signal}); }
+  catch(e){ if(e&&e.name==='AbortError') throw new Error('Request timed out — check your connection'); throw e; }
+  finally{ clearTimeout(t); }
+}
+async function apiGet(p)    { const r=await fetchWithTimeout(`${EDGE}?${new URLSearchParams(p)}`,{method:'GET',headers:HDRS}); if(!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text().catch(()=>'')}`); return r.json(); }
+async function apiPost(p,b) { const r=await fetchWithTimeout(`${EDGE}?${new URLSearchParams(p)}`,{method:'POST',headers:HDRS,body:JSON.stringify(b)},20000); if(!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text().catch(()=>'')}`); return r.json(); }
 
 // ─── Program ─────────────────────────────────────────────────────────────────
 // Exercises themselves come from the `exercises` table in Supabase.
 // This object only holds per-day metadata (label + accent color).
 // PROGRAM[day].exercises is populated at boot from the DB.
 const PROGRAM = {
-  Tuesday:  {label:'Legs',                    accent:'#4ade80', exercises:[]},
-  Thursday: {label:'Pull + 3D Density',       accent:'#60a5fa', exercises:[]},
-  Saturday: {label:'Push + Width',            accent:'#fb923c', exercises:[]},
-  Sunday:   {label:'Accessory + Weak Points', accent:'#c084fc', exercises:[]},
+  PUSH:  {label:'Push + Width',             accent:'#fb923c', exercises:[]},
+  PULL:  {label:'Pull + 3D Density',        accent:'#60a5fa', exercises:[]},
+  LEGS:  {label:'Legs',                     accent:'#4ade80', exercises:[]},
+  EXTRA: {label:'Accessory + Weak Points',  accent:'#c084fc', exercises:[]},
 };
 
-const DAYS = ['Tuesday','Thursday','Saturday','Sunday'];
+const DAYS = ['PUSH','PULL','LEGS','EXTRA'];
 const WEEK = [
-  {d:'M',l:'BJJ',    lift:false},
-  {d:'T',l:'Legs',   lift:true, prog:'Tuesday'},
-  {d:'W',l:'BJJ',    lift:false},
-  {d:'T',l:'Pull',   lift:true, prog:'Thursday'},
-  {d:'F',l:'BJJ',    lift:false},
-  {d:'S',l:'Push',   lift:true, prog:'Saturday'},
-  {d:'S',l:'Access.',lift:true, prog:'Sunday'},
+  {d:'M',l:'BJJ',  lift:false},
+  {d:'T',l:'Legs', lift:true, prog:'LEGS'},
+  {d:'W',l:'BJJ',  lift:false},
+  {d:'T',l:'Pull', lift:true, prog:'PULL'},
+  {d:'F',l:'BJJ',  lift:false},
+  {d:'S',l:'Push', lift:true, prog:'PUSH'},
+  {d:'S',l:'Extra',lift:true, prog:'EXTRA'},
 ];
+// Default to today's split (Tue=LEGS, Thu=PULL, Sat=PUSH, Sun=EXTRA)
+const SPLIT_BY_WEEKDAY = {2:'LEGS',4:'PULL',6:'PUSH',0:'EXTRA'};
 
 // ─── State ────────────────────────────────────────────────────────────────────
-let currentDay  = 'Saturday';
+let currentDay  = SPLIT_BY_WEEKDAY[new Date().getDay()] || 'PUSH';
 let currentView = 'log';
-let histDay     = 'Saturday';
+let histDay     = currentDay;
 // draft[exId] = [{w, r, done, startedAt, completedAt}]
 let draft       = {};
 let histData    = [];
@@ -332,6 +348,15 @@ let liveTimer   = null;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function todayKey(){ return new Date().toISOString().slice(0,10); }
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// ── Silent localStorage draft persistence ──
+const DRAFT_PREFIX='ironlog_draft_';
+function draftKey(){ return `${DRAFT_PREFIX}${currentDay}_${todayKey()}`; }
+function saveDraftLocal(){ try{ localStorage.setItem(draftKey(),JSON.stringify(draft)); }catch{} }
+function clearDraftLocal(){ try{ localStorage.removeItem(draftKey()); }catch{} }
+function loadDraftLocal(){ try{ const raw=localStorage.getItem(draftKey()); return raw?JSON.parse(raw):null; }catch{ return null; } }
+function pruneOldDrafts(){ try{ const today=todayKey(); for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&k.startsWith(DRAFT_PREFIX)&&!k.endsWith(today)) localStorage.removeItem(k); } }catch{} }
 function fmtDate(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}); }
 function fmtShort(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
 function fmtSecs(s){
@@ -485,14 +510,14 @@ function renderAll(){
   document.getElementById('day-tabs').innerHTML = DAYS.map(d=>{
     const p=PROGRAM[d],active=d===currentDay;
     return `<button class="day-tab" style="${active?`border-color:${p.accent};background:${p.accent}18;color:${p.accent}`:''}" onclick="selectDay('${d}')">
-      <span class="day-tab-d" style="color:${active?p.accent:'#475569'}">${d.slice(0,3).toUpperCase()}</span>
+      <span class="day-tab-d" style="color:${active?p.accent:'#475569'}">${d}</span>
       <span class="day-tab-l">${p.label}</span></button>`;
   }).join('');
 
   // Hist tabs
   document.getElementById('hist-tabs').innerHTML = DAYS.map(d=>{
     const p=PROGRAM[d],active=d===histDay;
-    return `<button class="hist-tab" style="${active?`color:${p.accent};border-color:${p.accent}`:''}" onclick="selectHistDay('${d}')">${d.slice(0,3)}</button>`;
+    return `<button class="hist-tab" style="${active?`color:${p.accent};border-color:${p.accent}`:''}" onclick="selectHistDay('${d}')">${d}</button>`;
   }).join('');
 
   renderExercises();
@@ -582,10 +607,10 @@ function renderExercises(){
     return `<div class="card" id="card-${ex.id}">
       <div class="card-head">
         <div style="display:flex;align-items:flex-start;gap:4px">
-          <div><div class="ex-name">${ex.name}</div>${ex.alt?`<div class="ex-alt">or: ${ex.alt}</div>`:''}</div>
+          <div><div class="ex-name">${escapeHtml(ex.name)}</div>${ex.alt?`<div class="ex-alt">or: ${escapeHtml(ex.alt)}</div>`:''}</div>
           <button class="card-edit-btn" onclick="openEditModal(${ex.id})" title="Edit exercise">✏️</button>
         </div>
-        <div class="ex-target" style="color:${ac}">${buildTargetBadge(ex)}</div>
+        <div class="ex-target" style="color:${ac}">${escapeHtml(buildTargetBadge(ex))}</div>
       </div>
       <div class="reorder-controls">
         <button class="reorder-arrow" onclick="moveExercise(${ex.id},-1)" ${prog.exercises[0].id===ex.id?'disabled':''}>↑ up</button>
@@ -727,6 +752,7 @@ async function saveModal(){
     if(saved.alt) newEx.alt = saved.alt;
     prog.exercises.push(newEx);
     if(!draft[newEx.id]) draft[newEx.id] = Array.from({length:ds},()=>({w:dw===0?'':String(dw),r:'',done:false,startedAt:null,completedAt:null}));
+    saveDraftLocal();
     document.getElementById('modal-overlay').classList.remove('open');
     renderExercises();
     return;
@@ -737,6 +763,7 @@ async function saveModal(){
       const cur=draft[ex.id]||[];
       while(cur.length<ds) cur.push({w:dw===0?'':String(dw),r:'',done:false,startedAt:null,completedAt:null});
       draft[ex.id]=cur;
+      saveDraftLocal();
       document.getElementById('modal-overlay').classList.remove('open');
       renderExercises();
       // Persist update (server will append old name to historical_names if changed)
@@ -880,7 +907,7 @@ function renderHistory(){
         return `<span class="hist-set" style="background:${r.done?p.accent+'20':'rgba(255,255,255,.04)'};color:${r.done?p.accent:'#475569'};border:1px solid ${r.done?p.accent+'40':'rgba(255,255,255,.06)'}">${label}</span>`;
       }).join('');
       return `<div class="hist-ex">
-        <div class="hist-ex-name">${ex.name}<span style="color:var(--muted);font-weight:400">${statsStr}</span><button class="prog-btn" onclick="event.stopPropagation();openChartModal(${ex.id})">📈</button></div>
+        <div class="hist-ex-name">${escapeHtml(ex.name)}<span style="color:var(--muted);font-weight:400">${statsStr}</span><button class="prog-btn" onclick="event.stopPropagation();openChartModal(${ex.id})">📈</button></div>
         <div class="hist-sets">${setsHtml}</div>
       </div>`;
     }).join('');
@@ -920,12 +947,13 @@ function toggleHist(i){
   c.textContent=b.classList.toggle('open')?'▲':'▼';
 }
 
-function updSet(id,si,f,v){ if(draft[id]) draft[id][si][f]=v; }
+function updSet(id,si,f,v){ if(draft[id]){ draft[id][si][f]=v; saveDraftLocal(); } }
 
 function startSet(id,si){
   // Stamp startedAt — rest ends here, exercise begins
   if(!draft[id]) return;
   draft[id][si].startedAt = new Date().toISOString();
+  saveDraftLocal();
   renderExercises();
 }
 
@@ -940,17 +968,20 @@ function toggleDone(id,si){
   } else {
     st.completedAt=null;
   }
+  saveDraftLocal();
   renderExercises();
 }
 
 function addSet(id,dw){
   if(!draft[id]) draft[id]=[];
   draft[id].push({w:dw===0?'':String(dw),r:'',done:false,startedAt:null,completedAt:null});
+  saveDraftLocal();
   renderExercises();
 }
 function rmSet(id,si){
   if(!draft[id]) return;
   draft[id].splice(si,1);
+  saveDraftLocal();
   renderExercises();
 }
 
@@ -958,6 +989,16 @@ function rmSet(id,si){
 async function loadDraft(){
   document.getElementById('ex-loading').style.display='block';
   document.getElementById('ex-list').style.display='none';
+  // 0. Unsaved local draft for this split+today wins (silent crash/refresh recovery)
+  const cached=loadDraftLocal();
+  if(cached && Object.keys(cached).length){
+    draft=cached;
+    document.getElementById('ex-loading').style.display='none';
+    document.getElementById('ex-list').style.display='';
+    renderExercises();
+    showToast('Restored unsaved sets','#60a5fa');
+    return;
+  }
   try{
     // 1. Try today's in-progress session first
     const todayRows=await apiGet({action:'get_today',day:currentDay,date:todayKey()});
@@ -1000,6 +1041,7 @@ async function saveSession(){
   try{
     await apiPost({action:'save_session'},{date:todayKey(),day:currentDay,rows:draftToRows(currentDay,todayKey())});
     btn.style.background='#14532d'; btn.style.color='#4ade80'; btn.textContent='SAVED ✓';
+    clearDraftLocal();
     showToast('Saved to Supabase!');
     setTimeout(()=>{ btn.style.background=PROGRAM[currentDay].accent; btn.style.color='#0a0f1a'; btn.textContent='SAVE'; btn.disabled=false; },3000);
   }catch(e){
@@ -1408,6 +1450,7 @@ function resetSwipe(id, si) {
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 (async () => {
+  pruneOldDrafts();
   await loadExercises();
   renderAll();
   await loadDraft();
