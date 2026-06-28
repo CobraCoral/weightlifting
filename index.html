@@ -203,6 +203,7 @@ body.reordering .reorder-banner{display:block;}
   <div id="ex-loading" class="loading" style="display:none">Loading from Supabase...</div>
   <div class="ex-list" id="ex-list"></div>
   <div class="action-row">
+    <button class="exp-btn" id="whoop-btn" onclick="copyForWhoop()">copy WHOOP</button>
     <button class="exp-btn" id="csv-btn" onclick="exportCSV()">export CSV</button>
     <button class="save-btn" id="save-btn" onclick="saveSession()">SAVE</button>
   </div>
@@ -1051,11 +1052,52 @@ async function saveSession(){
   }
 }
 
+// Reliable mobile-safe download (clipboard truncates large payloads on iOS).
+function downloadCSV(filename, text){
+  try{
+    const blob=new Blob([text],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    return true;
+  }catch(e){ console.error('CSV download failed',e); return false; }
+}
+
+// Compact session detail for WHOOP's AI strain input (exercise / set / rep / load).
+// Stays small enough that clipboard never truncates.
+function copyForWhoop(){
+  const rows=draftToRows(currentDay,todayKey());
+  const order=[]; const byEx={};
+  rows.forEach(r=>{
+    const hasW=!(r.weight==null||r.weight==='');
+    const hasR=!(r.reps==null||r.reps==='');
+    if(!hasW && !hasR) return;                 // skip blank sets
+    if(!(r.exercise in byEx)){ byEx[r.exercise]=[]; order.push(r.exercise); }
+    const load=hasW?`${r.weight}lb`:'BW';
+    const reps=hasR?r.reps:'?';
+    byEx[r.exercise].push(`${load} x ${reps}`);
+  });
+  if(!order.length){ showToast('No sets logged yet','#fb923c'); return; }
+  const head=`Iron Log — ${currentDay} — ${todayKey()}`;
+  const body=order.map(ex=>`${ex}: ${byEx[ex].join(', ')}`);
+  const text=[head,'',...body].join('\n');
+  navigator.clipboard.writeText(text).then(()=>{
+    const b=document.getElementById('whoop-btn');
+    if(b){ b.textContent='copied!'; setTimeout(()=>b.textContent='copy WHOOP',2500); }
+    showToast('Copied for WHOOP');
+  }).catch(()=>showToast('Copy failed','#f87171'));
+}
+
 function exportCSV(){
   const rows=draftToRows(currentDay,todayKey());
   const lines=['Date,Day,Exercise,Set,Weight,Reps,Done,StartedAt,CompletedAt'];
   rows.forEach(r=>lines.push(`${r.date},${r.day},"${r.exercise}",${r.set_number},${r.weight||''},${r.reps||''},${r.done?'yes':'no'},${r.started_at||''},${r.completed_at||''}`));
-  navigator.clipboard.writeText(lines.join('\n')).then(()=>{ const b=document.getElementById('csv-btn'); b.textContent='copied!'; setTimeout(()=>b.textContent='export CSV',2500); });
+  const ok=downloadCSV(`ironlog_${currentDay}_${todayKey()}.csv`, lines.join('\n'));
+  const b=document.getElementById('csv-btn');
+  if(b){ b.textContent=ok?'downloaded!':'failed'; setTimeout(()=>b.textContent='export CSV',2500); }
+  if(!ok) showToast('CSV download failed','#f87171');
 }
 
 function exportAllCSV(){
@@ -1072,7 +1114,8 @@ function exportAllCSV(){
       });
     });
   });
-  navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('History CSV copied!',null,true));
+  const ok=downloadCSV(`ironlog_history_${todayKey()}.csv`, lines.join('\n'));
+  showToast(ok?'History CSV downloaded!':'Download failed', ok?null:'#f87171', true);
 }
 
 // ─── WMA Chart ────────────────────────────────────────────────────────────────
