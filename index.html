@@ -344,6 +344,7 @@ let currentView = 'log';
 let histDay     = currentDay;
 // draft[exId] = [{w, r, done, startedAt, completedAt}]
 let draft       = {};
+let suggestions = {};   // exercise_id -> {mode, sets:[{w,r}], text, color}
 let histData    = [];
 let liveTimer   = null;
 
@@ -431,6 +432,111 @@ function getExSecs(thisSet){
 function getLiveRestSecs(prevSet){
   if(!prevSet?.completedAt) return null;
   return Math.round((Date.now() - new Date(prevSet.completedAt))/1000);
+}
+
+// ─── Progression engine (double progression) ──────────────────────────────────
+// Rule: each session try to add reps at the same weight until EVERY working set
+// reaches the top of the exercise's rep range (parsed from ex.rt, e.g. "8-12").
+// Once all sets hit the ceiling, bump the weight by the step and rebuild reps
+// from the range floor. Weight step defaults to 5; the cable stack steps by 1.5.
+// Edit PROG_STEP_OVERRIDES (by exact exercise name) to tune increments.
+const PROG_STEP_DEFAULT = 5;
+const PROG_STEP_OVERRIDES = {
+  'Rope Triceps Pushdowns'          : 1.5,
+  'Overhead Rope Tricep Ext.'       : 1.5,
+  'Lean-Away Cable Lateral Raises (60/75deg)': 2.5,
+  'Single-Hand Cable Traps'         : 2.5,
+  'Lat Pulldown'                    : 5,
+};
+function progStep(ex){
+  if(ex && Object.prototype.hasOwnProperty.call(PROG_STEP_OVERRIDES, ex.name)) return PROG_STEP_OVERRIDES[ex.name];
+  return PROG_STEP_DEFAULT;
+}
+function parseRepRange(rt){
+  if(rt==null) return null;
+  const nums = String(rt).match(/\d+(\.\d+)?/g);
+  if(!nums || !nums.length) return null;
+  const a = parseFloat(nums[0]);
+  const b = nums.length>1 ? parseFloat(nums[1]) : a;
+  return { lo: Math.min(a,b), hi: Math.max(a,b) };
+}
+function progFmtW(v){ return Number.isInteger(v) ? String(v) : v.toFixed(2).replace(/0$/,'').replace(/\.$/,''); }
+// history rows -> { exercise_id: [ newestSession[], prevSession[] ] }, each session = [{w,r}] by set
+function sessionsByExercise(rows){
+  const byEx = {};
+  (rows||[]).forEach(r=>{
+    if(r.exercise_id==null) return;
+    (byEx[r.exercise_id] ||= {})[r.date] ||= [];
+    byEx[r.exercise_id][r.date].push(r);
+  });
+  const out = {};
+  Object.entries(byEx).forEach(([id, byDate])=>{
+    const dates = Object.keys(byDate).sort().reverse();
+    out[id] = dates.slice(0,2).map(d =>
+      byDate[d].sort((a,b)=>a.set_number-b.set_number)
+        .map(s=>({ w: parseFloat(s.weight), r: parseFloat(s.reps) }))
+        .filter(s=>!isNaN(s.r))
+    );
+  });
+  return out;
+}
+function computeSuggestions(rows, day){
+  const exs  = (PROGRAM[day] && PROGRAM[day].exercises) || [];
+  const hist = sessionsByExercise(rows);
+  const res  = {};
+  exs.forEach(ex=>{
+    const sessions = hist[ex.id];
+    if(!sessions || !sessions.length) return;                 // no history -> no suggestion
+    const last    = sessions[0];
+    const prev    = sessions[1] || null;
+    const working = last.filter(s=>!isNaN(s.w));               // sets that carried a load
+    if(!working.length) return;
+    const range = parseRepRange(ex.rt) || { lo:null, hi:null };
+    const hi    = range.hi;
+    const step  = progStep(ex);
+    const aimStr = (range.lo!=null && hi!=null)
+      ? (range.lo===hi ? `${hi}` : `${range.lo}\u2013${hi}`) : '';
+
+    let mode, sets;
+    const allAtCeiling = hi!=null && working.every(s=>s.r>=hi);
+    if(allAtCeiling){
+      mode = 'increase';                                       // top of range on every set -> add load
+      sets = working.map(s=>({ w:+(s.w+step).toFixed(2), r:(range.lo!=null?range.lo:Math.max(1,hi-3)) }));
+    } else {
+      mode = 'progress';                                       // hold load, chase +1 rep/set
+      sets = working.map(s=>({ w:s.w, r:(hi!=null?Math.min(s.r+1,hi):s.r+1) }));
+      if(prev){                                                // stall = identical to the session before
+        const pw = prev.filter(s=>!isNaN(s.w));
+        const same = pw.length===working.length && working.every((s,i)=>pw[i]&&pw[i].w===s.w&&pw[i].r===s.r);
+        if(same) mode = 'stall';
+      }
+    }
+    const topW   = Math.max(...sets.map(s=>s.w));
+    const repStr = sets.map(s=>s.r).join(',');
+    const unit   = ex.u ? ' '+ex.u : '';
+    const text =
+      mode==='increase' ? `\u2191 ${progFmtW(topW)}${unit} \u00b7 rebuild reps${aimStr?' to '+aimStr:''}` :
+      mode==='stall'    ? `\u26a1 stalled \u00b7 hold ${progFmtW(topW)}${unit}, add a set or small back-off` :
+                          `\u2192 ${progFmtW(topW)}${unit} \u00d7 ${repStr}`;
+    res[ex.id] = { mode, sets, text,
+      color: mode==='increase' ? '#4ade80' : mode==='stall' ? '#fbbf24' : '#60a5fa' };
+  });
+  return res;
+}
+// Fresh draft (done/timers cleared) prefilled with the suggested weight + target reps.
+function suggestionsToFreshDraft(day){
+  const d = makeDefaultDraft(day);
+  ((PROGRAM[day] && PROGRAM[day].exercises) || []).forEach(ex=>{
+    const s = suggestions[ex.id];
+    if(s && s.sets && s.sets.length){
+      d[ex.id] = s.sets.map(x=>({
+        w: (x.w!=null && !isNaN(x.w)) ? String(x.w) : '',
+        r: (x.r!=null && !isNaN(x.r)) ? String(x.r) : '',
+        done:false, startedAt:null, completedAt:null
+      }));
+    }
+  });
+  return d;
 }
 
 function exStats(sets){
@@ -612,6 +718,7 @@ function renderExercises(){
           <button class="card-edit-btn" onclick="openEditModal(${ex.id})" title="Edit exercise">✏️</button>
         </div>
         <div class="ex-target" style="color:${ac}">${escapeHtml(buildTargetBadge(ex))}</div>
+        ${suggestions[ex.id] ? `<div class="ex-suggest" style="color:${suggestions[ex.id].color};font-size:11px;margin-top:3px;font-weight:600;letter-spacing:.01em">next: ${escapeHtml(suggestions[ex.id].text)}</div>` : ''}
       </div>
       <div class="reorder-controls">
         <button class="reorder-arrow" onclick="moveExercise(${ex.id},-1)" ${prog.exercises[0].id===ex.id?'disabled':''}>↑ up</button>
@@ -1001,10 +1108,20 @@ async function loadDraft(){
     return;
   }
   try{
+    // Progression suggestions from this split's history (non-fatal; powers badges + prefill)
+    try{
+      const hist=await apiGet({action:'get_by_day',day:currentDay});
+      suggestions=computeSuggestions(hist||[],currentDay);
+    }catch{ suggestions={}; }
+
     // 1. Try today's in-progress session first
     const todayRows=await apiGet({action:'get_today',day:currentDay,date:todayKey()});
     if(Array.isArray(todayRows)&&todayRows.length){
       draft=rowsToDraft(todayRows,currentDay);
+    } else if(Object.keys(suggestions).length){
+      // 2. No session today — prefill with next-target progression suggestions
+      draft=suggestionsToFreshDraft(currentDay);
+      showToast('Pre-filled with next-target suggestions \u2197','#60a5fa');
     } else {
       // 2. No session today — load last session for this day as pre-filled defaults
       try{
