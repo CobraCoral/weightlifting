@@ -147,6 +147,10 @@ canvas#wma-canvas{width:100%;display:block;border-radius:8px;background:rgba(255
 .modal-btn-save{color:#0a0f1a;}
 
 /* ── Section header with + button ── */
+.day-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px 14px 0;}
+.day-summary .ds-tile{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:7px 4px;text-align:center;min-width:0;}
+.day-summary .ds-val{font-size:13px;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.day-summary .ds-lbl{font-size:11px;color:#64748b;margin-top:2px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ex-section-header{display:flex;justify-content:space-between;align-items:center;padding:8px 14px 2px;}
 .ex-section-label{font-size:9px;color:var(–muted);letter-spacing:.12em;text-transform:uppercase;}
 .add-ex-btn{background:none;border:1px solid;border-radius:6px;padding:4px 10px;font-family:var(–font);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.06em;}
@@ -192,6 +196,7 @@ body.reordering .reorder-banner{display:block;}
 
 <div id="view-log">
   <div class="day-tabs" id="day-tabs"></div>
+  <div class="day-summary" id="day-summary" aria-live="polite"></div>
   <div class="ex-section-header">
     <span class="ex-section-label">EXERCISES</span>
     <div>
@@ -633,7 +638,60 @@ function renderAll(){
   renderExercises();
 }
 
+// ─── Day summary (whole-session header) ───────────────────────────────────────
+// Aggregates every completed set across all exercises for the current day.
+//   total time    = first set start → last set finish (session wall clock)
+//   avg set time  = mean(completedAt − startedAt) over completed sets
+//   avg rest/set  = mean gap between consecutive completed sets, in chronological
+//                   order across the whole day (same definition as the per-card rest)
+//   volume load   = Σ weight × reps for loaded sets; bodyweight/assisted (weight ≤ 0)
+//                   are excluded. Per-hand units (e.g. "lb/hand") count both hands.
+const VOLUME_COUNT_BOTH_HANDS = true;
+function fmtSecs(s){
+  if(s==null || isNaN(s)) return '\u2014';
+  const m=Math.floor(s/60), r=Math.round(s%60);
+  if(m>=60) return `${Math.floor(m/60)}h${String(m%60).padStart(2,'0')}m`;
+  return `${m}:${String(r).padStart(2,'0')}`;
+}
+function dayStats(day){
+  const exs=(PROGRAM[day]&&PROGRAM[day].exercises)||[];
+  const done=[]; let totalSets=0;
+  exs.forEach(ex=>{
+    const sets=draft[ex.id]||[]; totalSets+=sets.length;
+    const perHand=/\/hand/i.test(ex.u||'');
+    sets.forEach(s=>{
+      if(!(s.done&&s.startedAt&&s.completedAt)) return;
+      const st=new Date(s.startedAt).getTime(), en=new Date(s.completedAt).getTime();
+      if(isNaN(st)||isNaN(en)||en<st) return;
+      const w=parseFloat(s.w), r=parseFloat(s.r);
+      const vol=(w>0&&r>0)?w*r*((VOLUME_COUNT_BOTH_HANDS&&perHand)?2:1):0;
+      done.push({st,en,vol});
+    });
+  });
+  if(!done.length) return {totalTime:null,avgRest:null,avgSet:null,volume:0,done:0,total:totalSets};
+  done.sort((a,b)=>a.st-b.st);
+  const totalTime=Math.round((Math.max(...done.map(d=>d.en))-Math.min(...done.map(d=>d.st)))/1000);
+  const avgSet=Math.round(done.reduce((a,d)=>a+(d.en-d.st),0)/done.length/1000);
+  const rests=[];
+  for(let i=1;i<done.length;i++){ const g=(done[i].st-done[i-1].en)/1000; if(g>0) rests.push(g); }
+  const avgRest=rests.length?Math.round(rests.reduce((a,b)=>a+b,0)/rests.length):null;
+  const volume=done.reduce((a,d)=>a+d.vol,0);
+  return {totalTime,avgRest,avgSet,volume,done:done.length,total:totalSets};
+}
+function renderDaySummary(){
+  const el=document.getElementById('day-summary'); if(!el) return;
+  const s=dayStats(currentDay);
+  const volStr=s.volume>0 ? Math.round(s.volume).toLocaleString()+' lb' : '\u2014';
+  // All interpolated values are numbers/formatted strings — no user text, no escaping needed.
+  el.innerHTML=`
+    <div class="ds-tile"><div class="ds-val">${fmtSecs(s.totalTime)}</div><div class="ds-lbl">total \u00b7 ${s.done}/${s.total} sets</div></div>
+    <div class="ds-tile"><div class="ds-val">${fmtSecs(s.avgRest)}</div><div class="ds-lbl">avg rest/set</div></div>
+    <div class="ds-tile"><div class="ds-val">${fmtSecs(s.avgSet)}</div><div class="ds-lbl">avg set time</div></div>
+    <div class="ds-tile"><div class="ds-val">${volStr}</div><div class="ds-lbl">volume load</div></div>`;
+}
+
 function renderExercises(){
+  renderDaySummary();
   const prog=PROGRAM[currentDay], ac=prog.accent;
   document.getElementById('ex-list').innerHTML = prog.exercises.map(ex=>{
     const sets=draft[ex.id]||[];
