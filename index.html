@@ -565,6 +565,9 @@ function draftToRows(day,date){
       return;
     }
     (draft[ex.id]||[]).forEach((st,i)=>{
+      // Only persist sets the user actually engaged with (started ▶ or marked done ✓).
+      // Prevents prefilled progression suggestions from being saved as a phantom session.
+      if(!st.done && !st.startedAt) return;
       rows.push({date,day,exercise_id:ex.id,exercise:ex.name,set_number:i+1,weight:st.w||null,reps:st.r||null,done:st.done,started_at:st.startedAt||null,completed_at:st.completedAt||null});
     });
   });
@@ -1154,10 +1157,15 @@ async function loadHistory(){
 }
 
 async function saveSession(){
+  const rows=draftToRows(currentDay,todayKey());
+  if(!rows.length){
+    showToast('Nothing to save \u2014 start (\u25b6) or check (\u2713) a set first','#fb923c');
+    return;
+  }
   const btn=document.getElementById('save-btn');
   btn.textContent='saving...'; btn.disabled=true;
   try{
-    await apiPost({action:'save_session'},{date:todayKey(),day:currentDay,rows:draftToRows(currentDay,todayKey())});
+    await apiPost({action:'save_session'},{date:todayKey(),day:currentDay,rows});
     btn.style.background='#14532d'; btn.style.color='#4ade80'; btn.textContent='SAVED ✓';
     clearDraftLocal();
     showToast('Saved to Supabase!');
