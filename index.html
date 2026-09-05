@@ -440,30 +440,40 @@ function getLiveRestSecs(prevSet){
 }
 
 // ─── Progression engine (double progression) ──────────────────────────────────
+// @@TESTABLE-START  (pure functions only — extracted and unit-tested by tests/run.js)
 // Rule: each session try to add reps at the same weight until EVERY working set
-// reaches the top of the exercise's rep range (parsed from ex.rt, e.g. "8-12").
-// Once all sets hit the ceiling, bump the weight by the step and rebuild reps
-// from the range floor. Weight step defaults to 5; the cable stack steps by 1.5.
-// Edit PROG_STEP_OVERRIDES (by exact exercise name) to tune increments.
+// reaches the top of the exercise's rep range. Once all sets hit the ceiling,
+// bump the weight by the exercise's step and rebuild reps from the range floor.
+// Rep range comes from the DB's structured rep_min/rep_max (derived from the
+// "Rep Target" field by a trigger); falls back to parsing the text if absent.
+// Time/step-based targets (minutes, seconds, steps) get no rep suggestion.
+// Weight step comes from exercises.step in the DB (default 5; cable stack 1.5/2.5),
+// with an id-keyed fallback map for older API responses. Never keyed by name.
 const PROG_STEP_DEFAULT = 5;
-const PROG_STEP_OVERRIDES = {
-  'Rope Triceps Pushdowns'          : 1.5,
-  'Overhead Rope Tricep Ext.'       : 1.5,
-  'Lean-Away Cable Lateral Raises (60/75deg)': 2.5,
-  'Single-Hand Cable Traps'         : 2.5,
-  'Lat Pulldown'                    : 5,
-};
+const PROG_STEP_BY_ID = { 6:1.5, 7:1.5, 29:1.5, 37:1.5, 5:2.5, 28:2.5, 33:2.5 };
 function progStep(ex){
-  if(ex && Object.prototype.hasOwnProperty.call(PROG_STEP_OVERRIDES, ex.name)) return PROG_STEP_OVERRIDES[ex.name];
+  if(ex && Number.isFinite(ex.step) && ex.step>0) return ex.step;
+  if(ex && Object.prototype.hasOwnProperty.call(PROG_STEP_BY_ID, ex.id)) return PROG_STEP_BY_ID[ex.id];
   return PROG_STEP_DEFAULT;
 }
+// The DB grammar only allows digits, a dash and a unit word (min/s/sec/steps),
+// so ANY letter means a time/step target rather than reps.
 function parseRepRange(rt){
   if(rt==null) return null;
-  const nums = String(rt).match(/\d+(\.\d+)?/g);
+  const str=String(rt).trim();
+  if(/[a-z]/i.test(str)) return null;                      // time/step target -> not reps
+  const nums = str.match(/\d+(\.\d+)?/g);
   if(!nums || !nums.length) return null;
   const a = parseFloat(nums[0]);
   const b = nums.length>1 ? parseFloat(nums[1]) : a;
   return { lo: Math.min(a,b), hi: Math.max(a,b) };
+}
+// Structured DB fields win; text parse is the fallback. Returns null for non-rep targets.
+function getRepRange(ex){
+  if(!ex) return null;
+  if(ex.targetType && ex.targetType!=='reps') return null;
+  if(Number.isInteger(ex.repMin) && Number.isInteger(ex.repMax)) return { lo:ex.repMin, hi:ex.repMax };
+  return parseRepRange(ex.rt);
 }
 function progFmtW(v){ return Number.isInteger(v) ? String(v) : v.toFixed(2).replace(/0$/,'').replace(/\.$/,''); }
 // history rows -> { exercise_id: [ newestSession[], prevSession[] ] }, each session = [{w,r}] by set
@@ -496,7 +506,8 @@ function computeSuggestions(rows, day){
     const prev    = sessions[1] || null;
     const working = last.filter(s=>!isNaN(s.w));               // sets that carried a load
     if(!working.length) return;
-    const range = parseRepRange(ex.rt) || { lo:null, hi:null };
+    const range = getRepRange(ex);
+    if(!range) return;                                         // time/step-based -> no rep suggestion
     const hi    = range.hi;
     const step  = progStep(ex);
     const aimStr = (range.lo!=null && hi!=null)
@@ -544,6 +555,8 @@ function suggestionsToFreshDraft(day){
   return d;
 }
 
+// @@TESTABLE-END
+
 function exStats(sets){
   const doneSets = sets.filter(s=>s.done&&s.startedAt&&s.completedAt);
   if(!doneSets.length) return null;
@@ -559,6 +572,10 @@ function exStats(sets){
 }
 
 // ─── Draft ↔ DB conversion ────────────────────────────────────────────────────
+// DB now stores weight as numeric and reps as integer. 0 is a legitimate value
+// (bodyweight); only null/undefined become an empty input.
+function numToStr(v){ return (v==null || v==='') ? '' : String(v); }
+
 function draftToRows(day,date){
   const rows=[];
   const skipped=[];
@@ -573,7 +590,11 @@ function draftToRows(day,date){
       // Only persist sets the user actually engaged with (started ▶ or marked done ✓).
       // Prevents prefilled progression suggestions from being saved as a phantom session.
       if(!st.done && !st.startedAt) return;
-      rows.push({date,day,exercise_id:ex.id,exercise:ex.name,set_number:i+1,weight:st.w||null,reps:st.r||null,done:st.done,started_at:st.startedAt||null,completed_at:st.completedAt||null});
+      const wNum=(st.w===''||st.w==null)?null:parseFloat(st.w);
+      const rNum=(st.r===''||st.r==null)?null:Math.round(parseFloat(st.r));
+      rows.push({date,day,exercise_id:ex.id,exercise:ex.name,set_number:i+1,
+        weight:Number.isFinite(wNum)?wNum:null, reps:Number.isFinite(rNum)?rNum:null,
+        done:st.done,started_at:st.startedAt||null,completed_at:st.completedAt||null});
     });
   });
   if (skipped.length) {
@@ -587,7 +608,7 @@ function rowsToDraft(rows,day){
   const d=makeDefaultDraft(day);
   PROGRAM[day].exercises.forEach(ex=>{
     const er=rows.filter(r=>r.exercise_id===ex.id).sort((a,b)=>a.set_number-b.set_number);
-    if(er.length>0) d[ex.id]=er.map(r=>({w:r.weight||'',r:r.reps||'',done:r.done,startedAt:r.started_at||null,completedAt:r.completed_at||null}));
+    if(er.length>0) d[ex.id]=er.map(r=>({w:numToStr(r.weight),r:numToStr(r.reps),done:r.done,startedAt:r.started_at||null,completedAt:r.completed_at||null}));
   });
   return d;
 }
@@ -597,7 +618,7 @@ function rowsToFreshDraft(rows,day){
   const d=makeDefaultDraft(day);
   PROGRAM[day].exercises.forEach(ex=>{
     const er=rows.filter(r=>r.exercise_id===ex.id).sort((a,b)=>a.set_number-b.set_number);
-    if(er.length>0) d[ex.id]=er.map(r=>({w:r.weight||'',r:r.reps||'',done:false,startedAt:null,completedAt:null}));
+    if(er.length>0) d[ex.id]=er.map(r=>({w:numToStr(r.weight),r:numToStr(r.reps),done:false,startedAt:null,completedAt:null}));
   });
   return d;
 }
@@ -646,6 +667,7 @@ function renderAll(){
 //                   order across the whole day (same definition as the per-card rest)
 //   volume load   = Σ weight × reps for loaded sets; bodyweight/assisted (weight ≤ 0)
 //                   are excluded. Per-hand units (e.g. "lb/hand") count both hands.
+// @@TESTABLE-START
 const VOLUME_COUNT_BOTH_HANDS = true;
 function fmtSecs(s){
   if(s==null || isNaN(s)) return '\u2014';
@@ -678,6 +700,7 @@ function dayStats(day){
   const volume=done.reduce((a,d)=>a+d.vol,0);
   return {totalTime,avgRest,avgSet,volume,done:done.length,total:totalSets};
 }
+// @@TESTABLE-END
 function renderDaySummary(){
   const el=document.getElementById('day-summary'); if(!el) return;
   const s=dayStats(currentDay);
@@ -763,7 +786,7 @@ function renderExercises(){
             <span class="set-num" style="color:${st.done?ac:st.startedAt?ac:'#475569'}">${si+1}</span>
             <input class="set-input" type="number" value="${st.w}" placeholder="wt"
               style="color:${ac};-webkit-text-fill-color:${ac}" oninput="updSet(${ex.id},${si},'w',this.value)">
-            <input class="set-input" type="number" value="${st.r}" placeholder="reps"
+            <input class="set-input" type="number" step="1" inputmode="numeric" value="${st.r}" placeholder="reps"
               style="-webkit-text-fill-color:#e2e8f0" oninput="updSet(${ex.id},${si},'r',this.value)">
             ${actionBtn}
             ${timeLabel}
@@ -916,6 +939,10 @@ async function saveModal(){
     const newEx = {
       id: saved.id, name: saved.name, ds: saved.ds, rt: saved.rt,
       dw: parseFloat(saved.dw)||0, u: saved.u,
+      step: Number.isFinite(parseFloat(saved.step)) ? parseFloat(saved.step) : undefined,
+      repMin: Number.isInteger(saved.rep_min) ? saved.rep_min : undefined,
+      repMax: Number.isInteger(saved.rep_max) ? saved.rep_max : undefined,
+      targetType: saved.target_type || undefined,
       _historicalNames: saved.historical_names || [],
     };
     if(saved.alt) newEx.alt = saved.alt;
@@ -1002,6 +1029,10 @@ async function loadExercises(){
         rt: e.rt,
         dw: parseFloat(e.dw) || 0,
         u: e.u || '',
+        step: Number.isFinite(parseFloat(e.step)) ? parseFloat(e.step) : undefined,
+        repMin: Number.isInteger(e.rep_min) ? e.rep_min : undefined,
+        repMax: Number.isInteger(e.rep_max) ? e.rep_max : undefined,
+        targetType: e.target_type || undefined,
         _historicalNames: Array.isArray(e.historical_names) ? e.historical_names : [],
       };
       if(e.alt) ex.alt = e.alt;
@@ -1276,7 +1307,7 @@ function copyForWhoop(){
 function exportCSV(){
   const rows=draftToRows(currentDay,todayKey());
   const lines=['Date,Day,Exercise,Set,Weight,Reps,Done,StartedAt,CompletedAt'];
-  rows.forEach(r=>lines.push(`${r.date},${r.day},"${r.exercise}",${r.set_number},${r.weight||''},${r.reps||''},${r.done?'yes':'no'},${r.started_at||''},${r.completed_at||''}`));
+  rows.forEach(r=>lines.push(`${r.date},${r.day},"${r.exercise}",${r.set_number},${r.weight??''},${r.reps??''},${r.done?'yes':'no'},${r.started_at||''},${r.completed_at||''}`));
   const ok=downloadCSV(`ironlog_${currentDay}_${todayKey()}.csv`, lines.join('\n'));
   const b=document.getElementById('csv-btn');
   if(b){ b.textContent=ok?'downloaded!':'failed'; setTimeout(()=>b.textContent='export CSV',2500); }
@@ -1293,7 +1324,7 @@ function exportAllCSV(){
         r.exercise_id === ex.id ||
         (r.exercise_id == null && namesForEx.includes(r.exercise))
       ).sort((a,b)=>a.set_number-b.set_number).forEach(r=>{
-        lines.push(`${r.date},${r.day},"${r.exercise}",${r.set_number},${r.weight||''},${r.reps||''},${r.done?'yes':'no'},${r.started_at||''},${r.completed_at||''}`);
+        lines.push(`${r.date},${r.day},"${r.exercise}",${r.set_number},${r.weight??''},${r.reps??''},${r.done?'yes':'no'},${r.started_at||''},${r.completed_at||''}`);
       });
     });
   });
