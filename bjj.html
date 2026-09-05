@@ -1286,5 +1286,14 @@ function openEditRoll(roll) {
 // ── Init ──────────────────────────────────────────────────────────────────────
 init();
 </script>
+
+<script>
+// Service worker: network-first pages (fresh on every open) + offline fallback.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
 </body>
 </html>
