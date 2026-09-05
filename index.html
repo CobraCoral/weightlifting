@@ -1683,5 +1683,15 @@ function resetSwipe(id, si) {
 })();
 </script>
 
+<script>
+// Service worker: network-first pages (fresh on every open) + offline fallback.
+// Registered after load so it never delays first paint. Failure is silent.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+
 </body>
 </html>
