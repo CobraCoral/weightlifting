@@ -1198,6 +1198,21 @@ function rmSet(id,si){
   renderExercises();
 }
 
+// Fetch the rows the progression engine needs. Primary source is this split's
+// history; if any exercise on the day has NO rows there (e.g. it was moved from
+// another day), we lazily pull the other splits and merge in just that
+// exercise's history, so progression follows the exercise rather than the day.
+async function fetchSuggestionRows(day){
+  const rows = (await apiGet({action:'get_by_day', day})) || [];
+  const seen = new Set(rows.map(r=>r.exercise_id));
+  const missing = ((PROGRAM[day]&&PROGRAM[day].exercises)||[]).filter(ex=>!seen.has(ex.id));
+  if(!missing.length) return rows;
+  const ids = new Set(missing.map(ex=>ex.id));
+  const others = Object.keys(PROGRAM).filter(d=>d!==day);
+  const extra = await Promise.all(others.map(d=>apiGet({action:'get_by_day',day:d}).catch(()=>[])));
+  return rows.concat(extra.flat().filter(r=>r && ids.has(r.exercise_id)));
+}
+
 // ─── Supabase ─────────────────────────────────────────────────────────────────
 async function loadDraft(){
   document.getElementById('ex-loading').style.display='block';
@@ -1206,6 +1221,10 @@ async function loadDraft(){
   const cached=loadDraftLocal();
   if(cached && Object.keys(cached).length){
     draft=cached;
+    // Recompute suggestions so a restored draft still shows progression badges.
+    // Non-fatal: on failure the sets render exactly as they were, just unbadged.
+    try{ suggestions=computeSuggestions(await fetchSuggestionRows(currentDay)||[],currentDay); }
+    catch{ suggestions={}; }
     document.getElementById('ex-loading').style.display='none';
     document.getElementById('ex-list').style.display='';
     renderExercises();
@@ -1215,8 +1234,7 @@ async function loadDraft(){
   try{
     // Progression suggestions from this split's history (non-fatal; powers badges + prefill)
     try{
-      const hist=await apiGet({action:'get_by_day',day:currentDay});
-      suggestions=computeSuggestions(hist||[],currentDay);
+      suggestions=computeSuggestions(await fetchSuggestionRows(currentDay)||[],currentDay);
     }catch{ suggestions={}; }
 
     // 1. Try today's in-progress session first
