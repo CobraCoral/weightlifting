@@ -515,9 +515,18 @@ function computeSuggestions(rows, day){
 
     let mode, sets;
     const allAtCeiling = hi!=null && working.every(s=>s.r>=hi);
+    let setNote = '';
     if(allAtCeiling){
       mode = 'increase';                                       // top of range on every set -> add load
-      sets = working.map(s=>({ w:+(s.w+step).toFixed(2), r:(range.lo!=null?range.lo:Math.max(1,hi-3)) }));
+      const floorR = (range.lo!=null?range.lo:Math.max(1,hi-3));
+      // On a jump, return to the exercise's DEFAULT set count. An extra set added
+      // during a stall is a temporary plateau-breaker; once the jump is earned it
+      // has done its job, so it is dropped here rather than accumulating forever.
+      const base = Number.isInteger(ex.ds) && ex.ds>0 ? ex.ds : working.length;
+      const src  = working.slice(0, base);
+      while(src.length < base) src.push(src[src.length-1]);   // pad (repeat last) if fewer
+      sets = src.map(s=>({ w:+(s.w+step).toFixed(2), r:floorR }));
+      if(base !== working.length) setNote = ` \u00b7 back to ${base} sets`;
     } else {
       mode = 'progress';                                       // hold load, chase +1 rep/set
       sets = working.map(s=>({ w:s.w, r:(hi!=null?Math.min(s.r+1,hi):s.r+1) }));
@@ -531,7 +540,7 @@ function computeSuggestions(rows, day){
     const repStr = sets.map(s=>s.r).join(',');
     const unit   = ex.u ? ' '+ex.u : '';
     const text =
-      mode==='increase' ? `\u2191 ${progFmtW(topW)}${unit} \u00b7 rebuild reps${aimStr?' to '+aimStr:''}` :
+      mode==='increase' ? `\u2191 ${progFmtW(topW)}${unit} \u00b7 rebuild reps${aimStr?' to '+aimStr:''}${setNote}` :
       mode==='stall'    ? `\u26a1 stalled \u00b7 hold ${progFmtW(topW)}${unit}, add a set or small back-off` :
                           `\u2192 ${progFmtW(topW)}${unit} \u00d7 ${repStr}`;
     res[ex.id] = { mode, sets, text,
