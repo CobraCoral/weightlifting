@@ -103,12 +103,24 @@ const s3 = computeSuggestions([
   ...[10,10,10].map((r,i) => row(13,'2026-09-06',i,80,r)),         // 3 sets (< default 4), at ceiling
 ], 'PUSH');
 eq(s3[11].mode, 'increase', 'green with an extra set');
-eq(s3[11].sets.length, 4, 'green resets to default set count (5 -> 4)');
-eq(s3[11].text.includes('back to 4 sets'), true, 'green badge announces the reset');
+eq(s3[11].sets.length, 4, 'green -> default set count (5 -> 4)');
+eq(s3[11].text.includes('4 sets'), true, 'badge notes the count change');
 eq(s3[12].mode, 'progress', 'blue keeps building');
-eq(s3[12].sets.length, 5, 'blue keeps the extra set (5 stays 5)');
+eq(s3[12].sets.length, 4, 'blue -> default set count too (5 -> 4): program edits apply immediately');
 eq(s3[13].sets.length, 4, 'green pads up to default if fewer sets were done (3 -> 4)');
 eq(s3[13].sets.every(x => x.w === 85 && x.r === 8), true, 'padded sets use the new weight + floor reps');
+// amber = default + 1 for this session only
+const s4 = computeSuggestions([
+  ...[9,9,8,8].map((r,i) => row(11,'2026-09-13',i,80,r)),
+  ...[9,9,8,8].map((r,i) => row(11,'2026-09-06',i,80,r)),
+], 'PUSH');
+eq(s4[11].mode, 'stall', 'identical sessions -> amber');
+eq(s4[11].sets.length, 5, 'amber -> default + 1 (4 -> 5)');
+eq(s4[11].text.includes('+1 set'), true, 'amber badge announces the extra set');
+// a program trim (ds lowered) takes effect on the very next blue session
+ctx.PROGRAM.PUSH.exercises[1].ds = 3;
+const s5 = computeSuggestions([...[9,9,8,8,8].map((r,i) => row(12,'2026-09-06',i,80,r))], 'PUSH');
+eq(s5[12].sets.length, 3, 'ds trimmed 4->3 applies immediately on blue (5 -> 3)');
 
 
 // ── 6. Day summary ───────────────────────────────────────────────────────────
