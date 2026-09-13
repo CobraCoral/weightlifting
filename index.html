@@ -147,6 +147,9 @@ canvas#wma-canvas{width:100%;display:block;border-radius:8px;background:rgba(255
 .modal-btn-save{color:#0a0f1a;}
 
 /* ── Section header with + button ── */
+.bc-line{padding:8px 14px 0;font-size:11px;color:#94a3b8;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bc-line b{color:#f1f5f9;font-weight:700;}
+.bc-line .up{color:#fb923c;} .bc-line .down{color:#4ade80;}
 .day-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px 14px 0;}
 .day-summary .ds-tile{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:7px 4px;text-align:center;min-width:0;}
 .day-summary .ds-val{font-size:13px;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -196,6 +199,7 @@ body.reordering .reorder-banner{display:block;}
 
 <div id="view-log">
   <div class="day-tabs" id="day-tabs"></div>
+  <div class="bc-line" id="bc-line"></div>
   <div class="day-summary" id="day-summary" aria-live="polite"></div>
   <div class="ex-section-header">
     <span class="ex-section-label">EXERCISES</span>
@@ -315,6 +319,15 @@ async function fetchWithTimeout(url,opts={},ms=15000){
   try{ return await fetch(url,{...opts,signal:ctrl.signal}); }
   catch(e){ if(e&&e.name==='AbortError') throw new Error('Request timed out — check your connection'); throw e; }
   finally{ clearTimeout(t); }
+}
+// ─── Body composition (RENPHO → body_comp table) ─────────────────────────────
+// Newest first: [{measure_date, weight_lb, body_fat_pct, fat_free_mass_lb}]
+let bodyCompHistory = [];
+async function fetchBodyComp(){
+  try{
+    const r=await fetchWithTimeout(`${SB_URL}/rest/v1/body_comp?select=measure_date,weight_lb,body_fat_pct,fat_free_mass_lb&order=measured_at.desc&limit=120`,{headers:HDRS});
+    bodyCompHistory = r.ok ? (await r.json()) : [];
+  }catch{ bodyCompHistory = []; }
 }
 async function apiGet(p)    { const r=await fetchWithTimeout(`${EDGE}?${new URLSearchParams(p)}`,{method:'GET',headers:HDRS}); if(!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text().catch(()=>'')}`); return r.json(); }
 async function apiPost(p,b) { const r=await fetchWithTimeout(`${EDGE}?${new URLSearchParams(p)}`,{method:'POST',headers:HDRS,body:JSON.stringify(b)},20000); if(!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text().catch(()=>'')}`); return r.json(); }
@@ -456,6 +469,16 @@ function progStep(ex){
   if(ex && Object.prototype.hasOwnProperty.call(PROG_STEP_BY_ID, ex.id)) return PROG_STEP_BY_ID[ex.id];
   return PROG_STEP_DEFAULT;
 }
+// Bodyweight awareness. A "bodyweight" exercise is one whose unit says so
+// (e.g. "lb assist" for pull-ups). Its effective load = bodyweight + logged
+// weight (negative = assistance, positive = added). bodyWeightOn() returns the
+// latest measurement on or before a date so history is compared fairly.
+function isBodyweightEx(ex){ return !!(ex && /assist|bodyweight|\bbw\b/i.test(ex.u||'')); }
+function bodyWeightOn(dateStr, hist){
+  const h = hist || (typeof bodyCompHistory!=='undefined' ? bodyCompHistory : []);
+  for(const m of h){ if(m && m.measure_date <= dateStr){ const w=parseFloat(m.weight_lb); if(!isNaN(w)) return w; } }
+  return null;
+}
 // The DB grammar only allows digits, a dash and a unit word (min/s/sec/steps),
 // so ANY letter means a time/step target rather than reps.
 function parseRepRange(rt){
@@ -487,11 +510,11 @@ function sessionsByExercise(rows){
   const out = {};
   Object.entries(byEx).forEach(([id, byDate])=>{
     const dates = Object.keys(byDate).sort().reverse();
-    out[id] = dates.slice(0,2).map(d =>
+    out[id] = dates.slice(0,2).map(d => ({ date:d, sets:
       byDate[d].sort((a,b)=>a.set_number-b.set_number)
         .map(s=>({ w: parseFloat(s.weight), r: parseFloat(s.reps) }))
         .filter(s=>!isNaN(s.r))
-    );
+    }));
   });
   return out;
 }
@@ -502,9 +525,12 @@ function computeSuggestions(rows, day){
   exs.forEach(ex=>{
     const sessions = hist[ex.id];
     if(!sessions || !sessions.length) return;                 // no history -> no suggestion
-    const last    = sessions[0];
-    const prev    = sessions[1] || null;
-    const working = last.filter(s=>!isNaN(s.w));               // sets that carried a load
+    const last     = sessions[0].sets;
+    const prev     = sessions[1] ? sessions[1].sets : null;
+    const bwEx     = isBodyweightEx(ex);
+    const bwLast   = bwEx ? bodyWeightOn(sessions[0].date) : null;
+    const bwPrev   = (bwEx && sessions[1]) ? bodyWeightOn(sessions[1].date) : null;
+    const working  = last.filter(s=>!isNaN(s.w));              // sets that carried a load
     if(!working.length) return;
     const range = getRepRange(ex);
     if(!range) return;                                         // time/step-based -> no rep suggestion
@@ -522,7 +548,10 @@ function computeSuggestions(rows, day){
       if(prev){                                                // stall = identical to the session before
         const pw = prev.filter(s=>!isNaN(s.w));
         const same = pw.length===working.length && working.every((s,i)=>pw[i]&&pw[i].w===s.w&&pw[i].r===s.r);
-        if(same) mode = 'stall';
+        // Not a stall if bodyweight went up since last time: same reps at a
+        // heavier body IS progress on a bodyweight movement (bulk-proofing).
+        const bwRose = bwEx && bwLast!=null && bwPrev!=null && bwLast > bwPrev + 0.5;
+        if(same && !bwRose) mode = 'stall';
       }
     }
     // SET COUNT: the exercise editor (ex.ds) is the single source of truth.
@@ -540,13 +569,14 @@ function computeSuggestions(rows, day){
       ? { w:+(s.w+step).toFixed(2), r:floorR }
       : { w:s.w, r:(hi!=null?Math.min(s.r+1,hi):s.r+1) });
     const setNote = (count!==working.length) ? ` \u00b7 ${count} sets` : '';
+    const bwNote  = (bwEx && bwLast!=null) ? ` \u00b7 BW ${Math.round(bwLast)}` : '';
     const topW   = Math.max(...sets.map(s=>s.w));
     const repStr = sets.map(s=>s.r).join(',');
     const unit   = ex.u ? ' '+ex.u : '';
     const text =
-      mode==='increase' ? `\u2191 ${progFmtW(topW)}${unit} \u00b7 rebuild reps${aimStr?' to '+aimStr:''}${setNote}` :
-      mode==='stall'    ? `\u26a1 stalled \u00b7 hold ${progFmtW(topW)}${unit} \u00b7 +1 set this session` :
-                          `\u2192 ${progFmtW(topW)}${unit} \u00d7 ${repStr}${setNote}`;
+      mode==='increase' ? `\u2191 ${progFmtW(topW)}${unit} \u00b7 rebuild reps${aimStr?' to '+aimStr:''}${setNote}${bwNote}` :
+      mode==='stall'    ? `\u26a1 stalled \u00b7 hold ${progFmtW(topW)}${unit} \u00b7 +1 set this session${bwNote}` :
+                          `\u2192 ${progFmtW(topW)}${unit} \u00d7 ${repStr}${setNote}${bwNote}`;
     res[ex.id] = { mode, sets, text,
       color: mode==='increase' ? '#4ade80' : mode==='stall' ? '#fbbf24' : '#60a5fa' };
   });
@@ -688,18 +718,22 @@ function fmtSecs(s){
   if(m>=60) return `${Math.floor(m/60)}h${String(m%60).padStart(2,'0')}m`;
   return `${m}:${String(r).padStart(2,'0')}`;
 }
-function dayStats(day){
+function dayStats(day, dateStr){
   const exs=(PROGRAM[day]&&PROGRAM[day].exercises)||[];
   const done=[]; let totalSets=0;
+  const bwToday = bodyWeightOn(dateStr || (typeof todayKey==='function' ? todayKey() : '9999-12-31'));
   exs.forEach(ex=>{
     const sets=draft[ex.id]||[]; totalSets+=sets.length;
     const perHand=/\/hand/i.test(ex.u||'');
+    const bwEx=isBodyweightEx(ex);
     sets.forEach(s=>{
       if(!(s.done&&s.startedAt&&s.completedAt)) return;
       const st=new Date(s.startedAt).getTime(), en=new Date(s.completedAt).getTime();
       if(isNaN(st)||isNaN(en)||en<st) return;
       const w=parseFloat(s.w), r=parseFloat(s.r);
-      const vol=(w>0&&r>0)?w*r*((VOLUME_COUNT_BOTH_HANDS&&perHand)?2:1):0;
+      // bodyweight movement: effective load = BW + logged (negative = assist)
+      const load=(bwEx && bwToday!=null && !isNaN(w)) ? bwToday+w : w;
+      const vol=(load>0&&r>0)?load*r*((VOLUME_COUNT_BOTH_HANDS&&perHand)?2:1):0;
       done.push({st,en,vol});
     });
   });
@@ -714,7 +748,22 @@ function dayStats(day){
   return {totalTime,avgRest,avgSet,volume,done:done.length,total:totalSets};
 }
 // @@TESTABLE-END
+function renderBodyCompLine(){
+  const el=document.getElementById('bc-line'); if(!el) return;
+  const h=bodyCompHistory||[]; if(!h.length){ el.innerHTML=''; return; }
+  const now=h[0];
+  const cutoff=new Date(now.measure_date); cutoff.setDate(cutoff.getDate()-30);
+  const cut=cutoff.toISOString().slice(0,10);
+  const then=h.find(m=>m.measure_date<=cut);
+  const w=parseFloat(now.weight_lb), bf=parseFloat(now.body_fat_pct), lean=parseFloat(now.fat_free_mass_lb);
+  let delta='';
+  if(then){ const d=w-parseFloat(then.weight_lb); const cls=d>0?'up':'down'; delta=` \u00b7 <span class="${cls}">${d>0?'\u25b2':'\u25bc'} ${Math.abs(d).toFixed(1)} lb / 30d</span>`; }
+  const age=Math.round((Date.now()-new Date(now.measure_date))/86400000);
+  const stale=age>7?` <span style="color:#fbbf24">(${age}d old)</span>`:'';
+  el.innerHTML=`<b>${w.toFixed(1)} lb</b>${isNaN(bf)?'':` \u00b7 <b>${bf.toFixed(1)}%</b> BF`}${isNaN(lean)?'':` \u00b7 lean <b>${Math.round(lean)}</b>`}${delta}${stale}`;
+}
 function renderDaySummary(){
+  renderBodyCompLine();
   const el=document.getElementById('day-summary'); if(!el) return;
   const s=dayStats(currentDay);
   const volStr=s.volume>0 ? Math.round(s.volume).toLocaleString()+' lb' : '\u2014';
@@ -1217,6 +1266,7 @@ async function fetchSuggestionRows(day){
 async function loadDraft(){
   document.getElementById('ex-loading').style.display='block';
   document.getElementById('ex-list').style.display='none';
+  await fetchBodyComp();   // non-fatal; powers BW-aware engine + header trend line
   // 0. Unsaved local draft for this split+today wins (silent crash/refresh recovery)
   const cached=loadDraftLocal();
   if(cached && Object.keys(cached).length){
