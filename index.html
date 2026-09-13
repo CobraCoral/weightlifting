@@ -513,36 +513,40 @@ function computeSuggestions(rows, day){
     const aimStr = (range.lo!=null && hi!=null)
       ? (range.lo===hi ? `${hi}` : `${range.lo}\u2013${hi}`) : '';
 
-    let mode, sets;
+    let mode;
     const allAtCeiling = hi!=null && working.every(s=>s.r>=hi);
-    let setNote = '';
     if(allAtCeiling){
       mode = 'increase';                                       // top of range on every set -> add load
-      const floorR = (range.lo!=null?range.lo:Math.max(1,hi-3));
-      // On a jump, return to the exercise's DEFAULT set count. An extra set added
-      // during a stall is a temporary plateau-breaker; once the jump is earned it
-      // has done its job, so it is dropped here rather than accumulating forever.
-      const base = Number.isInteger(ex.ds) && ex.ds>0 ? ex.ds : working.length;
-      const src  = working.slice(0, base);
-      while(src.length < base) src.push(src[src.length-1]);   // pad (repeat last) if fewer
-      sets = src.map(s=>({ w:+(s.w+step).toFixed(2), r:floorR }));
-      if(base !== working.length) setNote = ` \u00b7 back to ${base} sets`;
     } else {
       mode = 'progress';                                       // hold load, chase +1 rep/set
-      sets = working.map(s=>({ w:s.w, r:(hi!=null?Math.min(s.r+1,hi):s.r+1) }));
       if(prev){                                                // stall = identical to the session before
         const pw = prev.filter(s=>!isNaN(s.w));
         const same = pw.length===working.length && working.every((s,i)=>pw[i]&&pw[i].w===s.w&&pw[i].r===s.r);
         if(same) mode = 'stall';
       }
     }
+    // SET COUNT: the exercise editor (ex.ds) is the single source of truth.
+    //   blue / green -> exactly the default set count
+    //   amber        -> default + 1 for THIS session only (a temporary plateau-breaker);
+    //                   the next session returns to default automatically.
+    // Nothing is carried over from the previous session's count, so program edits
+    // (trimming or adding sets) apply immediately and stall sets never accumulate.
+    const base  = (Number.isInteger(ex.ds) && ex.ds>0) ? ex.ds : working.length;
+    const count = mode==='stall' ? base+1 : base;
+    const src   = working.slice(0, count);
+    while(src.length < count) src.push(src[src.length-1]);   // pad by repeating the last set
+    const floorR = (range.lo!=null ? range.lo : Math.max(1,hi-3));
+    const sets = src.map(s => mode==='increase'
+      ? { w:+(s.w+step).toFixed(2), r:floorR }
+      : { w:s.w, r:(hi!=null?Math.min(s.r+1,hi):s.r+1) });
+    const setNote = (count!==working.length) ? ` \u00b7 ${count} sets` : '';
     const topW   = Math.max(...sets.map(s=>s.w));
     const repStr = sets.map(s=>s.r).join(',');
     const unit   = ex.u ? ' '+ex.u : '';
     const text =
       mode==='increase' ? `\u2191 ${progFmtW(topW)}${unit} \u00b7 rebuild reps${aimStr?' to '+aimStr:''}${setNote}` :
-      mode==='stall'    ? `\u26a1 stalled \u00b7 hold ${progFmtW(topW)}${unit}, add a set or small back-off` :
-                          `\u2192 ${progFmtW(topW)}${unit} \u00d7 ${repStr}`;
+      mode==='stall'    ? `\u26a1 stalled \u00b7 hold ${progFmtW(topW)}${unit} \u00b7 +1 set this session` :
+                          `\u2192 ${progFmtW(topW)}${unit} \u00d7 ${repStr}${setNote}`;
     res[ex.id] = { mode, sets, text,
       color: mode==='increase' ? '#4ade80' : mode==='stall' ? '#fbbf24' : '#60a5fa' };
   });
