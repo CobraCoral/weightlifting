@@ -123,6 +123,45 @@ const s5 = computeSuggestions([...[9,9,8,8,8].map((r,i) => row(12,'2026-09-06',i
 eq(s5[12].sets.length, 3, 'ds trimmed 4->3 applies immediately on blue (5 -> 3)');
 
 
+// ── 5b. Cross-day history merge (fetchSuggestionRows) ───────────────────────
+console.log('\n[cross-day history]');
+function crossDayTests(){
+  // Simulate: exercise 99 sits on PULL but all its history was logged on EXTRA.
+  const store = {
+    PULL:  [ { exercise_id: 1, date: '2026-09-06', set_number: 1, weight: 80, reps: 10 } ],
+    EXTRA: [ { exercise_id: 99, date: '2026-09-07', set_number: 1, weight: 85, reps: 12 },
+             { exercise_id: 77, date: '2026-09-07', set_number: 1, weight: 20, reps: 10 } ],
+    PUSH:  [], LEGS: [],
+  };
+  let calls = 0;
+  const PROG = { PULL: { exercises: [{ id: 1 }, { id: 99 }] }, EXTRA:{exercises:[]}, PUSH:{exercises:[]}, LEGS:{exercises:[]} };
+  const apiGet = async ({ day }) => { calls++; return store[day] || []; };
+  // inline copy of fetchSuggestionRows against these stubs
+  const fetchSuggestionRows = async (day) => {
+    const rows = (await apiGet({ day })) || [];
+    const seen = new Set(rows.map(r => r.exercise_id));
+    const missing = ((PROG[day] && PROG[day].exercises) || []).filter(ex => !seen.has(ex.id));
+    if (!missing.length) return rows;
+    const ids = new Set(missing.map(ex => ex.id));
+    const others = Object.keys(PROG).filter(d => d !== day);
+    const extra = await Promise.all(others.map(d => apiGet({ day: d }).catch(() => [])));
+    return rows.concat(extra.flat().filter(r => r && ids.has(r.exercise_id)));
+  };
+  return fetchSuggestionRows('PULL').then(merged=>{
+  eq(merged.length, 2, 'merges the moved exercise history into this day');
+  eq(merged.some(r => r.exercise_id === 99), true, 'moved exercise (99) history found on another day');
+  eq(merged.some(r => r.exercise_id === 77), false, 'unrelated exercise (77) is NOT merged in');
+  eq(calls, 4, 'one call for the day + others only because a gap existed');
+
+  calls = 0;
+  PROG.PULL.exercises = [{ id: 1 }];                    // no gaps now
+  return fetchSuggestionRows('PULL').then(merged2=>{
+    eq(merged2.length, 1, 'no gap -> returns just this day');
+    eq(calls, 1, 'no gap -> only ONE request (no extra fetches)');
+  });
+  });
+}
+
 // ── 6. Day summary ───────────────────────────────────────────────────────────
 console.log('\n[day summary]');
 const T = (m, sec) => new Date(Date.UTC(2026, 7, 29, 14, m, sec)).toISOString();
@@ -149,5 +188,7 @@ eq(d.done, 5, 'done sets counted'); eq(d.total, 6, 'total sets counted');
 eq(fmtSecs(590), '9:50', 'fmt m:ss'); eq(fmtSecs(3725), '1h02m', 'fmt hours'); eq(fmtSecs(null), '—', 'fmt null');
 
 // ── Result ───────────────────────────────────────────────────────────────────
-console.log(`\n${passed} passed, ${failed} failed`);
-process.exit(failed ? 1 : 0);
+crossDayTests().then(()=>{
+  console.log(`\n${passed} passed, ${failed} failed`);
+  process.exit(failed ? 1 : 0);
+});
