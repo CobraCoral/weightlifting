@@ -91,6 +91,26 @@ eq(s[8], undefined, 'time-based exercise gets NO suggestion');
 const s2 = computeSuggestions([row(1,'2026-07-11',0,45,12), row(1,'2026-07-11',1,45,12)], 'PUSH');
 eq(s2[1].mode, 'increase', 'numeric weight/reps from API handled');
 
+// set-count handling: extra stall set is kept on blue/amber, dropped on green
+ctx.PROGRAM = { PUSH: { exercises: [
+  { id: 11, name: 'RowWithExtraSet', repMin: 8, repMax: 10, ds: 4, u: 'lb' },
+  { id: 12, name: 'RowStillBuilding', repMin: 8, repMax: 10, ds: 4, u: 'lb' },
+  { id: 13, name: 'RowFewerThanDefault', repMin: 8, repMax: 10, ds: 4, u: 'lb' },
+] } };
+const s3 = computeSuggestions([
+  ...[10,10,10,10,10].map((r,i) => row(11,'2026-09-06',i,80,r)),   // 5 sets, all at ceiling
+  ...[9,9,8,8,8].map((r,i) => row(12,'2026-09-06',i,80,r)),        // 5 sets, below ceiling
+  ...[10,10,10].map((r,i) => row(13,'2026-09-06',i,80,r)),         // 3 sets (< default 4), at ceiling
+], 'PUSH');
+eq(s3[11].mode, 'increase', 'green with an extra set');
+eq(s3[11].sets.length, 4, 'green resets to default set count (5 -> 4)');
+eq(s3[11].text.includes('back to 4 sets'), true, 'green badge announces the reset');
+eq(s3[12].mode, 'progress', 'blue keeps building');
+eq(s3[12].sets.length, 5, 'blue keeps the extra set (5 stays 5)');
+eq(s3[13].sets.length, 4, 'green pads up to default if fewer sets were done (3 -> 4)');
+eq(s3[13].sets.every(x => x.w === 85 && x.r === 8), true, 'padded sets use the new weight + floor reps');
+
+
 // ── 6. Day summary ───────────────────────────────────────────────────────────
 console.log('\n[day summary]');
 const T = (m, sec) => new Date(Date.UTC(2026, 7, 29, 14, m, sec)).toISOString();
