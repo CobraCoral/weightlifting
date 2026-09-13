@@ -36,10 +36,10 @@ const blocks = [...main.matchAll(/\/\/ @@TESTABLE-START[^\n]*\n([\s\S]*?)\/\/ @@
 ok(blocks.length === 2, `found ${blocks.length} @@TESTABLE blocks (expected 2)`);
 
 // Sandbox with the globals the pure functions reference.
-const ctx = { PROGRAM: {}, draft: {}, suggestions: {}, makeDefaultDraft: (day) => ({}), console };
+const ctx = { PROGRAM: {}, draft: {}, suggestions: {}, bodyCompHistory: [], makeDefaultDraft: (day) => ({}), console };
 vm.createContext(ctx);
 vm.runInContext(blocks.join('\n'), ctx);
-const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs } = ctx;
+const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx } = ctx;
 
 // ── 3. Rep-range parsing / structured targets ────────────────────────────────
 console.log('\n[rep targets]');
@@ -122,6 +122,53 @@ ctx.PROGRAM.PUSH.exercises[1].ds = 3;
 const s5 = computeSuggestions([...[9,9,8,8,8].map((r,i) => row(12,'2026-09-06',i,80,r))], 'PUSH');
 eq(s5[12].sets.length, 3, 'ds trimmed 4->3 applies immediately on blue (5 -> 3)');
 
+
+// ── 5a. Bodyweight awareness ────────────────────────────────────────────────
+console.log('\n[bodyweight]');
+const bcHist = [ // newest first, like the API
+  { measure_date: '2026-09-13', weight_lb: 160, body_fat_pct: 14, fat_free_mass_lb: 137.6 },
+  { measure_date: '2026-09-01', weight_lb: 158, body_fat_pct: 15, fat_free_mass_lb: 134.3 },
+  { measure_date: '2026-08-01', weight_lb: 165, body_fat_pct: 19, fat_free_mass_lb: 133.6 },
+];
+eq(bodyWeightOn('2026-09-13', bcHist), 160, 'exact date match');
+eq(bodyWeightOn('2026-09-05', bcHist), 158, 'between readings -> latest prior');
+eq(bodyWeightOn('2026-07-01', bcHist), null, 'before any reading -> null');
+eq(isBodyweightEx({ u: 'lb assist' }), true,  '"lb assist" is bodyweight');
+eq(isBodyweightEx({ u: 'lb/hand' }),   false, '"lb/hand" is not');
+eq(isBodyweightEx({ u: 'lb' }),        false, '"lb" is not');
+
+// stall suppression: identical pull-up sets but bodyweight rose -> NOT a stall
+ctx.bodyCompHistory = bcHist;
+ctx.PROGRAM = { PULL: { exercises: [
+  { id: 19, name: 'Pull-Ups', repMin: 8, repMax: 12, ds: 4, u: 'lb assist' },
+  { id: 20, name: 'Row',      repMin: 8, repMax: 12, ds: 4, u: 'lb' },
+] } };
+const pu = [
+  ...[10,9,8,8].map((r,i) => row(19,'2026-09-13',i,0,r)),   // BW 160 on this date
+  ...[10,9,8,8].map((r,i) => row(19,'2026-09-06',i,0,r)),   // BW 158 on this date
+  ...[10,9,8,8].map((r,i) => row(20,'2026-09-13',i,80,r)),  // control: loaded row, same reps
+  ...[10,9,8,8].map((r,i) => row(20,'2026-09-06',i,80,r)),
+];
+const sp = computeSuggestions(pu, 'PULL');
+eq(sp[19].mode, 'progress', 'pull-ups: same reps at +2 lb bodyweight -> progress, NOT stall');
+eq(sp[19].text.includes('BW 160'), true, 'badge shows current bodyweight');
+eq(sp[20].mode, 'stall', 'control: loaded row with identical sessions still stalls');
+// same pull-up numbers with NO bodyweight change -> stall as normal
+ctx.bodyCompHistory = [{ measure_date: '2026-09-13', weight_lb: 160 }, { measure_date: '2026-09-01', weight_lb: 160 }];
+eq(computeSuggestions(pu, 'PULL')[19].mode, 'stall', 'pull-ups: same reps, same bodyweight -> stall');
+
+// volume: bodyweight movement counts BW + load (assist is negative)
+ctx.bodyCompHistory = bcHist;
+ctx.PROGRAM = { PULL: { exercises: [{ id: 19, name: 'Pull-Ups', u: 'lb assist' }, { id: 21, name: 'Abs', u: 'lb' }] } };
+const T2 = (m) => new Date(Date.UTC(2026, 8, 13, 14, m, 0)).toISOString();
+ctx.draft = {
+  19: [{ w:'0',   r:'10', done:true, startedAt:T2(0), completedAt:T2(1) },   // 160 x 10
+       { w:'-20', r:'10', done:true, startedAt:T2(3), completedAt:T2(4) }],  // (160-20) x 10
+  21: [{ w:'0',   r:'15', done:true, startedAt:T2(6), completedAt:T2(7) }],  // non-BW ex at 0 -> excluded
+};
+eq(dayStats('PULL', '2026-09-13').volume, 1600 + 1400, 'volume = (BW+load)*reps for bodyweight exercises; 0-lb non-BW excluded');
+ctx.bodyCompHistory = [];
+eq(dayStats('PULL', '2026-09-13').volume, 0, 'no bodyweight data -> bodyweight sets contribute 0 (no guess)');
 
 // ── 5b. Cross-day history merge (fetchSuggestionRows) ───────────────────────
 console.log('\n[cross-day history]');
