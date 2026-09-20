@@ -147,6 +147,8 @@ canvas#wma-canvas{width:100%;display:block;border-radius:8px;background:rgba(255
 .modal-btn-save{color:#0a0f1a;}
 
 /* ── Section header with + button ── */
+.rest-live{font-size:10px;font-weight:600;margin-left:6px;white-space:nowrap;}
+.ex-rest{font-size:10px;color:#64748b;margin-top:2px;letter-spacing:.02em;}
 .rir-row{display:flex;align-items:center;gap:5px;padding:2px 0 4px 25px;}
 .rir-lbl{font-size:10px;color:#64748b;letter-spacing:.06em;margin-right:2px;}
 .rir-btn{font-size:11px;font-weight:600;min-width:26px;padding:3px 0;border-radius:5px;
@@ -779,6 +781,13 @@ function renderBodyCompLine(){
   const stale=age>7?` <span style="color:#fbbf24">(${age}d old)</span>`:'';
   el.innerHTML=`<b>${w.toFixed(1)} lb</b>${isNaN(bf)?'':` \u00b7 <b>${bf.toFixed(1)}%</b> BF`}${isNaN(lean)?'':` \u00b7 lean <b>${Math.round(lean)}</b>`}${delta}${stale}`;
 }
+// Re-render once a second only while a rest timer is actually pending, so the
+// live counter moves without burning cycles the rest of the time.
+function syncRestTicker(){
+  const pending=document.querySelector('.rest-live');
+  if(pending && !restTicker){ restTicker=setInterval(()=>renderExercises(),1000); }
+  else if(!pending && restTicker){ clearInterval(restTicker); restTicker=null; }
+}
 function renderDaySummary(){
   renderBodyCompLine();
   const el=document.getElementById('day-summary'); if(!el) return;
@@ -792,8 +801,10 @@ function renderDaySummary(){
     <div class="ds-tile"><div class="ds-val">${volStr}</div><div class="ds-lbl">volume load</div></div>`;
 }
 
+let restTicker=null;
 function renderExercises(){
   renderDaySummary();
+  const nowTs=Date.now();
   const prog=PROGRAM[currentDay], ac=prog.accent;
   document.getElementById('ex-list').innerHTML = prog.exercises.map(ex=>{
     const sets=draft[ex.id]||[];
@@ -837,6 +848,20 @@ function renderExercises(){
       // ── Set row ──
       const timeStr = st.startedAt ? fmtTime(st.startedAt) : '';
       const doneTimeStr = st.completedAt ? fmtTime(st.completedAt) : '';
+      // Rest coaching: on the first un-started set after a completed one, show a live
+      // timer counting toward this exercise's target (ex.rest). Amber until the target
+      // is met, green once it is — so a set started early is visible in the moment.
+      let restLabel='';
+      if(!st.startedAt && !st.done && si>0){
+        const prev=arr[si-1];
+        if(prev && prev.completedAt){
+          const tgt=Number.isInteger(ex.rest)?ex.rest:null;
+          const el=Math.max(0,Math.round((nowTs-new Date(prev.completedAt).getTime())/1000));
+          const ok=tgt==null||el>=tgt;
+          restLabel=`<span class="rest-live" style="color:${ok?'#4ade80':'#fbbf24'}">`
+            +`rest ${fmtSecs(el)}${tgt!=null?` / ${fmtSecs(tgt)}`:''}</span>`;
+        }
+      }
       const timeLabel = st.startedAt
         ? `<span class="set-time">${timeStr}${st.completedAt?' → '+doneTimeStr:' → ...'}</span>`
         : '';
@@ -868,7 +893,7 @@ function renderExercises(){
             <input class="set-input" type="number" step="1" inputmode="numeric" value="${st.r}" placeholder="reps"
               style="-webkit-text-fill-color:#e2e8f0" oninput="updSet(${ex.id},${si},'r',this.value)">
             ${actionBtn}
-            ${timeLabel}
+            ${timeLabel}${restLabel}
           </div>
           ${(si===arr.length-1 && st.done) ? `
           <div class="rir-row">
@@ -888,6 +913,7 @@ function renderExercises(){
           <button class="card-edit-btn" onclick="openEditModal(${ex.id})" title="Edit exercise">✏️</button>
         </div>
         <div class="ex-target" style="color:${ac}">${escapeHtml(buildTargetBadge(ex))}</div>
+        ${Number.isInteger(ex.rest) ? `<div class="ex-rest">rest ${fmtSecs(ex.rest)}</div>` : ''}
         ${suggestions[ex.id] ? `<div class="ex-suggest" style="color:${suggestions[ex.id].color};font-size:11px;margin-top:3px;font-weight:600;letter-spacing:.01em">next: ${escapeHtml(suggestions[ex.id].text)}</div>` : ''}
       </div>
       <div class="reorder-controls">
@@ -918,6 +944,7 @@ function renderExercises(){
   msb.style.background=PROGRAM[currentDay].accent;
 
   startLiveTimer();
+  syncRestTicker();
 }
 
 // ─── Reorder mode ─────────────────────────────────────────────────────────────
@@ -1026,6 +1053,7 @@ async function saveModal(){
       id: saved.id, name: saved.name, ds: saved.ds, rt: saved.rt,
       dw: parseFloat(saved.dw)||0, u: saved.u,
       step: Number.isFinite(parseFloat(saved.step)) ? parseFloat(saved.step) : undefined,
+      rest: Number.isInteger(saved.rest_s) ? saved.rest_s : undefined,
       repMin: Number.isInteger(saved.rep_min) ? saved.rep_min : undefined,
       repMax: Number.isInteger(saved.rep_max) ? saved.rep_max : undefined,
       targetType: saved.target_type || undefined,
@@ -1116,6 +1144,7 @@ async function loadExercises(){
         dw: parseFloat(e.dw) || 0,
         u: e.u || '',
         step: Number.isFinite(parseFloat(e.step)) ? parseFloat(e.step) : undefined,
+        rest: Number.isInteger(e.rest_s) ? e.rest_s : undefined,
         repMin: Number.isInteger(e.rep_min) ? e.rep_min : undefined,
         repMax: Number.isInteger(e.rep_max) ? e.rep_max : undefined,
         targetType: e.target_type || undefined,
