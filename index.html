@@ -766,6 +766,30 @@ function dayStats(day, dateStr){
   const volume=done.reduce((a,d)=>a+d.vol,0);
   return {totalTime,avgRest,avgSet,volume,done:done.length,total:totalSets};
 }
+// Projected finish for the whole day: work already done, plus the remaining sets
+// costed at (set time + that exercise's rest target). Set time uses this session's
+// own average once there are a few completed sets, else a 40s default; the last set
+// of an exercise carries no rest, since you move on instead of resting.
+const DEFAULT_SET_S = 40;
+function dayProjection(day, dateStr){
+  const exs=(PROGRAM[day]&&PROGRAM[day].exercises)||[];
+  const st=dayStats(day, dateStr);
+  let remainingSets=0, remainingSecs=0;
+  const avgSet = st.avgSet && st.done>=3 ? st.avgSet : DEFAULT_SET_S;
+  exs.forEach(ex=>{
+    const sets=draft[ex.id]||[];
+    const rest=Number.isInteger(ex.rest)?ex.rest:105;
+    sets.forEach((s,i)=>{
+      if(s.done) return;
+      remainingSets++;
+      remainingSecs += avgSet + (i<sets.length-1 ? rest : 0);
+    });
+  });
+  const elapsed = st.totalTime!=null ? st.totalTime : 0;
+  return { remainingSets, remainingSecs, avgSet,
+           totalSecs: elapsed + remainingSecs,
+           finishAt: remainingSets ? new Date(Date.now()+remainingSecs*1000) : null };
+}
 // @@TESTABLE-END
 function renderBodyCompLine(){
   const el=document.getElementById('bc-line'); if(!el) return;
@@ -795,7 +819,11 @@ function renderDaySummary(){
   const volStr=s.volume>0 ? Math.round(s.volume).toLocaleString()+' lb' : '\u2014';
   // All interpolated values are numbers/formatted strings — no user text, no escaping needed.
   el.innerHTML=`
-    <div class="ds-tile"><div class="ds-val">${fmtSecs(s.totalTime)}</div><div class="ds-lbl">total \u00b7 ${s.done}/${s.total} sets</div></div>
+    ${(()=>{ const p=dayProjection(currentDay);
+      if(!p.remainingSets) return `<div class="ds-tile"><div class="ds-val">${fmtSecs(s.totalTime)}</div><div class="ds-lbl">total \u00b7 ${s.done}/${s.total} sets</div></div>`;
+      const eta=p.finishAt.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+      return `<div class="ds-tile"><div class="ds-val">~${fmtSecs(p.totalSecs)}</div><div class="ds-lbl">est \u00b7 done ${eta}</div></div>`;
+    })()}
     <div class="ds-tile"><div class="ds-val">${fmtSecs(s.avgRest)}</div><div class="ds-lbl">avg rest/set</div></div>
     <div class="ds-tile"><div class="ds-val">${fmtSecs(s.avgSet)}</div><div class="ds-lbl">avg set time</div></div>
     <div class="ds-tile"><div class="ds-val">${volStr}</div><div class="ds-lbl">volume load</div></div>`;
