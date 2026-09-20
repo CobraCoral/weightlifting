@@ -39,7 +39,7 @@ ok(blocks.length === 2, `found ${blocks.length} @@TESTABLE blocks (expected 2)`)
 const ctx = { PROGRAM: {}, draft: {}, suggestions: {}, bodyCompHistory: [], makeDefaultDraft: (day) => ({}), console };
 vm.createContext(ctx);
 vm.runInContext(blocks.join('\n'), ctx);
-const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx } = ctx;
+const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx, dayProjection } = ctx;
 
 // ── 3. Rep-range parsing / structured targets ────────────────────────────────
 console.log('\n[rep targets]');
@@ -177,6 +177,48 @@ console.log('\n[rest targets]');
   eq(restState(t0, at(90), 105).el, 90, 'elapsed seconds computed from previous set end');
   eq(fmtSecs(105), '1:45', 'target renders as m:ss');
   eq(fmtSecs(150), '2:30', 'compound target renders as m:ss');
+}
+
+// ── 4d. Session-time projection ─────────────────────────────────────────────
+console.log('\n[projection]');
+{
+  ctx.bodyCompHistory = [];
+  ctx.PROGRAM = { PUSH: { exercises: [
+    { id: 60, name: 'Press', u: 'lb', rest: 150 },
+    { id: 61, name: 'Fly',   u: 'lb', rest: 105 },
+  ] } };
+  const T3 = (m,sec) => new Date(Date.UTC(2026, 8, 20, 14, m, sec)).toISOString();
+  // nothing logged yet: 3 + 2 sets, all remaining
+  ctx.draft = {
+    60: [ {w:'50',r:'8',done:false}, {w:'50',r:'8',done:false}, {w:'50',r:'8',done:false} ],
+    61: [ {w:'30',r:'12',done:false}, {w:'30',r:'12',done:false} ],
+  };
+  let p = dayProjection('PUSH', '2026-09-20');
+  eq(p.remainingSets, 5, 'counts every unfinished set');
+  eq(p.avgSet, 40, 'falls back to 40s per set with no history');
+  // press: 3x40 + 2 rests x150 = 420 ; fly: 2x40 + 1 rest x105 = 185
+  eq(p.remainingSecs, 420 + 185, 'last set of each exercise carries no rest');
+  eq(p.totalSecs, 605, 'total = elapsed (0) + remaining');
+
+  // partially done, with real set times: two 30s sets completed
+  ctx.draft = {
+    60: [ {w:'50',r:'8',done:true,startedAt:T3(0,0),completedAt:T3(0,30)},
+          {w:'50',r:'8',done:true,startedAt:T3(3,0),completedAt:T3(3,30)},
+          {w:'50',r:'8',done:true,startedAt:T3(6,0),completedAt:T3(6,30)},
+          {w:'50',r:'8',done:false} ],
+    61: [ {w:'30',r:'12',done:false} ],
+  };
+  p = dayProjection('PUSH', '2026-09-20');
+  eq(p.remainingSets, 2, 'only unfinished sets remain');
+  eq(p.avgSet, 30, 'uses this session actual average once 3+ sets are done');
+  // press set 4 is last -> no rest ; fly single set -> no rest
+  eq(p.remainingSecs, 30 + 30, 'remaining = set time only when each is the last of its exercise');
+  eq(p.totalSecs, 390 + 60, 'total = elapsed 6:30 + remaining 1:00');
+  eq(typeof p.finishAt?.getTime === 'function', true, 'finish time is a Date while sets remain');
+
+  // fully done
+  ctx.draft = { 60: [ {w:'50',r:'8',done:true,startedAt:T3(0,0),completedAt:T3(0,30)} ], 61: [] };
+  eq(dayProjection('PUSH','2026-09-20').finishAt, null, 'no finish estimate once everything is done');
 }
 
 // ── 5a. Bodyweight awareness ────────────────────────────────────────────────
