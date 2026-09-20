@@ -123,6 +123,42 @@ const s5 = computeSuggestions([...[9,9,8,8,8].map((r,i) => row(12,'2026-09-06',i
 eq(s5[12].sets.length, 3, 'ds trimmed 4->3 applies immediately on blue (5 -> 3)');
 
 
+// ── 4b. RIR-aware suggestions ───────────────────────────────────────────────
+console.log('\n[RIR]');
+ctx.bodyCompHistory = [];
+ctx.PROGRAM = { PUSH: { exercises: [
+  { id: 30, name: 'Laterals', repMin: 12, repMax: 15, ds: 3, u: 'lb/hand' },
+  { id: 31, name: 'Pushdowns', repMin: 10, repMax: 15, ds: 3, u: 'lb' },
+  { id: 32, name: 'Row', repMin: 8, repMax: 10, ds: 3, u: 'lb' },
+] } };
+const rowR = (id, date, i, w, r, rir) => ({ exercise_id: id, date, set_number: i + 1, weight: w, reps: r, rir });
+// ceiling reached at 4 RIR -> double step (5 -> +10 not +5)
+const r1 = computeSuggestions([
+  rowR(30,'2026-09-19',0,25,15,null), rowR(30,'2026-09-19',1,25,15,null), rowR(30,'2026-09-19',2,25,15,4),
+], 'PUSH');
+eq(r1[30].mode, 'increase', 'ceiling reached -> increase');
+eq(r1[30].sets[0].w, 35, 'high RIR at ceiling -> DOUBLE step (25 + 2x5)');
+eq(r1[30].text.includes('double step'), true, 'badge explains the bigger jump');
+// ceiling reached at 1 RIR -> normal step
+const r2 = computeSuggestions([
+  rowR(30,'2026-09-19',0,25,15,null), rowR(30,'2026-09-19',1,25,15,null), rowR(30,'2026-09-19',2,25,15,1),
+], 'PUSH');
+eq(r2[30].sets[0].w, 30, 'low RIR at ceiling -> normal step');
+eq(r2[30].text.includes('1 RIR'), true, 'badge shows the logged RIR');
+// below ceiling but 4 RIR -> advisory + amber colour
+const r3 = computeSuggestions([
+  rowR(31,'2026-09-19',0,50,12,null), rowR(31,'2026-09-19',1,50,12,null), rowR(31,'2026-09-19',2,50,12,4),
+], 'PUSH');
+eq(r3[31].mode, 'progress', 'below ceiling stays progress');
+eq(r3[31].text.includes('go heavier'), true, 'advisory when reps added at 4+ RIR');
+eq(r3[31].color, '#fbbf24', 'too-easy sets turn the badge amber');
+// no RIR logged -> unchanged behaviour, no note
+const r4 = computeSuggestions([
+  rowR(32,'2026-09-19',0,80,10,null), rowR(32,'2026-09-19',1,80,10,null), rowR(32,'2026-09-19',2,80,10,null),
+], 'PUSH');
+eq(r4[32].sets[0].w, 85, 'no RIR -> normal step (back-compatible)');
+eq(/RIR/.test(r4[32].text), false, 'no RIR logged -> no RIR text in badge');
+
 // ── 5a. Bodyweight awareness ────────────────────────────────────────────────
 console.log('\n[bodyweight]');
 const bcHist = [ // newest first, like the API
