@@ -147,6 +147,10 @@ canvas#wma-canvas{width:100%;display:block;border-radius:8px;background:rgba(255
 .modal-btn-save{color:#0a0f1a;}
 
 /* ── Section header with + button ── */
+.rir-row{display:flex;align-items:center;gap:5px;padding:2px 0 4px 25px;}
+.rir-lbl{font-size:10px;color:#64748b;letter-spacing:.06em;margin-right:2px;}
+.rir-btn{font-size:11px;font-weight:600;min-width:26px;padding:3px 0;border-radius:5px;
+  background:transparent;border:1px solid rgba(255,255,255,.12);color:#94a3b8;font-family:inherit;}
 .bc-line{padding:8px 14px 0;font-size:11px;color:#94a3b8;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .bc-line b{color:#f1f5f9;font-weight:700;}
 .bc-line .up{color:#fb923c;} .bc-line .down{color:#4ade80;}
@@ -512,7 +516,7 @@ function sessionsByExercise(rows){
     const dates = Object.keys(byDate).sort().reverse();
     out[id] = dates.slice(0,2).map(d => ({ date:d, sets:
       byDate[d].sort((a,b)=>a.set_number-b.set_number)
-        .map(s=>({ w: parseFloat(s.weight), r: parseFloat(s.reps) }))
+        .map(s=>({ w: parseFloat(s.weight), r: parseFloat(s.reps), rir: (s.rir==null?null:parseInt(s.rir,10)) }))
         .filter(s=>!isNaN(s.r))
     }));
   });
@@ -539,6 +543,9 @@ function computeSuggestions(rows, day){
     const aimStr = (range.lo!=null && hi!=null)
       ? (range.lo===hi ? `${hi}` : `${range.lo}\u2013${hi}`) : '';
 
+    // RIR from the last set that carries one (logged once per exercise).
+    let lastRir = null;
+    for(let i=last.length-1;i>=0;i--){ if(Number.isInteger(last[i].rir)){ lastRir=last[i].rir; break; } }
     let mode;
     const allAtCeiling = hi!=null && working.every(s=>s.r>=hi);
     if(allAtCeiling){
@@ -565,20 +572,29 @@ function computeSuggestions(rows, day){
     const src   = working.slice(0, count);
     while(src.length < count) src.push(src[src.length-1]);   // pad by repeating the last set
     const floorR = (range.lo!=null ? range.lo : Math.max(1,hi-3));
+    // Effort-aware jump: hitting the ceiling with 3+ reps still in reserve means the
+    // load was too light, so take a double step. 0-2 RIR earns the normal step.
+    const bigJump = mode==='increase' && lastRir!=null && lastRir>=3;
+    const useStep = bigJump ? step*2 : step;
     const sets = src.map(s => mode==='increase'
-      ? { w:+(s.w+step).toFixed(2), r:floorR }
+      ? { w:+(s.w+useStep).toFixed(2), r:floorR }
       : { w:s.w, r:(hi!=null?Math.min(s.r+1,hi):s.r+1) });
+    // Advisory when reps are being added at an effort level that won't drive growth.
+    const tooEasy = mode==='progress' && lastRir!=null && lastRir>=4;
+    const rirNote = bigJump ? ` \u00b7 was ${lastRir} RIR \u2192 double step`
+                  : tooEasy ? ` \u00b7 last was ${lastRir} RIR \u2014 go heavier`
+                  : (lastRir!=null ? ` \u00b7 ${lastRir} RIR` : '');
     const setNote = (count!==working.length) ? ` \u00b7 ${count} sets` : '';
     const bwNote  = (bwEx && bwLast!=null) ? ` \u00b7 BW ${Math.round(bwLast)}` : '';
     const topW   = Math.max(...sets.map(s=>s.w));
     const repStr = sets.map(s=>s.r).join(',');
     const unit   = ex.u ? ' '+ex.u : '';
     const text =
-      mode==='increase' ? `\u2191 ${progFmtW(topW)}${unit} \u00b7 rebuild reps${aimStr?' to '+aimStr:''}${setNote}${bwNote}` :
-      mode==='stall'    ? `\u26a1 stalled \u00b7 hold ${progFmtW(topW)}${unit} \u00b7 +1 set this session${bwNote}` :
-                          `\u2192 ${progFmtW(topW)}${unit} \u00d7 ${repStr}${setNote}${bwNote}`;
+      mode==='increase' ? `\u2191 ${progFmtW(topW)}${unit} \u00b7 rebuild reps${aimStr?' to '+aimStr:''}${setNote}${bwNote}${rirNote}` :
+      mode==='stall'    ? `\u26a1 stalled \u00b7 hold ${progFmtW(topW)}${unit} \u00b7 +1 set this session${bwNote}${rirNote}` :
+                          `\u2192 ${progFmtW(topW)}${unit} \u00d7 ${repStr}${setNote}${bwNote}${rirNote}`;
     res[ex.id] = { mode, sets, text,
-      color: mode==='increase' ? '#4ade80' : mode==='stall' ? '#fbbf24' : '#60a5fa' };
+      color: mode==='increase' ? '#4ade80' : (mode==='stall'||tooEasy) ? '#fbbf24' : '#60a5fa' };
   });
   return res;
 }
@@ -591,7 +607,7 @@ function suggestionsToFreshDraft(day){
       d[ex.id] = s.sets.map(x=>({
         w: (x.w!=null && !isNaN(x.w)) ? String(x.w) : '',
         r: (x.r!=null && !isNaN(x.r)) ? String(x.r) : '',
-        done:false, startedAt:null, completedAt:null
+        done:false, startedAt:null, completedAt:null, rir:null
       }));
     }
   });
@@ -637,7 +653,8 @@ function draftToRows(day,date){
       const rNum=(st.r===''||st.r==null)?null:Math.round(parseFloat(st.r));
       rows.push({date,day,exercise_id:ex.id,exercise:ex.name,set_number:i+1,
         weight:Number.isFinite(wNum)?wNum:null, reps:Number.isFinite(rNum)?rNum:null,
-        done:st.done,started_at:st.startedAt||null,completed_at:st.completedAt||null});
+        done:st.done,started_at:st.startedAt||null,completed_at:st.completedAt||null,
+        rir:(st.rir===''||st.rir==null)?null:parseInt(st.rir,10)});
     });
   });
   if (skipped.length) {
@@ -651,7 +668,7 @@ function rowsToDraft(rows,day){
   const d=makeDefaultDraft(day);
   PROGRAM[day].exercises.forEach(ex=>{
     const er=rows.filter(r=>r.exercise_id===ex.id).sort((a,b)=>a.set_number-b.set_number);
-    if(er.length>0) d[ex.id]=er.map(r=>({w:numToStr(r.weight),r:numToStr(r.reps),done:r.done,startedAt:r.started_at||null,completedAt:r.completed_at||null}));
+    if(er.length>0) d[ex.id]=er.map(r=>({w:numToStr(r.weight),r:numToStr(r.reps),done:r.done,startedAt:r.started_at||null,completedAt:r.completed_at||null,rir:(r.rir==null?null:r.rir)}));
   });
   return d;
 }
@@ -661,7 +678,7 @@ function rowsToFreshDraft(rows,day){
   const d=makeDefaultDraft(day);
   PROGRAM[day].exercises.forEach(ex=>{
     const er=rows.filter(r=>r.exercise_id===ex.id).sort((a,b)=>a.set_number-b.set_number);
-    if(er.length>0) d[ex.id]=er.map(r=>({w:numToStr(r.weight),r:numToStr(r.reps),done:false,startedAt:null,completedAt:null}));
+    if(er.length>0) d[ex.id]=er.map(r=>({w:numToStr(r.weight),r:numToStr(r.reps),done:false,startedAt:null,completedAt:null,rir:null}));
   });
   return d;
 }
@@ -794,7 +811,7 @@ function renderExercises(){
     }
 
     let setsHtml='';
-    sets.forEach((st,si)=>{
+    sets.forEach((st,si,arr)=>{
       const prev = si>0 ? sets[si-1] : null;
 
       // ── Between-set badges ──
@@ -853,6 +870,13 @@ function renderExercises(){
             ${actionBtn}
             ${timeLabel}
           </div>
+          ${(si===arr.length-1 && st.done) ? `
+          <div class="rir-row">
+            <span class="rir-lbl">RIR</span>
+            ${[0,1,2,3,4,5].map(v=>`<button class="rir-btn${String(st.rir)===String(v)?' on':''}"
+              style="${String(st.rir)===String(v)?`background:${ac};border-color:${ac};color:#080d18`:''}"
+              onclick="setRir(${ex.id},${si},${v})">${v===5?'5+':v}</button>`).join('')}
+          </div>` : ''}
         </div>
       </div>`;
     });
@@ -1209,6 +1233,14 @@ function toggleHist(i){
   c.textContent=b.classList.toggle('open')?'▲':'▼';
 }
 
+// RIR is logged once per exercise, on its last set. Tapping the active value clears it.
+function setRir(id,si,v){
+  if(!draft[id]) return;
+  const st=draft[id][si];
+  st.rir = (String(st.rir)===String(v)) ? null : v;
+  saveDraftLocal();
+  renderExercises();
+}
 function updSet(id,si,f,v){ if(draft[id]){ draft[id][si][f]=v; saveDraftLocal(); } }
 
 function startSet(id,si){
