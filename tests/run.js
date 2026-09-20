@@ -159,6 +159,26 @@ const r4 = computeSuggestions([
 eq(r4[32].sets[0].w, 85, 'no RIR -> normal step (back-compatible)');
 eq(/RIR/.test(r4[32].text), false, 'no RIR logged -> no RIR text in badge');
 
+// ── 4c. Rest targets ────────────────────────────────────────────────────────
+console.log('\n[rest targets]');
+{
+  // The rest indicator is pure arithmetic: elapsed vs target decides the colour.
+  const restState = (prevCompletedAt, nowTs, target) => {
+    const el = Math.max(0, Math.round((nowTs - new Date(prevCompletedAt).getTime()) / 1000));
+    const ok = target == null || el >= target;
+    return { el, ok };
+  };
+  const t0 = new Date(Date.UTC(2026, 8, 20, 10, 0, 0));
+  const at = (sec) => t0.getTime() + sec * 1000;
+  eq(restState(t0, at(60), 105).ok, false, '60s into a 105s target -> not met (amber)');
+  eq(restState(t0, at(105), 105).ok, true, 'exactly at target -> met (green)');
+  eq(restState(t0, at(200), 150).ok, true, 'past a 150s compound target -> met');
+  eq(restState(t0, at(45), null).ok, true, 'no target set -> always met (never nags)');
+  eq(restState(t0, at(90), 105).el, 90, 'elapsed seconds computed from previous set end');
+  eq(fmtSecs(105), '1:45', 'target renders as m:ss');
+  eq(fmtSecs(150), '2:30', 'compound target renders as m:ss');
+}
+
 // ── 5a. Bodyweight awareness ────────────────────────────────────────────────
 console.log('\n[bodyweight]');
 const bcHist = [ // newest first, like the API
