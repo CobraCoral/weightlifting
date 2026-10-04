@@ -403,6 +403,15 @@ function makeDefaultDraft(day){
 
 // Build the target badge from actual draft data (last session weights/reps)
 // Falls back to static program target if no real data exists
+// Header badge: what you actually did last time. Falls back to the static target
+// when there is no history, so a brand-new exercise still shows its rep range.
+function buildLastBadge(ex){
+  const L = lastSessions[ex.id];
+  if(!L) return `${ex.rt}${ex.u?' \u00b7 '+ex.u:''}`;
+  const fmt = v => Number.isInteger(v) ? String(v) : String(v).replace(/0$/,'').replace(/\.$/,'');
+  const w = L.topW!=null ? ` / ${fmt(L.topW)}${ex.u?' '+ex.u:''}` : '';
+  return `last ${L.n}\u00d7${L.reps}${w}`;
+}
 function buildTargetBadge(ex){
   const sets = draft[ex.id];
   if(!sets || !sets.length) return `${ex.rt}${ex.u?' · '+ex.u:''}`;
@@ -521,6 +530,25 @@ function sessionsByExercise(rows){
         .map(s=>({ w: parseFloat(s.weight), r: parseFloat(s.reps), rir: (s.rir==null?null:parseInt(s.rir,10)) }))
         .filter(s=>!isNaN(s.r))
     }));
+  });
+  return out;
+}
+// Last completed session per exercise, for the card header: {sets, reps:'10' or '8-10', topW}
+let lastSessions = {};
+function computeLastSessions(rows, day){
+  const hist = sessionsByExercise(rows);
+  const out = {};
+  ((PROGRAM[day]&&PROGRAM[day].exercises)||[]).forEach(ex=>{
+    const s = hist[ex.id];
+    if(!s || !s.length) return;
+    const sets = s[0].sets.filter(x=>!isNaN(x.r));
+    if(!sets.length) return;
+    const reps = sets.map(x=>x.r);
+    const lo=Math.min(...reps), hi=Math.max(...reps);
+    const ws = sets.map(x=>x.w).filter(w=>!isNaN(w));
+    out[ex.id] = { date:s[0].date, n:sets.length,
+      reps: lo===hi ? String(lo) : `${lo}\u2013${hi}`,
+      topW: ws.length ? Math.max(...ws) : null };
   });
   return out;
 }
@@ -940,7 +968,7 @@ function renderExercises(){
           <div><div class="ex-name">${escapeHtml(ex.name)}</div>${ex.alt?`<div class="ex-alt">or: ${escapeHtml(ex.alt)}</div>`:''}</div>
           <button class="card-edit-btn" onclick="openEditModal(${ex.id})" title="Edit exercise">✏️</button>
         </div>
-        <div class="ex-target" style="color:${ac}">${escapeHtml(buildTargetBadge(ex))}</div>
+        <div class="ex-target" style="color:${ac}">${escapeHtml(buildLastBadge(ex))}</div>
         ${Number.isInteger(ex.rest) ? `<div class="ex-rest">rest ${fmtSecs(ex.rest)}</div>` : ''}
         ${suggestions[ex.id] ? `<div class="ex-suggest" style="color:${suggestions[ex.id].color};font-size:11px;margin-top:3px;font-weight:600;letter-spacing:.01em">next: ${escapeHtml(suggestions[ex.id].text)}</div>` : ''}
       </div>
@@ -1362,8 +1390,10 @@ async function loadDraft(){
     draft=cached;
     // Recompute suggestions so a restored draft still shows progression badges.
     // Non-fatal: on failure the sets render exactly as they were, just unbadged.
-    try{ suggestions=computeSuggestions(await fetchSuggestionRows(currentDay)||[],currentDay); }
-    catch{ suggestions={}; }
+    try{ const hr=await fetchSuggestionRows(currentDay)||[];
+         suggestions=computeSuggestions(hr,currentDay);
+         lastSessions=computeLastSessions(hr,currentDay); }
+    catch{ suggestions={}; lastSessions={}; }
     document.getElementById('ex-loading').style.display='none';
     document.getElementById('ex-list').style.display='';
     renderExercises();
@@ -1373,7 +1403,9 @@ async function loadDraft(){
   try{
     // Progression suggestions from this split's history (non-fatal; powers badges + prefill)
     try{
-      suggestions=computeSuggestions(await fetchSuggestionRows(currentDay)||[],currentDay);
+      const histRows=await fetchSuggestionRows(currentDay)||[];
+      suggestions=computeSuggestions(histRows,currentDay);
+      lastSessions=computeLastSessions(histRows,currentDay);
     }catch{ suggestions={}; }
 
     // 1. Try today's in-progress session first
