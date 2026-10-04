@@ -36,10 +36,18 @@ const blocks = [...main.matchAll(/\/\/ @@TESTABLE-START[^\n]*\n([\s\S]*?)\/\/ @@
 ok(blocks.length === 2, `found ${blocks.length} @@TESTABLE blocks (expected 2)`);
 
 // Sandbox with the globals the pure functions reference.
-const ctx = { PROGRAM: {}, draft: {}, suggestions: {}, bodyCompHistory: [], makeDefaultDraft: (day) => ({}), console };
+const ctx = { PROGRAM: {}, draft: {}, suggestions: {}, bodyCompHistory: [],
+  numToStr: (v) => (v == null || v === '') ? '' : String(v),
+  makeDefaultDraft: (day) => {
+    const o = {};
+    ((ctx.PROGRAM[day] && ctx.PROGRAM[day].exercises) || []).forEach(ex => {
+      o[ex.id] = Array.from({ length: ex.ds || 1 }, () => ({ w: String(ex.dw ?? ''), r: '', done: false, startedAt: null, completedAt: null, rir: null }));
+    });
+    return o;
+  }, console };
 vm.createContext(ctx);
 vm.runInContext(blocks.join('\n'), ctx);
-const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx, dayProjection, computeLastSessions } = ctx;
+const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx, dayProjection, computeLastSessions, rowsToDraft } = ctx;
 
 // ── 3. Rep-range parsing / structured targets ────────────────────────────────
 console.log('\n[rep targets]');
@@ -240,6 +248,35 @@ console.log('\n[last session badge]');
   eq(L[70].topW, 65, 'uses the most recent session, not the heaviest ever');
   eq(L[71].reps, '8\u20139', 'varied reps render as a low-high range');
   eq(L[72], undefined, 'no history -> no badge data (falls back to static target)');
+}
+
+// ── 4f. Mid-session refresh keeps the prefill ───────────────────────────────
+console.log('\n[refresh / rowsToDraft]');
+{
+  ctx.PROGRAM = { PULL: { exercises: [
+    { id: 80, name: 'Row',  ds: 3, dw: 40, repMin: 8,  repMax: 12, u: 'lb' },  // partially done
+    { id: 81, name: 'Curl', ds: 3, dw: 40, repMin: 8,  repMax: 12, u: 'lb' },  // untouched
+  ] } };
+  // history gives both a suggestion of 85 (blue: hold weight, chase reps)
+  const h = (id,date,i,w,r) => ({ exercise_id:id, date, set_number:i+1, weight:w, reps:r });
+  ctx.suggestions = computeSuggestions([
+    ...[9,9,9].map((v,i)=>h(80,'2026-09-27',i,85,v)),
+    ...[9,9,9].map((v,i)=>h(81,'2026-09-27',i,70,v)),
+  ], 'PULL');
+  // today: only the 2 sets actually completed on exercise 80 were saved
+  const saved = [
+    { exercise_id:80, set_number:1, weight:85, reps:10, done:true,  started_at:'t', completed_at:'t', rir:null },
+    { exercise_id:80, set_number:2, weight:85, reps:10, done:true,  started_at:'t', completed_at:'t', rir:2 },
+  ];
+  const d = rowsToDraft(saved, 'PULL');
+  eq(d[80].length, 3, 'partially-done exercise keeps all planned sets');
+  eq(d[80][0].done, true, 'saved set 1 restored as done');
+  eq(d[80][1].rir, 2, 'saved RIR survives a refresh');
+  eq(d[80][2].w, '85', 'unfinished set keeps the SUGGESTED weight, not the 40 lb default');
+  eq(d[80][2].r, '10', 'unfinished set keeps the suggested reps, not blank');
+  eq(d[80][2].done, false, 'unfinished set is not marked done');
+  eq(d[81].map(x=>x.w), ['70','70','70'], 'untouched exercise keeps its suggested weight');
+  eq(d[81].every(x=>x.r==='10'), true, 'untouched exercise keeps suggested reps (not blank)');
 }
 
 // ── 5a. Bodyweight awareness ────────────────────────────────────────────────
