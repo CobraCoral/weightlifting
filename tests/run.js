@@ -39,7 +39,7 @@ ok(blocks.length === 2, `found ${blocks.length} @@TESTABLE blocks (expected 2)`)
 const ctx = { PROGRAM: {}, draft: {}, suggestions: {}, bodyCompHistory: [], makeDefaultDraft: (day) => ({}), console };
 vm.createContext(ctx);
 vm.runInContext(blocks.join('\n'), ctx);
-const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx, dayProjection } = ctx;
+const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx, dayProjection, computeLastSessions } = ctx;
 
 // ── 3. Rep-range parsing / structured targets ────────────────────────────────
 console.log('\n[rep targets]');
@@ -219,6 +219,27 @@ console.log('\n[projection]');
   // fully done
   ctx.draft = { 60: [ {w:'50',r:'8',done:true,startedAt:T3(0,0),completedAt:T3(0,30)} ], 61: [] };
   eq(dayProjection('PUSH','2026-09-20').finishAt, null, 'no finish estimate once everything is done');
+}
+
+// ── 4e. Last-session header badge ───────────────────────────────────────────
+console.log('\n[last session badge]');
+{
+  ctx.PROGRAM = { PUSH: { exercises: [
+    { id: 70, name: 'Rope', u: 'lb' },
+    { id: 71, name: 'Row',  u: 'lb/hand' },
+    { id: 72, name: 'New',  u: 'lb' },
+  ] } };
+  const r = (id,date,i,w,rp) => ({ exercise_id:id, date, set_number:i+1, weight:w, reps:rp });
+  const L = computeLastSessions([
+    ...[10,10,10,10].map((v,i)=>r(70,'2026-10-03',i,65,v)),      // newest
+    ...[14,14,14,14].map((v,i)=>r(70,'2026-09-26',i,85,v)),      // older, ignored
+    ...[9,9,8,8].map((v,i)=>r(71,'2026-10-03',i,85,v)),          // varied reps
+  ], 'PUSH');
+  eq(L[70].n, 4, 'set count from last session');
+  eq(L[70].reps, '10', 'uniform reps render as one number');
+  eq(L[70].topW, 65, 'uses the most recent session, not the heaviest ever');
+  eq(L[71].reps, '8\u20139', 'varied reps render as a low-high range');
+  eq(L[72], undefined, 'no history -> no badge data (falls back to static target)');
 }
 
 // ── 5a. Bodyweight awareness ────────────────────────────────────────────────
