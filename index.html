@@ -644,6 +644,22 @@ function suggestionsToFreshDraft(day){
   return d;
 }
 
+// Rebuild today's draft from saved rows. Only sets you actually started/checked are
+// persisted, so anything not yet done has no row — those keep their suggested prefill
+// instead of falling back to the exercise's static default weight with blank reps.
+// Partially-completed exercises keep their logged sets and pad the rest from the plan.
+function rowsToDraft(rows,day){
+  const d=suggestionsToFreshDraft(day);
+  PROGRAM[day].exercises.forEach(ex=>{
+    const er=rows.filter(r=>r.exercise_id===ex.id).sort((a,b)=>a.set_number-b.set_number);
+    if(!er.length) return;                       // untouched exercise -> keep the prefill
+    const planned=d[ex.id]||[];
+    const merged=er.map(r=>({w:numToStr(r.weight),r:numToStr(r.reps),done:r.done,startedAt:r.started_at||null,completedAt:r.completed_at||null,rir:(r.rir==null?null:r.rir)}));
+    for(let i=merged.length;i<planned.length;i++) merged.push(planned[i]);
+    d[ex.id]=merged;
+  });
+  return d;
+}
 // @@TESTABLE-END
 
 function exStats(sets){
@@ -694,14 +710,6 @@ function draftToRows(day,date){
   return rows;
 }
 
-function rowsToDraft(rows,day){
-  const d=makeDefaultDraft(day);
-  PROGRAM[day].exercises.forEach(ex=>{
-    const er=rows.filter(r=>r.exercise_id===ex.id).sort((a,b)=>a.set_number-b.set_number);
-    if(er.length>0) d[ex.id]=er.map(r=>({w:numToStr(r.weight),r:numToStr(r.reps),done:r.done,startedAt:r.started_at||null,completedAt:r.completed_at||null,rir:(r.rir==null?null:r.rir)}));
-  });
-  return d;
-}
 
 // Pre-fills weights/reps from a previous session, but clears done/timestamps
 function rowsToFreshDraft(rows,day){
