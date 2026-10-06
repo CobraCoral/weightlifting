@@ -390,6 +390,29 @@ eq(d.volume, 2400,   'volume: per-hand doubled, assisted + 0 lb excluded, untouc
 eq(d.done, 5, 'done sets counted'); eq(d.total, 6, 'total sets counted');
 eq(fmtSecs(590), '9:50', 'fmt m:ss'); eq(fmtSecs(3725), '1h02m', 'fmt hours'); eq(fmtSecs(null), '—', 'fmt null');
 
+// ── 7. Day/tab wiring ────────────────────────────────────────────────────────
+// Days are data-driven (exercises come from the DB by `day`), but the tab
+// labels, accents and week strip are client-side. A day in DAYS with no
+// PROGRAM entry crashes renderAll(), so assert they stay in sync.
+console.log('\n[day wiring]');
+{
+  const grab = (re) => (main.match(re) || [, 'null'])[1];
+  const { P, D, W, SPLIT } = vm.runInNewContext(`({
+    P: ${grab(/const PROGRAM\s*=\s*(\{[\s\S]*?\n\});/)},
+    D: ${grab(/const DAYS\s*=\s*(\[[^\]]*\]);/)},
+    W: ${grab(/const WEEK\s*=\s*(\[[\s\S]*?\n\]);/)},
+    SPLIT: ${grab(/const SPLIT_BY_WEEKDAY\s*=\s*(\{[^}]*\});/)}
+  })`);
+  ok(D.length >= 4, `DAYS parsed (${D.length}: ${D.join(',')})`);
+  ok(D.every(d => P[d] && P[d].label && P[d].accent), 'every DAYS entry has a PROGRAM label + accent');
+  ok(Object.keys(P).every(d => D.includes(d)), 'every PROGRAM day is reachable from a tab');
+  ok(D.includes('HOME') && P.HOME.exercises.length === 0, 'HOME day present, exercises filled from DB');
+  ok(W.filter(w => w.lift).every(w => P[w.prog]), 'every week-strip lift cell points at a real day');
+  ok(W.filter(w => w.pm).every(w => P[w.pm]), 'every week-strip pm (evening) cell points at a real day');
+  ok(Object.values(SPLIT).every(d => P[d]), 'every weekday default points at a real day');
+  ok(new Set(D.map(d => P[d].accent)).size === D.length, 'accents are distinct per day');
+}
+
 // ── Result ───────────────────────────────────────────────────────────────────
 crossDayTests().then(()=>{
   console.log(`\n${passed} passed, ${failed} failed`);
