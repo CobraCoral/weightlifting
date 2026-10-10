@@ -343,28 +343,50 @@ async function apiPost(p,b) { const r=await fetchWithTimeout(`${EDGE}?${new URLS
 // Exercises themselves come from the `exercises` table in Supabase.
 // This object only holds per-day metadata (label + accent color).
 // PROGRAM[day].exercises is populated at boot from the DB.
+// `retired: true` keeps a day out of the tab bar while leaving it in PROGRAM,
+// so the cross-day suggestion lookup can still find an exercise's history
+// under the day it used to live on.
 const PROGRAM = {
   PUSH:  {label:'Push + Width',             accent:'#fb923c', exercises:[]},
   PULL:  {label:'Pull + 3D Density',        accent:'#60a5fa', exercises:[]},
   LEGS:  {label:'Legs',                     accent:'#4ade80', exercises:[]},
-  EXTRA: {label:'Accessory + Weak Points',  accent:'#c084fc', exercises:[]},
+  FULL:  {label:'Full Body',                accent:'#f472b6', exercises:[]},
   HOME:  {label:'Home Delts · 15 min',      accent:'#22d3ee', exercises:[]},
+  EXTRA: {label:'Accessory (retired)',      accent:'#c084fc', exercises:[], retired:true},
 };
 
-const DAYS = ['PUSH','PULL','LEGS','EXTRA','HOME'];
+const DAYS = Object.keys(PROGRAM).filter(d => !PROGRAM[d].retired);
+
+// ─── Schedule phase ──────────────────────────────────────────────────────────
+// CUT  — Tue LEGS · Thu PULL (+HOME pm) · Sat PUSH · Sun rest
+// BULK — Tue LEGS · Thu FULL (+HOME pm) · Sat PUSH · Sun PULL
+// Set BULK_START to the date the lean bulk begins and the week strip plus the
+// weekday defaults switch themselves over that morning. null = stay on the cut.
+const BULK_START = null;              // e.g. '2027-01-05'
+const ON_BULK = !!BULK_START && new Date().toISOString().slice(0,10) >= BULK_START;
+
 // WEEK cells may carry an optional `pm` day = a second, short session that
-// evening (currently Thursday's home delt block). Tapping it selects that day.
-const WEEK = [
+// evening (Thursday's home delt block). Tapping it selects that day.
+const WEEK = ON_BULK ? [
+  {d:'M',l:'BJJ',  lift:false},
+  {d:'T',l:'Legs', lift:true, prog:'LEGS'},
+  {d:'W',l:'BJJ',  lift:false},
+  {d:'T',l:'Full', lift:true, prog:'FULL', pm:'HOME'},
+  {d:'F',l:'BJJ',  lift:false},
+  {d:'S',l:'Push', lift:true, prog:'PUSH'},
+  {d:'S',l:'Pull', lift:true, prog:'PULL'},
+] : [
   {d:'M',l:'BJJ',  lift:false},
   {d:'T',l:'Legs', lift:true, prog:'LEGS'},
   {d:'W',l:'BJJ',  lift:false},
   {d:'T',l:'Pull', lift:true, prog:'PULL', pm:'HOME'},
   {d:'F',l:'BJJ',  lift:false},
   {d:'S',l:'Push', lift:true, prog:'PUSH'},
-  {d:'S',l:'Extra',lift:true, prog:'EXTRA'},
+  {d:'S',l:'Rest', lift:false},
 ];
-// Default to today's split (Tue=LEGS, Thu=PULL, Sat=PUSH, Sun=EXTRA)
-const SPLIT_BY_WEEKDAY = {2:'LEGS',4:'PULL',6:'PUSH',0:'EXTRA'};
+const SPLIT_BY_WEEKDAY = ON_BULK
+  ? {2:'LEGS',4:'FULL',6:'PUSH',0:'PULL'}
+  : {2:'LEGS',4:'PULL',6:'PUSH'};
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let currentDay  = SPLIT_BY_WEEKDAY[new Date().getDay()] || 'PUSH';

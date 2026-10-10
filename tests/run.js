@@ -396,21 +396,41 @@ eq(fmtSecs(590), '9:50', 'fmt m:ss'); eq(fmtSecs(3725), '1h02m', 'fmt hours'); e
 // PROGRAM entry crashes renderAll(), so assert they stay in sync.
 console.log('\n[day wiring]');
 {
-  const grab = (re) => (main.match(re) || [, 'null'])[1];
-  const { P, D, W, SPLIT } = vm.runInNewContext(`({
-    P: ${grab(/const PROGRAM\s*=\s*(\{[\s\S]*?\n\});/)},
-    D: ${grab(/const DAYS\s*=\s*(\[[^\]]*\]);/)},
-    W: ${grab(/const WEEK\s*=\s*(\[[\s\S]*?\n\]);/)},
-    SPLIT: ${grab(/const SPLIT_BY_WEEKDAY\s*=\s*(\{[^}]*\});/)}
-  })`);
-  ok(D.length >= 4, `DAYS parsed (${D.length}: ${D.join(',')})`);
-  ok(D.every(d => P[d] && P[d].label && P[d].accent), 'every DAYS entry has a PROGRAM label + accent');
-  ok(Object.keys(P).every(d => D.includes(d)), 'every PROGRAM day is reachable from a tab');
-  ok(D.includes('HOME') && P.HOME.exercises.length === 0, 'HOME day present, exercises filled from DB');
-  ok(W.filter(w => w.lift).every(w => P[w.prog]), 'every week-strip lift cell points at a real day');
-  ok(W.filter(w => w.pm).every(w => P[w.pm]), 'every week-strip pm (evening) cell points at a real day');
-  ok(Object.values(SPLIT).every(d => P[d]), 'every weekday default points at a real day');
-  ok(new Set(D.map(d => P[d].accent)).size === D.length, 'accents are distinct per day');
+  // Run the real declaration block, so DAYS/WEEK/SPLIT are computed the way the
+  // app computes them. BULK_START is swapped to exercise both schedule phases.
+  const block = (main.match(/const PROGRAM[\s\S]*?const SPLIT_BY_WEEKDAY[\s\S]*?\};/) || [''])[0];
+  ok(block.length > 0, 'schedule block extracted from index.html');
+  const phase = (bulkStart) => vm.runInNewContext(
+    block.replace(/const BULK_START\s*=\s*[^;]*;/, `const BULK_START = ${JSON.stringify(bulkStart)};`) +
+    '\n;({P:PROGRAM, D:DAYS, W:WEEK, SPLIT:SPLIT_BY_WEEKDAY, ON_BULK})'
+  );
+
+  for (const [name, bulkStart] of [['cut', null], ['bulk', '2000-01-01']]) {
+    const { P, D, W, SPLIT, ON_BULK } = phase(bulkStart);
+    const all = Object.keys(P);
+    ok(ON_BULK === (bulkStart !== null), `${name}: ON_BULK resolves correctly`);
+    ok(D.length >= 4, `${name}: DAYS parsed (${D.join(',')})`);
+    ok(D.every(d => P[d] && P[d].label && P[d].accent), `${name}: every tab has a label + accent`);
+    // Retired days stay in PROGRAM — fetchSuggestionRows scans its keys for an
+    // exercise's history under the day it used to live on — but get no tab.
+    ok(all.filter(d => P[d].retired).every(d => !D.includes(d)), `${name}: retired days get no tab`);
+    ok(all.filter(d => !P[d].retired).every(d => D.includes(d)), `${name}: every live day has a tab`);
+    ok(all.includes('EXTRA') && P.EXTRA.retired === true, `${name}: EXTRA kept for history lookup only`);
+    ok(W.filter(w => w.lift).every(w => P[w.prog] && !P[w.prog].retired), `${name}: strip lift cells point at live days`);
+    ok(W.filter(w => w.pm).every(w => P[w.pm] && !P[w.pm].retired), `${name}: strip pm cells point at live days`);
+    ok(Object.values(SPLIT).every(d => P[d] && !P[d].retired), `${name}: weekday defaults point at live days`);
+    ok(new Set(all.map(d => P[d].accent)).size === all.length, `${name}: accents are distinct`);
+    ok(W.length === 7, `${name}: week strip covers 7 days`);
+  }
+
+  const cut = phase(null), bulk = phase('2000-01-01');
+  eq(cut.W[3].prog, 'PULL',  'cut: Thursday is the pull day');
+  eq(cut.SPLIT[0], undefined, 'cut: Sunday has no default (EXTRA retired)');
+  eq(bulk.W[3].prog, 'FULL', 'bulk: Thursday becomes full body');
+  eq(bulk.W[3].pm, 'HOME',   'bulk: Thursday keeps the evening delt block');
+  eq(bulk.W[6].prog, 'PULL', 'bulk: Sunday becomes the pull day');
+  eq(bulk.SPLIT, {0:'PULL',2:'LEGS',4:'FULL',6:'PUSH'}, 'bulk: weekday defaults follow the strip');
+  ok(bulk.W.filter(w => w.lift).length === 4, 'bulk: four lifting days in the strip');
 }
 
 // ── Result ───────────────────────────────────────────────────────────────────
