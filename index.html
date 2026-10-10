@@ -360,23 +360,24 @@ const DAYS = Object.keys(PROGRAM).filter(d => !PROGRAM[d].retired);
 // ─── Schedule phase ──────────────────────────────────────────────────────────
 // CUT  — Tue LEGS · Thu PULL (+HOME pm) · Sat PUSH · Sun rest
 // BULK — Tue LEGS · Thu FULL (+HOME pm) · Sat PUSH · Sun PULL
-// The week strip and the weekday defaults switch themselves over on BULK_START.
-// It is a calendar stand-in for the real trigger, which is hitting ~12% BF — if
-// the cut runs long, move the date rather than training the bulk split early.
-const BULK_START = '2027-01-04';      // first Monday of January; null = stay on the cut
-const ON_BULK = !!BULK_START && new Date().toISOString().slice(0,10) >= BULK_START;
+// The phase flips itself the first time a FULL session is saved — the schedule
+// follows what was actually trained, so there is no date to remember and no
+// risk of the strip switching while the cut is still running. The answer is
+// cached in localStorage so the strip paints correctly on the first frame;
+// detectPhase() confirms it against the DB at boot, which is what carries a
+// session logged on another device across. It never switches back.
+const PHASE_KEY = 'ironlog_phase';
+let onBulk = (() => { try { return localStorage.getItem(PHASE_KEY) === 'bulk'; } catch { return false; } })();
+function setPhase(bulk){
+  if(bulk === onBulk) return false;
+  onBulk = bulk;
+  try{ localStorage.setItem(PHASE_KEY, bulk ? 'bulk' : 'cut'); }catch{}
+  return true;                       // changed — caller re-renders
+}
 
 // WEEK cells may carry an optional `pm` day = a second, short session that
 // evening (Thursday's home delt block). Tapping it selects that day.
-const WEEK = ON_BULK ? [
-  {d:'M',l:'BJJ',  lift:false},
-  {d:'T',l:'Legs', lift:true, prog:'LEGS'},
-  {d:'W',l:'BJJ',  lift:false},
-  {d:'T',l:'Full', lift:true, prog:'FULL', pm:'HOME'},
-  {d:'F',l:'BJJ',  lift:false},
-  {d:'S',l:'Push', lift:true, prog:'PUSH'},
-  {d:'S',l:'Pull', lift:true, prog:'PULL'},
-] : [
+const WEEK_CUT = [
   {d:'M',l:'BJJ',  lift:false},
   {d:'T',l:'Legs', lift:true, prog:'LEGS'},
   {d:'W',l:'BJJ',  lift:false},
@@ -385,12 +386,33 @@ const WEEK = ON_BULK ? [
   {d:'S',l:'Push', lift:true, prog:'PUSH'},
   {d:'S',l:'Rest', lift:false},
 ];
-const SPLIT_BY_WEEKDAY = ON_BULK
-  ? {2:'LEGS',4:'FULL',6:'PUSH',0:'PULL'}
-  : {2:'LEGS',4:'PULL',6:'PUSH'};
+const WEEK_BULK = [
+  {d:'M',l:'BJJ',  lift:false},
+  {d:'T',l:'Legs', lift:true, prog:'LEGS'},
+  {d:'W',l:'BJJ',  lift:false},
+  {d:'T',l:'Full', lift:true, prog:'FULL', pm:'HOME'},
+  {d:'F',l:'BJJ',  lift:false},
+  {d:'S',l:'Push', lift:true, prog:'PUSH'},
+  {d:'S',l:'Pull', lift:true, prog:'PULL'},
+];
+const SPLIT_CUT  = {2:'LEGS',4:'PULL',6:'PUSH'};
+const SPLIT_BULK = {2:'LEGS',4:'FULL',6:'PUSH',0:'PULL'};
+const week  = () => onBulk ? WEEK_BULK  : WEEK_CUT;
+const split = () => onBulk ? SPLIT_BULK : SPLIT_CUT;
+
+// One GET, and only until the day the first FULL session exists; after that the
+// cached flag short-circuits it. Offline or on error the cached phase stands.
+async function detectPhase(){
+  if(onBulk) return false;
+  try{
+    const rows = await apiGet({action:'get_by_day', day:'FULL'});
+    if(Array.isArray(rows) && rows.length) return setPhase(true);
+  }catch{}
+  return false;
+}
 
 // ─── State ────────────────────────────────────────────────────────────────────
-let currentDay  = SPLIT_BY_WEEKDAY[new Date().getDay()] || 'PUSH';
+let currentDay  = split()[new Date().getDay()] || 'PUSH';
 let currentView = 'log';
 let histDay     = currentDay;
 // draft[exId] = [{w, r, done, startedAt, completedAt}]
@@ -760,7 +782,7 @@ function renderAll(){
     new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
 
   // Week strip
-  document.getElementById('week-strip').innerHTML = WEEK.map(w=>{
+  document.getElementById('week-strip').innerHTML = week().map(w=>{
     const ac=w.lift?PROGRAM[w.prog].accent:'#334155';
     const pmP=w.pm?PROGRAM[w.pm]:null;
     const pmOn=!!pmP && w.pm===currentDay && currentView==='log';
@@ -1499,6 +1521,8 @@ async function saveSession(){
     await apiPost({action:'save_session'},{date:todayKey(),day:currentDay,rows});
     btn.style.background='#14532d'; btn.style.color='#4ade80'; btn.textContent='SAVED ✓';
     clearDraftLocal();
+    // First FULL session saved -> the lean-bulk week is now the real one.
+    if(currentDay==='FULL' && setPhase(true)) renderAll();
     showToast('Saved to Supabase!');
     setTimeout(()=>{ btn.style.background=PROGRAM[currentDay].accent; btn.style.color='#0a0f1a'; btn.textContent='SAVE'; btn.disabled=false; },3000);
   }catch(e){
@@ -1950,7 +1974,8 @@ function resetSwipe(id, si) {
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 (async () => {
   pruneOldDrafts();
-  await loadExercises();
+  const [, switched] = await Promise.all([loadExercises(), detectPhase()]);
+  if(switched) currentDay = split()[new Date().getDay()] || currentDay;
   renderAll();
   await loadDraft();
 })();

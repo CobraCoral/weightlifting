@@ -396,19 +396,37 @@ eq(fmtSecs(590), '9:50', 'fmt m:ss'); eq(fmtSecs(3725), '1h02m', 'fmt hours'); e
 // PROGRAM entry crashes renderAll(), so assert they stay in sync.
 console.log('\n[day wiring]');
 {
-  // Run the real declaration block, so DAYS/WEEK/SPLIT are computed the way the
-  // app computes them. BULK_START is swapped to exercise both schedule phases.
-  const block = (main.match(/const PROGRAM[\s\S]*?const SPLIT_BY_WEEKDAY[\s\S]*?\};/) || [''])[0];
+  // Run the real declaration block, so DAYS/week()/split() behave as the app
+  // computes them. A fake localStorage stands in for the cached phase.
+  const block = (main.match(/const PROGRAM[\s\S]*?\nconst split\s*=[^\n]*\n/) || [''])[0];
   ok(block.length > 0, 'schedule block extracted from index.html');
-  const phase = (bulkStart) => vm.runInNewContext(
-    block.replace(/const BULK_START\s*=\s*[^;]*;/, `const BULK_START = ${JSON.stringify(bulkStart)};`) +
-    '\n;({P:PROGRAM, D:DAYS, W:WEEK, SPLIT:SPLIT_BY_WEEKDAY, ON_BULK})'
-  );
+  const load = (cached) => {
+    const store = { [ 'ironlog_phase' ]: cached };
+    const ls = { getItem: (k) => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = v; } };
+    const api = vm.runInNewContext(block + `
+      ;({ P:PROGRAM, D:DAYS, setPhase,
+          read: () => ({ W: week(), SPLIT: split(), onBulk }) })`, { localStorage: ls });
+    return { ...api, store };
+  };
 
-  for (const [name, bulkStart] of [['cut', null], ['bulk', '2000-01-01']]) {
-    const { P, D, W, SPLIT, ON_BULK } = phase(bulkStart);
+  // The phase is sticky across reloads and survives a localStorage that throws.
+  { const a = load(undefined); ok(a.read().onBulk === false, 'fresh install boots on the cut schedule'); }
+  { const b = load('bulk');    ok(b.read().onBulk === true,  'cached phase is honoured on the next load'); }
+  {
+    const c = load(undefined);
+    ok(c.setPhase(true)  === true,  'setPhase reports the change so the caller re-renders');
+    ok(c.store['ironlog_phase'] === 'bulk', 'the switch is persisted for the first paint next time');
+    ok(c.setPhase(true)  === false, 'setPhase is a no-op when the phase already matches');
+  }
+  ok(vm.runInNewContext(block + ';({ onBulk })',
+      { localStorage: { getItem(){ throw new Error('blocked'); } } }).onBulk === false,
+    'a blocked localStorage falls back to the cut schedule instead of throwing');
+
+  for (const name of ['cut', 'bulk']) {
+    const app = load(undefined);
+    app.setPhase(name === 'bulk');
+    const { P, D } = app, { W, SPLIT } = app.read();
     const all = Object.keys(P);
-    ok(ON_BULK === (bulkStart !== null), `${name}: ON_BULK resolves correctly`);
     ok(D.length >= 4, `${name}: DAYS parsed (${D.join(',')})`);
     ok(D.every(d => P[d] && P[d].label && P[d].accent), `${name}: every tab has a label + accent`);
     // Retired days stay in PROGRAM — fetchSuggestionRows scans its keys for an
@@ -423,7 +441,8 @@ console.log('\n[day wiring]');
     ok(W.length === 7, `${name}: week strip covers 7 days`);
   }
 
-  const cut = phase(null), bulk = phase('2000-01-01');
+  const cutApp = load(undefined), bulkApp = load('bulk');
+  const cut = cutApp.read(), bulk = bulkApp.read();
   eq(cut.W[3].prog, 'PULL',  'cut: Thursday is the pull day');
   eq(cut.SPLIT[0], undefined, 'cut: Sunday has no default (EXTRA retired)');
   eq(bulk.W[3].prog, 'FULL', 'bulk: Thursday becomes full body');
