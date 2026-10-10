@@ -360,9 +360,10 @@ const DAYS = Object.keys(PROGRAM).filter(d => !PROGRAM[d].retired);
 // ─── Schedule phase ──────────────────────────────────────────────────────────
 // CUT  — Tue LEGS · Thu PULL (+HOME pm) · Sat PUSH · Sun rest
 // BULK — Tue LEGS · Thu FULL (+HOME pm) · Sat PUSH · Sun PULL
-// Set BULK_START to the date the lean bulk begins and the week strip plus the
-// weekday defaults switch themselves over that morning. null = stay on the cut.
-const BULK_START = null;              // e.g. '2027-01-05'
+// The week strip and the weekday defaults switch themselves over on BULK_START.
+// It is a calendar stand-in for the real trigger, which is hitting ~12% BF — if
+// the cut runs long, move the date rather than training the bulk split early.
+const BULK_START = '2027-01-04';      // first Monday of January; null = stay on the cut
 const ON_BULK = !!BULK_START && new Date().toISOString().slice(0,10) >= BULK_START;
 
 // WEEK cells may carry an optional `pm` day = a second, short session that
