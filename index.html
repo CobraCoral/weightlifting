@@ -36,6 +36,7 @@
 .strip-d{font-size:10px;font-weight:800;}
 .strip-l{font-size:9px;color:var(--muted);margin-top:1px;}
 .strip-pm{font-size:9px;font-weight:700;margin-top:2px;cursor:pointer;}
+.strip-cell.phase{flex:0 0 auto;padding:7px 9px;opacity:1;cursor:pointer;border-left:1px solid rgba(255,255,255,.08);}
 
 /* ── Day tabs ── */
 .day-tabs{display:flex;gap:5px;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.05);flex-wrap:wrap;}
@@ -426,12 +427,11 @@ const DAYS = Object.keys(PROGRAM).filter(d => !PROGRAM[d].retired);
 // ─── Schedule phase ──────────────────────────────────────────────────────────
 // CUT  — Tue LEGS · Thu PULL (+HOME pm) · Sat PUSH · Sun rest
 // BULK — Tue LEGS · Thu FULL (+HOME pm) · Sat PUSH · Sun PULL
-// The phase flips itself the first time a FULL session is saved — the schedule
-// follows what was actually trained, so there is no date to remember and no
-// risk of the strip switching while the cut is still running. The answer is
-// cached in localStorage so the strip paints correctly on the first frame;
-// detectPhase() confirms it against the DB at boot, which is what carries a
-// session logged on another device across. It never switches back.
+// The phase is an explicit choice: tap the CUT/BULK chip at the end of the week
+// strip and confirm. It used to flip itself the first time a FULL session was
+// saved, which meant one travel-fallback FULL workout would silently and
+// permanently rewrite the schedule. Stored per device in localStorage; it
+// switches in either direction and never on its own.
 const PHASE_KEY = 'ironlog_phase';
 let onBulk = (() => { try { return localStorage.getItem(PHASE_KEY) === 'bulk'; } catch { return false; } })();
 function setPhase(bulk){
@@ -439,6 +439,15 @@ function setPhase(bulk){
   onBulk = bulk;
   try{ localStorage.setItem(PHASE_KEY, bulk ? 'bulk' : 'cut'); }catch{}
   return true;                       // changed — caller re-renders
+}
+function togglePhase(){
+  const toBulk = !onBulk;
+  const msg = toBulk
+    ? 'Switch the schedule to LEAN BULK?\n\nThu \u2192 FULL (+ delts pm) \u00b7 Sun \u2192 PULL'
+    : 'Switch the schedule back to CUT?\n\nThu \u2192 PULL (+ delts pm) \u00b7 Sun \u2192 rest';
+  if(!confirm(msg)) return;
+  if(setPhase(toBulk)) renderAll();
+  showToast(toBulk ? 'Lean-bulk week active' : 'Cut week active');
 }
 
 // WEEK cells may carry an optional `pm` day = a second, short session that
@@ -466,17 +475,6 @@ const SPLIT_BULK = {2:'LEGS',4:'FULL',6:'PUSH',0:'PULL'};
 const week  = () => onBulk ? WEEK_BULK  : WEEK_CUT;
 const split = () => onBulk ? SPLIT_BULK : SPLIT_CUT;
 
-// One GET, and only until the day the first FULL session exists; after that the
-// cached flag short-circuits it. Offline or on error the cached phase stands.
-async function detectPhase(){
-  if(onBulk) return false;
-  try{
-    const rows = await apiGet({action:'get_by_day', day:'FULL'});
-    if(Array.isArray(rows) && rows.length) return setPhase(true);
-  }catch{}
-  return false;
-}
-
 // ─── State ────────────────────────────────────────────────────────────────────
 let currentDay  = split()[new Date().getDay()] || 'PUSH';
 let currentView = 'log';
@@ -488,7 +486,10 @@ let histData    = [];
 let liveTimer   = null;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-function todayKey(){ return new Date().toISOString().slice(0,10); }
+// Local calendar date, never UTC: toISOString() would roll a session logged
+// after 8 PM Miami time (7 PM once DST ends) onto tomorrow's date and split
+// the crash-recovery draft across two keys mid-workout.
+function todayKey(){ return isoLocal(new Date()); }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 // ── Silent localStorage draft persistence ──
@@ -592,6 +593,19 @@ function getLiveRestSecs(prevSet){
 // Time/step-based targets (minutes, seconds, steps) get no rep suggestion.
 // Weight step comes from exercises.step in the DB (default 5; cable stack 1.5/2.5),
 // with an id-keyed fallback map for older API responses. Never keyed by name.
+// YYYY-MM-DD in the device's local timezone (the date the lifter would write).
+function isoLocal(d){
+  const p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
+// One CSV field: quotes when needed (RFC 4180, doubled inner quotes) and
+// neutralises spreadsheet formula injection (=, +, -, @ leading a text cell).
+function csvCell(v){
+  if(v==null) return '';
+  let t=String(v);
+  if(/^[=+\-@\t\r]/.test(t)) t="'"+t;
+  return /[",\r\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t;
+}
 const PROG_STEP_DEFAULT = 5;
 const PROG_STEP_BY_ID = { 6:1.5, 7:1.5, 29:1.5, 37:1.5, 5:2.5, 28:2.5, 33:2.5 };
 function progStep(ex){
@@ -828,12 +842,16 @@ function draftToRows(day,date){
       // Only persist sets the user actually engaged with (started ▶ or marked done ✓).
       // Prevents prefilled progression suggestions from being saved as a phantom session.
       if(!st.done && !st.startedAt) return;
-      const wNum=(st.w===''||st.w==null)?null:parseFloat(st.w);
-      const rNum=(st.r===''||st.r==null)?null:Math.round(parseFloat(st.r));
+      // Clamp to the DB CHECK ranges (reps >= 0, weight -1000..10000, rir 0..5)
+      // so a typo can never make the save fail server-side.
+      const wRaw=(st.w===''||st.w==null)?NaN:parseFloat(st.w);
+      const rRaw=(st.r===''||st.r==null)?NaN:Math.round(parseFloat(st.r));
+      const rirRaw=(st.rir===''||st.rir==null)?NaN:parseInt(st.rir,10);
       rows.push({date,day,exercise_id:ex.id,exercise:ex.name,set_number:i+1,
-        weight:Number.isFinite(wNum)?wNum:null, reps:Number.isFinite(rNum)?rNum:null,
-        done:st.done,started_at:st.startedAt||null,completed_at:st.completedAt||null,
-        rir:(st.rir===''||st.rir==null)?null:parseInt(st.rir,10)});
+        weight:Number.isFinite(wRaw)?Math.min(10000,Math.max(-1000,wRaw)):null,
+        reps:Number.isFinite(rRaw)?Math.min(10000,Math.max(0,rRaw)):null,
+        done:!!st.done,started_at:st.startedAt||null,completed_at:st.completedAt||null,
+        rir:Number.isFinite(rirRaw)?Math.min(5,Math.max(0,rirRaw)):null});
     });
   });
   if (skipped.length) {
@@ -876,7 +894,8 @@ function renderAll(){
       <div class="strip-d" style="color:${ac}">${w.d}</div><div class="strip-l">${w.l}</div>${
         pmP?`<div class="strip-pm" style="color:${pmP.accent};${pmOn?'font-weight:800':''}" onclick="event.stopPropagation();selectDay('${w.pm}')">+ delts</div>`:''
       }</div>`;
-  }).join('');
+  }).join('') + `<div class="strip-cell phase" onclick="togglePhase()" title="Switch schedule phase">
+      <div class="strip-d" style="color:${onBulk?'#4ade80':'#fbbf24'}">${onBulk?'BULK':'CUT'}</div><div class="strip-l">phase</div></div>`;
 
   // Day tabs
   document.getElementById('day-tabs').innerHTML = DAYS.map(d=>{
@@ -1166,13 +1185,15 @@ function renderBodyCompLine(){
   const el=document.getElementById('bc-line'); if(!el) return;
   const h=bodyCompHistory||[]; if(!h.length){ el.innerHTML=''; return; }
   const now=h[0];
-  const cutoff=new Date(now.measure_date); cutoff.setDate(cutoff.getDate()-30);
-  const cut=cutoff.toISOString().slice(0,10);
+  // Parse at local noon so neither the 30-day cutoff nor the age badge drifts
+  // a day across the UTC boundary.
+  const cutoff=new Date(now.measure_date+'T12:00:00'); cutoff.setDate(cutoff.getDate()-30);
+  const cut=isoLocal(cutoff);
   const then=h.find(m=>m.measure_date<=cut);
   const w=parseFloat(now.weight_lb), bf=parseFloat(now.body_fat_pct), lean=parseFloat(now.fat_free_mass_lb);
   let delta='';
   if(then){ const d=w-parseFloat(then.weight_lb); const cls=d>0?'up':'down'; delta=` \u00b7 <span class="${cls}">${d>0?'\u25b2':'\u25bc'} ${Math.abs(d).toFixed(1)} lb / 30d</span>`; }
-  const age=Math.round((Date.now()-new Date(now.measure_date))/86400000);
+  const age=Math.round((new Date(todayKey()+'T12:00:00')-new Date(now.measure_date+'T12:00:00'))/86400000);
   const stale=age>7?` <span style="color:#fbbf24">(${age}d old)</span>`:'';
   el.innerHTML=`<b>${w.toFixed(1)} lb</b>${isNaN(bf)?'':` \u00b7 <b>${bf.toFixed(1)}%</b> BF`}${isNaN(lean)?'':` \u00b7 lean <b>${Math.round(lean)}</b>`}${delta}${stale}`;
 }
@@ -1180,7 +1201,7 @@ function renderBodyCompLine(){
 // live counter moves without burning cycles the rest of the time.
 function syncRestTicker(){
   const pending=document.querySelector('.rest-live');
-  if(pending && !restTicker){ restTicker=setInterval(()=>renderExercises(),1000); }
+  if(pending && !restTicker){ restTicker=setInterval(()=>{ if(!_swipeAnimating) renderExercises(); },1000); }
   else if(!pending && restTicker){ clearInterval(restTicker); restTicker=null; }
 }
 function renderDaySummary(){
@@ -1724,6 +1745,14 @@ function rmSet(id,si){
   saveDraftLocal();
   renderExercises();
 }
+// Swipe-to-delete resolves the row by identity when its timer fires, so two
+// quick swipes (or a re-render in between) can't shift the index onto the
+// wrong set.
+function rmSetObj(id,setObj){
+  if(!draft[id]) return;
+  const i=draft[id].indexOf(setObj);
+  if(i>=0) rmSet(id,i);
+}
 
 // Fetch the rows the progression engine needs. Primary source is this split's
 // history; if any exercise on the day has NO rows there (e.g. it was moved from
@@ -1817,12 +1846,11 @@ async function saveSession(){
   const btn=document.getElementById('save-btn');
   btn.textContent='saving...'; btn.disabled=true;
   try{
-    await apiPost({action:'save_session'},{date:todayKey(),day:currentDay,rows});
+    const res=await apiPost({action:'save_session'},{date:todayKey(),day:currentDay,rows});
     btn.style.background='#14532d'; btn.style.color='#4ade80'; btn.textContent='SAVED ✓';
     clearDraftLocal();
-    // First FULL session saved -> the lean-bulk week is now the real one.
-    if(currentDay==='FULL' && setPhase(true)) renderAll();
-    showToast('Saved to Supabase!');
+    if(res && res.warning) showToast(res.warning,'#fb923c');
+    else showToast('Saved to Supabase!');
     setTimeout(()=>{ btn.style.background=PROGRAM[currentDay].accent; btn.style.color='#0a0f1a'; btn.textContent='SAVE'; btn.disabled=false; },3000);
   }catch(e){
     btn.style.background='#7f1d1d'; btn.style.color='#fca5a5'; btn.textContent='FAILED';
@@ -1872,7 +1900,7 @@ function copyForWhoop(){
 function exportCSV(){
   const rows=draftToRows(currentDay,todayKey());
   const lines=['Date,Day,Exercise,Set,Weight,Reps,Done,StartedAt,CompletedAt'];
-  rows.forEach(r=>lines.push(`${r.date},${r.day},"${r.exercise}",${r.set_number},${r.weight??''},${r.reps??''},${r.done?'yes':'no'},${r.started_at||''},${r.completed_at||''}`));
+  rows.forEach(r=>lines.push(`${r.date},${r.day},${csvCell(r.exercise)},${r.set_number},${r.weight??''},${r.reps??''},${r.done?'yes':'no'},${r.started_at||''},${r.completed_at||''}`));
   const ok=downloadCSV(`ironlog_${currentDay}_${todayKey()}.csv`, lines.join('\n'));
   const b=document.getElementById('csv-btn');
   if(b){ b.textContent=ok?'downloaded!':'failed'; setTimeout(()=>b.textContent='export CSV',2500); }
@@ -1889,7 +1917,7 @@ function exportAllCSV(){
         r.exercise_id === ex.id ||
         (r.exercise_id == null && namesForEx.includes(r.exercise))
       ).sort((a,b)=>a.set_number-b.set_number).forEach(r=>{
-        lines.push(`${r.date},${r.day},"${r.exercise}",${r.set_number},${r.weight??''},${r.reps??''},${r.done?'yes':'no'},${r.started_at||''},${r.completed_at||''}`);
+        lines.push(`${r.date},${r.day},${csvCell(r.exercise)},${r.set_number},${r.weight??''},${r.reps??''},${r.done?'yes':'no'},${r.started_at||''},${r.completed_at||''}`);
       });
     });
   });
@@ -2232,6 +2260,7 @@ function swipeMove(e, id, si) {
   }
 }
 
+let _swipeAnimating = 0;   // exit animations in flight; the rest ticker waits for them
 function swipeEnd(e, id, si) {
   const key = `${id}-${si}`;
   const s = _swipe[key];
@@ -2254,7 +2283,9 @@ function swipeEnd(e, id, si) {
         wrap.style.opacity   = '0';
       });
     }
-    setTimeout(() => rmSet(id, si), 340);
+    const target = (draft[id]||[])[si];
+    _swipeAnimating++;
+    setTimeout(() => { _swipeAnimating=Math.max(0,_swipeAnimating-1); if(target) rmSetObj(id, target); else renderExercises(); }, 340);
   } else {
     resetSwipe(id, si);
   }
@@ -2273,8 +2304,7 @@ function resetSwipe(id, si) {
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 (async () => {
   pruneOldDrafts();
-  const [, switched] = await Promise.all([loadExercises(), detectPhase()]);
-  if(switched) currentDay = split()[new Date().getDay()] || currentDay;
+  await loadExercises();
   renderAll();
   applyFestive();
   await loadDraft();

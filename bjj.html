@@ -439,7 +439,11 @@ let showRollForm = false;
 let creatingOpp = false;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function todayKey() { return new Date().toISOString().slice(0,10); }
+// Local calendar date, never UTC — an evening session must not land on tomorrow.
+function todayKey() {
+  const d = new Date(), p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
 function fmtDate(iso) { return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}); }
 function fmtShort(iso) { return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
 

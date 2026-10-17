@@ -33,7 +33,7 @@ catch (e) { ok(false, 'sw.js parses'); }
 // ── 2. Extract testable blocks ───────────────────────────────────────────────
 const main = scriptsOf('index.html').reduce((a, b) => (b.length > a.length ? b : a), '');
 const blocks = [...main.matchAll(/\/\/ @@TESTABLE-START[^\n]*\n([\s\S]*?)\/\/ @@TESTABLE-END/g)].map(m => m[1]);
-ok(blocks.length === 2, `found ${blocks.length} @@TESTABLE blocks (expected 2)`);
+ok(blocks.length >= 2, `found ${blocks.length} @@TESTABLE blocks (expected at least 2: progression + festive)`);
 
 // Sandbox with the globals the pure functions reference.
 const ctx = { PROGRAM: {}, draft: {}, suggestions: {}, bodyCompHistory: [],
@@ -48,7 +48,33 @@ const ctx = { PROGRAM: {}, draft: {}, suggestions: {}, bodyCompHistory: [],
 vm.createContext(ctx);
 vm.runInContext(blocks.join('\n'), ctx);
 const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx, dayProjection, computeLastSessions, rowsToDraft, clusterSupersets,
-        weekBounds, nthWeekday, easterDate, eventsForWeek, festiveLabel, festiveTheme } = ctx;
+        weekBounds, nthWeekday, easterDate, eventsForWeek, festiveLabel, festiveTheme, isoLocal, csvCell } = ctx;
+
+// ── 2b. Local dates and CSV cells ───────────────────────────────────────────
+console.log('\n[dates]');
+// 11:30 PM local on Oct 16 is already Oct 17 in UTC for any zone west of
+// Greenwich; the app must file it under the lifter's own calendar day.
+eq(isoLocal(new Date(2026, 9, 16, 23, 30)), '2026-10-16', 'late-evening local time stays on the local date');
+eq(isoLocal(new Date(2026, 0, 1, 0, 5)),    '2026-01-01', 'just after local midnight is the new local day');
+eq(isoLocal(new Date(2026, 2, 5, 12)),      '2026-03-05', 'month and day are zero-padded');
+ok(!/function todayKey\(\)[^\n]*toISOString/.test(main), 'index.html todayKey does not use the UTC date');
+{
+  const bjj = fs.readFileSync(path.join(ROOT, 'bjj.html'), 'utf8');
+  ok(!/function todayKey\(\)[^\n]*toISOString/.test(bjj), 'bjj.html todayKey does not use the UTC date');
+}
+ok(!/currentDay==='FULL'\s*&&\s*setPhase\(true\)/.test(main), 'saving a FULL session no longer flips the schedule phase');
+ok(!/async function detectPhase/.test(main), 'no boot-time phase detection from the DB');
+
+console.log('\n[csv]');
+eq(csvCell('Leg Press'),            'Leg Press',          'plain text is unquoted');
+eq(csvCell('Flat/Low-Incline DB Press (-ve 10 deg)'), 'Flat/Low-Incline DB Press (-ve 10 deg)', 'slashes and parens need no quoting');
+eq(csvCell('Dumbbell waiter\u2019s curl'), 'Dumbbell waiter\u2019s curl', 'typographic apostrophe passes through');
+eq(csvCell('Pull-ups, weighted'),   '"Pull-ups, weighted"', 'comma forces quoting');
+eq(csvCell('6" box step'),          '"6"" box step"',     'inner quote is doubled and the cell quoted');
+eq(csvCell('=HYPERLINK("x")'),      '"\'=HYPERLINK(""x"")"', 'leading = is neutralised against formula injection');
+eq(csvCell('-ve incline'),          "'-ve incline",       'leading - is neutralised too');
+eq(csvCell(null),                   '',                   'null is an empty cell');
+eq(csvCell(12.5),                   '12.5',               'numbers stringify');
 
 // ── 3. Rep-range parsing / structured targets ────────────────────────────────
 console.log('\n[rep targets]');
@@ -502,7 +528,10 @@ console.log('\n[day wiring]');
     ok(c.setPhase(true)  === true,  'setPhase reports the change so the caller re-renders');
     ok(c.store['ironlog_phase'] === 'bulk', 'the switch is persisted for the first paint next time');
     ok(c.setPhase(true)  === false, 'setPhase is a no-op when the phase already matches');
+    ok(c.setPhase(false) === true,  'the phase switches back to cut on request');
+    ok(c.store['ironlog_phase'] === 'cut', 'switching back is persisted too');
   }
+  ok(/function togglePhase\(\)[\s\S]*?confirm\(/.test(main), 'the phase toggle asks for confirmation');
   ok(vm.runInNewContext(block + ';({ onBulk })',
       { localStorage: { getItem(){ throw new Error('blocked'); } } }).onBulk === false,
     'a blocked localStorage falls back to the cut schedule instead of throwing');
