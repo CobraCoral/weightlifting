@@ -46,6 +46,11 @@
 /* ── Exercise list ── */
 .ex-list{padding:9px 14px;display:flex;flex-direction:column;gap:10px;}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px;}
+/* Superset: adjacent cards sharing exercises.superset_group render as one joined block. */
+.card.ss{border-color:rgba(167,139,250,.35);}
+.card.ss-first,.card.ss-mid{border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none;}
+.card.ss-mid,.card.ss-last{margin-top:-10px;border-top-left-radius:0;border-top-right-radius:0;border-top:1px dashed rgba(167,139,250,.35);}
+.ss-tag{font-size:8px;font-weight:700;letter-spacing:.09em;color:#a78bfa;text-transform:uppercase;margin-bottom:4px;}
 .card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
 .ex-name{font-size:12px;font-weight:700;color:#f1f5f9;}
 .ex-alt{font-size:10px;color:var(--muted);margin-top:1px;}
@@ -709,6 +714,24 @@ function rowsToDraft(rows,day){
   });
   return d;
 }
+
+// Keep superset members adjacent. sort_order is rewritten as a plain 0..n-1
+// index on every reorder, so a drag can otherwise separate a pair and the
+// group would silently stop rendering as one unit. Anchor each group at its
+// first member and pull the remaining members in behind it; order within a
+// group follows the incoming list order (i.e. sort_order).
+function clusterSupersets(list){
+  const out=[], placed=new Set();
+  (list||[]).forEach(ex=>{
+    if(placed.has(ex.id)) return;
+    out.push(ex); placed.add(ex.id);
+    if(ex.ssGroup==null) return;
+    (list||[]).forEach(o=>{
+      if(!placed.has(o.id) && o.ssGroup!=null && o.ssGroup===ex.ssGroup){ out.push(o); placed.add(o.id); }
+    });
+  });
+  return out;
+}
 // @@TESTABLE-END
 
 function exStats(sets){
@@ -924,9 +947,21 @@ function renderExercises(){
   renderDaySummary();
   const nowTs=Date.now();
   const prog=PROGRAM[currentDay], ac=prog.accent;
-  document.getElementById('ex-list').innerHTML = prog.exercises.map(ex=>{
+  document.getElementById('ex-list').innerHTML = prog.exercises.map((ex,exIdx,exArr)=>{
     const sets=draft[ex.id]||[];
     const stats=exStats(sets);
+
+    // Superset position. clusterSupersets() guarantees members are adjacent,
+    // so the immediate neighbours are enough to work out where in the block
+    // this card sits.
+    let ssCls='', ssTag='';
+    if(ex.ssGroup!=null){
+      const prevSame = exIdx>0 && exArr[exIdx-1].ssGroup===ex.ssGroup;
+      const nextSame = exIdx<exArr.length-1 && exArr[exIdx+1].ssGroup===ex.ssGroup;
+      let pos=0; for(let i=exIdx-1;i>=0 && exArr[i].ssGroup===ex.ssGroup;i--) pos++;
+      ssCls = ' ss' + (prevSame ? (nextSame ? ' ss-mid' : ' ss-last') : ' ss-first');
+      ssTag = `<div class="ss-tag">superset ${String.fromCharCode(65+pos)}</div>`;
+    }
 
     // Timing summary bar
     let timingBar='';
@@ -1024,7 +1059,8 @@ function renderExercises(){
       </div>`;
     });
 
-    return `<div class="card" id="card-${ex.id}">
+    return `<div class="card${ssCls}" id="card-${ex.id}">
+      ${ssTag}
       <div class="card-head">
         <div style="display:flex;align-items:flex-start;gap:4px">
           <div><div class="ex-name">${escapeHtml(ex.name)}</div>${ex.alt?`<div class="ex-alt">or: ${escapeHtml(ex.alt)}</div>`:''}</div>
@@ -1266,6 +1302,7 @@ async function loadExercises(){
         repMin: Number.isInteger(e.rep_min) ? e.rep_min : undefined,
         repMax: Number.isInteger(e.rep_max) ? e.rep_max : undefined,
         targetType: e.target_type || undefined,
+        ssGroup: Number.isInteger(e.superset_group) ? e.superset_group : undefined,
         _historicalNames: Array.isArray(e.historical_names) ? e.historical_names : [],
       };
       if(e.alt) ex.alt = e.alt;
@@ -1280,6 +1317,10 @@ async function loadExercises(){
         return av - bv;
       });
     });
+
+    // Superset members render as one joined block, so keep them adjacent
+    // regardless of what the stored sort_order happens to be.
+    Object.values(PROGRAM).forEach(p => { p.exercises = clusterSupersets(p.exercises); });
   }catch(e){ console.warn('loadExercises failed', e); }
 }
 

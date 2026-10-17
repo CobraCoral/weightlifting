@@ -47,7 +47,7 @@ const ctx = { PROGRAM: {}, draft: {}, suggestions: {}, bodyCompHistory: [],
   }, console };
 vm.createContext(ctx);
 vm.runInContext(blocks.join('\n'), ctx);
-const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx, dayProjection, computeLastSessions, rowsToDraft } = ctx;
+const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx, dayProjection, computeLastSessions, rowsToDraft, clusterSupersets } = ctx;
 
 // ── 3. Rep-range parsing / structured targets ────────────────────────────────
 console.log('\n[rep targets]');
@@ -66,6 +66,35 @@ eq(progStep({ id: 6, step: 1.5 }), 1.5, 'uses exercises.step from DB');
 eq(progStep({ id: 6 }),            1.5, 'id-keyed fallback for cable pushdowns');
 eq(progStep({ id: 2 }),            5,   'default step');
 eq(progStep({ id: 2, name: 'Rope Triceps Pushdowns' }), 5, 'name alone does NOT change the step');
+
+// ── 4b. Superset clustering ──────────────────────────────────────────────────
+// exercises.superset_group -> ex.ssGroup. Members must render adjacent even
+// after a reorder renumbers sort_order, so loadExercises() runs the day list
+// through clusterSupersets() after sorting.
+console.log('\n[supersets]');
+{
+  const ids = l => l.map(e => e.id);
+  eq(ids(clusterSupersets([{id:1},{id:2},{id:3}])), [1,2,3],
+     'no groups: order preserved');
+  eq(ids(clusterSupersets([{id:1},{id:2,ssGroup:1},{id:3,ssGroup:1},{id:4}])), [1,2,3,4],
+     'adjacent pair stays put');
+  eq(ids(clusterSupersets([{id:1},{id:2,ssGroup:1},{id:3},{id:4,ssGroup:1}])), [1,2,4,3],
+     'split pair is rejoined behind its first member');
+  eq(ids(clusterSupersets([{id:1,ssGroup:1},{id:2,ssGroup:2},{id:3,ssGroup:1},{id:4,ssGroup:2}])), [1,3,2,4],
+     'two interleaved groups untangle independently');
+  eq(ids(clusterSupersets([{id:1,ssGroup:7},{id:2},{id:3,ssGroup:7},{id:4,ssGroup:7}])), [1,3,4,2],
+     'tri-set pulls both partners in');
+  eq(ids(clusterSupersets([{id:1},{id:2,ssGroup:3}])), [1,2],
+     'lone group member is harmless');
+  eq(ids(clusterSupersets([{id:1,ssGroup:null},{id:2},{id:3,ssGroup:null}])), [1,2,3],
+     'null groups never cluster with each other');
+  ok(clusterSupersets([]).length === 0,   'empty list');
+  ok(clusterSupersets(null).length === 0, 'null list');
+  // Input is never mutated.
+  const src = [{id:1},{id:2,ssGroup:1},{id:3},{id:4,ssGroup:1}];
+  clusterSupersets(src);
+  eq(ids(src), [1,2,3,4], 'source array is not mutated');
+}
 
 // ── 5. Progression engine ────────────────────────────────────────────────────
 console.log('\n[engine]');
