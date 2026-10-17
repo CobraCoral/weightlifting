@@ -47,7 +47,8 @@ const ctx = { PROGRAM: {}, draft: {}, suggestions: {}, bodyCompHistory: [],
   }, console };
 vm.createContext(ctx);
 vm.runInContext(blocks.join('\n'), ctx);
-const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx, dayProjection, computeLastSessions, rowsToDraft, clusterSupersets } = ctx;
+const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx, dayProjection, computeLastSessions, rowsToDraft, clusterSupersets,
+        weekBounds, nthWeekday, easterDate, eventsForWeek, festiveLabel, festiveTheme } = ctx;
 
 // ── 3. Rep-range parsing / structured targets ────────────────────────────────
 console.log('\n[rep targets]');
@@ -94,6 +95,61 @@ console.log('\n[supersets]');
   const src = [{id:1},{id:2,ssGroup:1},{id:3},{id:4,ssGroup:1}];
   clusterSupersets(src);
   eq(ids(src), [1,2,3,4], 'source array is not mutated');
+}
+
+// ── 4c. Festive weeks ────────────────────────────────────────────────────────
+// Birthdays + holidays theme the Mon–Sun week that contains them. All dates
+// are local-midnight so the week flips at the user's midnight, not UTC's.
+console.log('\n[festive]');
+{
+  const D   = (y,m,d) => new Date(y, m-1, d);
+  const ymd = x => `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
+  const names = evs => evs.map(e => e.name);
+
+  // week bounds: Mon 00:00 → Sun 23:59:59.999
+  const wb = weekBounds(D(2026,10,17));                         // Saturday
+  eq([ymd(wb.start), ymd(wb.end)], ['2026-10-12','2026-10-18'], 'Sat Oct 17 → week Mon 12 – Sun 18');
+  eq(ymd(weekBounds(D(2026,10,12)).start), '2026-10-12',        'Monday is its own week start');
+  eq(ymd(weekBounds(D(2026,10,18)).start), '2026-10-12',        'Sunday belongs to the preceding Monday');
+  eq([wb.end.getHours(), wb.end.getMinutes(), wb.end.getMilliseconds()], [23,59,999], 'week end is end of Sunday');
+
+  // moveable feasts
+  eq(ymd(nthWeekday(2025,11,4,4)), '2025-11-27', 'Thanksgiving 2025');
+  eq(ymd(nthWeekday(2026,11,4,4)), '2026-11-26', 'Thanksgiving 2026');
+  eq(ymd(nthWeekday(2027,11,4,4)), '2027-11-25', 'Thanksgiving 2027');
+  eq(ymd(easterDate(2025)), '2025-04-20', 'Easter 2025');
+  eq(ymd(easterDate(2026)), '2026-04-05', 'Easter 2026');
+  eq(ymd(easterDate(2027)), '2027-03-28', 'Easter 2027');
+
+  // single events
+  let ev = eventsForWeek(D(2026,10,17));
+  eq(names(ev), ['Daniel'], 'Oct 17 2026 → Daniel (Tue Oct 13)');
+  eq(ev[0].age, 39,         'Daniel turns 39 in 2026');
+  eq(names(eventsForWeek(D(2026,10,29))), ['Halloween'],    'Oct 29 → Halloween week (Sat Oct 31)');
+  eq(names(eventsForWeek(D(2026,11,25))), ['Thanksgiving'], 'Nov 25 → Thanksgiving week');
+  eq(names(eventsForWeek(D(2026, 4, 2))), ['Easter'],       'Apr 2 2026 → Easter week (Sun Apr 5)');
+  eq(names(eventsForWeek(D(2026, 8,12))), [],               'mid-August: quiet week');
+
+  // stacked events — these recur every year, not edge cases
+  ev = eventsForWeek(D(2026,12,16));
+  eq(names(ev), ['Maya','Fernando'],   'Dec 14–20 → Maya then Fernando, by date');
+  eq([ev[0].age, ev[1].age], [5, 50],  'Maya 5, Fernando 50 in 2026');
+  ev = eventsForWeek(D(2026,7,1));
+  eq(names(ev), ['Arya','Fourth of July'], 'Jun 29–Jul 5 → Arya (Thu 2nd) before the 4th');
+  eq(ev[0].age, 7, 'Arya turns 7 in 2026');
+
+  // year boundary: Dec 28 2026 – Jan 3 2027 holds New Year but not Christmas
+  eq(names(eventsForWeek(D(2026,12,30))), ['New Year'],  'week straddling the year picks up Jan 1');
+  eq(names(eventsForWeek(D(2026,12,23))), ['Christmas'], 'Christmas week does not bleed into New Year');
+
+  // banner text + theme selection
+  eq(festiveLabel(eventsForWeek(D(2026,10,17))), '🎂 Daniel turns 39',                    'single birthday label');
+  eq(festiveLabel(eventsForWeek(D(2026,12,16))), '🎂 Maya turns 5 · Fernando turns 50',   'two birthdays share one cake');
+  eq(festiveLabel(eventsForWeek(D(2026,7,1))),   '🎂 Arya turns 7 · 🎆 Fourth of July',   'birthday + holiday both labelled');
+  eq(festiveLabel([]), '',                                                                'no events → empty label');
+  eq(festiveTheme(eventsForWeek(D(2026,7,1))),   'birthday',  'birthday wins the colour scheme over a holiday');
+  eq(festiveTheme(eventsForWeek(D(2026,10,29))), 'halloween', 'lone holiday sets its own scheme');
+  eq(festiveTheme([]), null, 'no events → no theme');
 }
 
 // ── 5. Progression engine ────────────────────────────────────────────────────
