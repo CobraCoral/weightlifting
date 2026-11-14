@@ -21,7 +21,7 @@ function scriptsOf(file){
   const html = fs.readFileSync(path.join(ROOT, file), 'utf8');
   return [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
 }
-for (const file of ['index.html', 'bjj.html']) {
+for (const file of ['index.html', 'bjj.html', 'exercises.html']) {
   scriptsOf(file).forEach((src, i) => {
     try { new vm.Script(src, { filename: `${file}#${i}` }); ok(true, `${file} script #${i} parses`); }
     catch (e) { ok(false, `${file} script #${i} parses — ${e.message}`); }
@@ -48,7 +48,8 @@ const ctx = { PROGRAM: {}, draft: {}, suggestions: {}, bodyCompHistory: [],
 vm.createContext(ctx);
 vm.runInContext(blocks.join('\n'), ctx);
 const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx, dayProjection, computeLastSessions, rowsToDraft, clusterSupersets,
-        weekBounds, nthWeekday, easterDate, eventsForWeek, festiveLabel, festiveTheme, isoLocal, csvCell } = ctx;
+        weekBounds, nthWeekday, easterDate, eventsForWeek, festiveLabel, festiveTheme, isoLocal, csvCell,
+        emptySwaps, exFromRow, buildDayList, inferSwaps, pickerOptions, sessionExerciseGroups } = ctx;
 
 // ── 2b. Local dates and CSV cells ───────────────────────────────────────────
 console.log('\n[dates]');
@@ -440,39 +441,28 @@ eq(dayStats('PULL', '2026-09-13').volume, 0, 'no bodyweight data -> bodyweight s
 // ── 5b. Cross-day history merge (fetchSuggestionRows) ───────────────────────
 console.log('\n[cross-day history]');
 function crossDayTests(){
-  // Simulate: exercise 99 sits on PULL but all its history was logged on EXTRA.
-  const store = {
-    PULL:  [ { exercise_id: 1, date: '2026-09-06', set_number: 1, weight: 80, reps: 10 } ],
-    EXTRA: [ { exercise_id: 99, date: '2026-09-07', set_number: 1, weight: 85, reps: 12 },
-             { exercise_id: 77, date: '2026-09-07', set_number: 1, weight: 20, reps: 10 } ],
-    PUSH:  [], LEGS: [],
-  };
-  let calls = 0;
-  const PROG = { PULL: { exercises: [{ id: 1 }, { id: 99 }] }, EXTRA:{exercises:[]}, PUSH:{exercises:[]}, LEGS:{exercises:[]} };
-  const apiGet = async ({ day }) => { calls++; return store[day] || []; };
-  // inline copy of fetchSuggestionRows against these stubs
-  const fetchSuggestionRows = async (day) => {
-    const rows = (await apiGet({ day })) || [];
-    const seen = new Set(rows.map(r => r.exercise_id));
-    const missing = ((PROG[day] && PROG[day].exercises) || []).filter(ex => !seen.has(ex.id));
-    if (!missing.length) return rows;
-    const ids = new Set(missing.map(ex => ex.id));
-    const others = Object.keys(PROG).filter(d => d !== day);
-    const extra = await Promise.all(others.map(d => apiGet({ day: d }).catch(() => [])));
-    return rows.concat(extra.flat().filter(r => r && ids.has(r.exercise_id)));
-  };
-  return fetchSuggestionRows('PULL').then(merged=>{
-  eq(merged.length, 2, 'merges the moved exercise history into this day');
-  eq(merged.some(r => r.exercise_id === 99), true, 'moved exercise (99) history found on another day');
-  eq(merged.some(r => r.exercise_id === 77), false, 'unrelated exercise (77) is NOT merged in');
-  eq(calls, 4, 'one call for the day + others only because a gap existed');
-
-  calls = 0;
-  PROG.PULL.exercises = [{ id: 1 }];                    // no gaps now
-  return fetchSuggestionRows('PULL').then(merged2=>{
-    eq(merged2.length, 1, 'no gap -> returns just this day');
-    eq(calls, 1, 'no gap -> only ONE request (no extra fetches)');
-  });
+  // The real fetchSuggestionRows, run against a stubbed apiGet: one request,
+  // by exercise id, across every day, excluding today.
+  const src = (main.match(/async function fetchSuggestionRows[\s\S]*?\n}\n/) || [''])[0];
+  ok(src.length > 0, 'fetchSuggestionRows extracted from index.html');
+  const calls = [];
+  const sb = { PROGRAM: { PULL: { exercises: [{ id: 1 }, { id: 99 }] } }, todayKey: () => '2026-11-14',
+    apiGet: async (p) => { calls.push(p); return [{ exercise_id: 99, day: 'EXTRA', date: '2026-09-07' }]; } };
+  vm.createContext(sb);
+  vm.runInContext(src + ';this.f=fetchSuggestionRows;', sb);
+  return sb.f('PULL').then(rows => {
+    eq(calls.length, 1, 'one request for the whole day');
+    eq(calls[0].action, 'get_by_exercises', 'history is fetched by exercise, not by day');
+    eq(calls[0].ids, '1,99', 'asks for every exercise on the list');
+    eq(calls[0].before, '2026-11-14', 'excludes today so a mid-session save is never "last time"');
+    eq(rows.length, 1, 'rows logged under another day come back');
+    calls.length = 0;
+    return sb.f('PULL', [42]).then(() => {
+      eq(calls[0].ids, '42', 'a single swapped-in exercise can be fetched on its own');
+      calls.length = 0;
+      sb.PROGRAM.PULL.exercises = [];
+      return sb.f('PULL').then(r => { eq([calls.length, r.length], [0, 0], 'empty day makes no request'); });
+    });
   });
 }
 
@@ -500,6 +490,74 @@ eq(d.avgSet, 34,     'avg set time');
 eq(d.volume, 2400,   'volume: per-hand doubled, assisted + 0 lb excluded, untouched ignored');
 eq(d.done, 5, 'done sets counted'); eq(d.total, 6, 'total sets counted');
 eq(fmtSecs(590), '9:50', 'fmt m:ss'); eq(fmtSecs(3725), '1h02m', 'fmt hours'); eq(fmtSecs(null), '—', 'fmt null');
+
+// ── 6b. Library-linked days, swaps, picker, history grouping ───────────────
+console.log('\n[library days]');
+{
+  const lib = {};
+  [[1,'Rope Pushdown','Triceps'],[2,'Ext Machine','Triceps'],[3,'Waiter Curl','Biceps'],
+   [4,'Overhead Ext','Triceps'],[5,'Incline Press','Chest'],[6,'Old Thing','Triceps',true],[7,'Leg Press','Quads']]
+    .forEach(([id,name,muscle,del]) => { lib[id] = exFromRow({ id, name, muscle, ds:3, rt:'8-10', dw:'40', u:'lb', step:'2.5', rest_s:105, is_deleted:!!del, historical_names:['x'] }); });
+  eq([lib[1].dw, lib[1].step, lib[1].rest, lib[1].muscle, lib[6].archived], [40, 2.5, 105, 'Triceps', true], 'exFromRow normalises numbers, muscle and archived flag');
+
+  const slots = [ {slotId:10, exId:5, ssGroup:null}, {slotId:11, exId:1, ssGroup:null},
+                  {slotId:12, exId:2, ssGroup:1},    {slotId:13, exId:3, ssGroup:1} ];
+  const ids = l => l.map(e => e.id);
+  eq(ids(buildDayList(slots, lib, emptySwaps())), [5,1,2,3], 'no swaps -> the program as stored');
+  const sw = { s: { 11: 4 }, x: [7] };
+  const d = buildDayList(slots, lib, sw);
+  eq(ids(d), [5,4,2,3,7], 'swap replaces the slot in place; today-only extra goes last');
+  eq([d[1].slotId, d[1].swappedFrom, d[1].defaultId], [11, 1, 1], 'swapped card keeps its slot and remembers the usual exercise');
+  eq([d[4].extra, d[4].slotId], [true, null], 'extra is flagged and has no slot');
+  eq([d[2].ssGroup, d[3].ssGroup], [1, 1], 'superset belongs to the slot, so it survives a swap');
+  eq(ids(buildDayList(slots, lib, { s: { 12: 4 }, x: [] })).slice(2,4), [4,3], 'swapping one superset member keeps the pair together');
+  eq(ids(buildDayList(slots, lib, { s: { 11: 2 }, x: [] })), [5,2,3], 'an exercise can only appear once per day');
+  eq(ids(buildDayList([{slotId:1, exId:999}], lib, emptySwaps())), [], 'a slot pointing at an unknown exercise is skipped, not crashed on');
+  eq(ids(buildDayList(slots, lib, { s: { 11: 999 }, x: [] })), [5,1,2,3], 'swap to an unknown exercise falls back to the usual one');
+
+  // inferSwaps: sets saved today for something not on the list
+  eq(inferSwaps(slots, lib, emptySwaps(), [4]).s, { 11: 4 }, 'stray triceps sets land in the triceps slot with nothing logged');
+  eq(inferSwaps(slots, lib, emptySwaps(), [4, 1]).s, { 12: 4 }, 'a slot that already has logged sets is never overwritten');
+  eq(inferSwaps(slots, lib, emptySwaps(), [7]), { s: {}, x: [7] }, 'no same-muscle slot -> kept as a today-only extra');
+  eq(inferSwaps(slots, lib, { s:{11:4}, x:[] }, [4]), { s: {11:4}, x: [] }, 'already on the list -> nothing changes');
+  eq(inferSwaps(slots, lib, emptySwaps(), [12345]), { s: {}, x: [] }, 'unknown ids are ignored');
+
+  // picker
+  const po = pickerOptions(lib, { exclude:[1,2], muscle:'Triceps' });
+  eq(ids(po.same), [4], 'same-muscle choices exclude ones already on the day and archived ones');
+  eq(ids(po.rest), [3,5,7], 'everything else follows, grouped by muscle');
+  eq(ids(pickerOptions(lib, { q:'press' }).rest), [5,7], 'search matches name');
+  eq(ids(pickerOptions(lib, { q:'quads' }).rest), [7], 'search matches muscle');
+  eq(ids(pickerOptions(lib, {}).rest).includes(6), false, 'archived exercises never offered');
+
+  // history grouping
+  const rows = [ {exercise_id:4,set_number:2},{exercise_id:5,set_number:1},{exercise_id:4,set_number:1},
+                 {exercise_id:null,exercise:'Legacy',set_number:1},{exercise_id:9,set_number:1} ];
+  const g = sessionExerciseGroups(rows, [5,1,2,3]);
+  eq(g.map(x=>x.id), [5,4,null,9], 'day order first, then swapped/removed exercises in logged order');
+  eq(g[1].rows.map(r=>r.set_number), [1,2], 'sets sorted within each exercise');
+}
+
+console.log('\n[library page]');
+{
+  const lsrc = fs.readFileSync(path.join(ROOT, 'exercises.html'), 'utf8');
+  const lb = [...lsrc.matchAll(/\/\/ @@TESTABLE-START[^\n]*\n([\s\S]*?)\/\/ @@TESTABLE-END/g)].map(m => m[1]);
+  ok(lb.length === 1, 'exercises.html has one testable block');
+  const L = {}; vm.createContext(L); vm.runInContext(lb.join('\n') + ';Object.assign(this,{normName,findDuplicates,filterLibrary,groupByMuscle,prescription,fmtRest});', L);
+  eq(L.normName("Dumbbell Waiter’s  Curl!"), 'dumbbell waiters curl', 'normName ignores case, apostrophes, punctuation, spacing');
+  const exs = [ {id:1,name:'Calf Raises',muscle:'Calves',days:['LEGS']}, {id:2,name:'calf raises',muscle:'Calves',days:['FULL']},
+                {id:3,name:'Lu Raises',muscle:'Side delts',days:['PUSH'],alt:'Y raise'}, {id:4,name:'Calf Raises',is_deleted:true},
+                {id:5,name:'Mystery',muscle:'',days:[]}, {id:6,name:'Leg Press',muscle:'Quads',days:['LEGS'],historical_names:['Hack squat']} ];
+  eq([...L.findDuplicates(exs)].sort(), [1,2], 'live same-name exercises flagged; archived one is not');
+  eq(L.filterLibrary(exs,{q:'raise'}).map(e=>e.id), [1,2,3], 'search hits names');
+  eq(L.filterLibrary(exs,{q:'y raise'}).map(e=>e.id), [3], 'search hits alt names');
+  eq(L.filterLibrary(exs,{q:'hack'}).map(e=>e.id), [6], 'search hits former names');
+  eq(L.filterLibrary(exs,{day:'LEGS'}).map(e=>e.id), [1,6], 'day filter');
+  eq(L.filterLibrary(exs,{archived:true}).map(e=>e.id), [4], 'archived view shows only archived');
+  eq(L.groupByMuscle(L.filterLibrary(exs)).map(g=>g.muscle), ['Side delts','Quads','Calves',''], 'groups follow muscle order, unassigned last');
+  eq(L.prescription({ds:4,rt:'10-15',dw:'85',u:'lb',rest_s:105,step:'1.5'}), '4×10-15 · 85 lb · rest 1:45 · step 1.5', 'prescription line');
+  eq(L.prescription({ds:3,rt:'8-12',dw:'0',u:'lb assist',rest_s:null,step:'5'}), '3×8-12 · lb assist', 'no weight / rest / default step are omitted');
+}
 
 // ── 7. Day/tab wiring ────────────────────────────────────────────────────────
 // Days are data-driven (exercises come from the DB by `day`), but the tab

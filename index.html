@@ -250,7 +250,28 @@ body.reordering .reorder-controls{display:flex;}
 body.reordering .reorder-banner{display:block;}
 
 /* ── Edit pencil on card ── */
-.card-edit-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:0 2px;line-height:1;margin-left:4px;}
+.card-edit-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:2px 4px;line-height:1;margin-left:2px;text-decoration:none;}
+.card-swap-btn{flex:0 0 auto;background:none;border:1px solid;border-radius:6px;font-size:13px;font-weight:700;line-height:1;padding:4px 8px;cursor:pointer;font-family:var(--font);}
+.card-swap-btn:active{background:rgba(255,255,255,.08);}
+.ex-swapped{font-size:9.5px;color:#a78bfa;margin-top:2px;letter-spacing:.02em;}
+body.reordering .card-swap-btn{display:none;}
+.reorder-arrow.ss-btn{flex:2;font-size:11px;}
+.reorder-arrow.ss-btn.on{color:#a78bfa;border-color:rgba(167,139,250,.5);background:rgba(167,139,250,.1);}
+.reorder-arrow.slot-rm{flex:0 0 44px;color:#f87171;border-color:rgba(248,113,113,.3);}
+a.nav-btn{text-decoration:none;display:inline-flex;align-items:center;}
+.pick-modal{max-height:88vh;display:flex;flex-direction:column;padding-bottom:calc(16px + env(safe-area-inset-bottom));}
+.pick-sub{font-size:10px;color:var(--muted);margin:-10px 0 10px;}
+.pick-opt{display:flex;align-items:center;gap:8px;font-size:11px;color:#94a3b8;margin:10px 0 4px;cursor:pointer;}
+.pick-opt input{accent-color:var(--ac,#60a5fa);width:16px;height:16px;}
+.pick-list{overflow-y:auto;flex:1;margin:6px -4px 0;padding:0 4px;min-height:120px;}
+.pick-group{font-size:9px;font-weight:800;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;padding:10px 2px 4px;}
+.pick-row{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:9px 10px;margin-bottom:5px;cursor:pointer;font-family:var(--font);color:var(--text);}
+.pick-row:active{border-color:var(--ac,#60a5fa);}
+.pick-row.revert{border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.08);}
+.pick-name{font-size:12px;font-weight:700;}
+.pick-meta{font-size:10px;color:var(--muted);}
+.pick-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;}
+.pick-new{font-size:11px;font-weight:700;color:#a78bfa;text-decoration:none;}
 .card-edit-btn:hover{color:var(--text);}
 
 </style>
@@ -266,6 +287,7 @@ body.reordering .reorder-banner{display:block;}
   <div class="nav-btns">
     <button class="nav-btn active" onclick="switchView('log')" id="btn-log">LOG</button>
     <button class="nav-btn" onclick="switchView('history')" id="btn-history">HISTORY</button>
+    <a class="nav-btn" href="./exercises.html" id="btn-library">LIBRARY</a>
   </div>
 </div>
 
@@ -278,11 +300,11 @@ body.reordering .reorder-banner{display:block;}
   <div class="ex-section-header">
     <span class="ex-section-label">EXERCISES</span>
     <div>
-      <button class="reorder-btn" id="reorder-btn" onclick="toggleReorderMode()">🔀 reorder</button>
-      <button class="add-ex-btn" id="add-ex-btn" onclick="openAddModal()">+ add exercise</button>
+      <button class="reorder-btn" id="reorder-btn" onclick="toggleReorderMode()">✎ edit day</button>
+      <button class="add-ex-btn" id="add-ex-btn" onclick="openPicker('add')">+ add</button>
     </div>
   </div>
-  <div class="reorder-banner" id="reorder-banner">Reorder mode — use ↑ ↓ to move exercises, then tap Done</div>
+  <div class="reorder-banner" id="reorder-banner">Edit day — ↑ ↓ reorder · ⛓ link a superset · ✕ remove from day. Tap Done to save.</div>
   <div id="ex-loading" class="loading" style="display:none">Loading from Supabase...</div>
   <div class="ex-list" id="ex-list"></div>
   <div class="action-row">
@@ -293,44 +315,18 @@ body.reordering .reorder-banner{display:block;}
   <div class="toast" id="toast"></div>
 </div>
 
-<!-- ── Add / Edit Exercise Modal ── -->
-
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-title" id="modal-title">Add Exercise</div>
-    <div class="modal-field">
-      <div class="modal-label">Exercise Name</div>
-      <input class="modal-input" id="modal-name" placeholder="e.g. Leg Press" type="text">
+<!-- ── Exercise picker (swap / add from library) ── -->
+<div class="modal-overlay" id="pick-overlay" onclick="closePicker(event)">
+  <div class="modal pick-modal">
+    <div class="modal-title" id="pick-title">Swap</div>
+    <div class="pick-sub" id="pick-sub"></div>
+    <input class="modal-input" id="pick-q" type="search" placeholder="Search library…" autocomplete="off" oninput="renderPicker()">
+    <label class="pick-opt" id="pick-opt-wrap"><input type="checkbox" id="pick-opt"> <span id="pick-opt-lbl"></span></label>
+    <div class="pick-list" id="pick-list"></div>
+    <div class="pick-foot">
+      <a class="pick-new" id="pick-new" href="./exercises.html?new=1">+ new exercise in library</a>
+      <button class="modal-btn modal-btn-cancel" style="flex:0 0 auto;padding:9px 16px" onclick="closePicker()">Close</button>
     </div>
-    <div class="modal-field">
-      <div class="modal-label">Alternate Name (optional)</div>
-      <input class="modal-input" id="modal-alt" placeholder="e.g. Hack Squat" type="text">
-    </div>
-    <div class="modal-row">
-      <div class="modal-field">
-        <div class="modal-label">Sets</div>
-        <input class="modal-input" id="modal-sets" placeholder="3" type="number" min="1" max="10">
-      </div>
-      <div class="modal-field">
-        <div class="modal-label">Rep Target</div>
-        <input class="modal-input" id="modal-reps" placeholder="8-10" type="text">
-      </div>
-    </div>
-    <div class="modal-row">
-      <div class="modal-field">
-        <div class="modal-label">Default Weight</div>
-        <input class="modal-input" id="modal-weight" placeholder="135" type="number">
-      </div>
-      <div class="modal-field">
-        <div class="modal-label">Unit</div>
-        <input class="modal-input" id="modal-unit" placeholder="lb" type="text">
-      </div>
-    </div>
-    <div class="modal-btns">
-      <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="modal-btn modal-btn-save" id="modal-save-btn" onclick="saveModal()">Save</button>
-    </div>
-    <button id="modal-del-btn" onclick="deleteExerciseFromProgram()" style="display:none;width:100%;margin-top:10px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171;border-radius:8px;padding:9px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.05em">🗑 Delete Exercise</button>
   </div>
 </div>
 
@@ -381,6 +377,15 @@ body.reordering .reorder-banner{display:block;}
 </div>
 
 <script>
+// Rows the progression engine needs: every earlier session of each exercise on
+// the day's list, whichever day it was logged under. Today is excluded so a
+// mid-session save never becomes "last time".
+async function fetchSuggestionRows(day, ids){
+  ids = ids || ((PROGRAM[day]&&PROGRAM[day].exercises)||[]).map(e=>e.id);
+  if(!ids.length) return [];
+  return (await apiGet({action:'get_by_exercises', ids:ids.join(','), before:todayKey()})) || [];
+}
+
 // ─── Supabase ─────────────────────────────────────────────────────────────────
 const SB_URL = 'https://skfuygyygrapnrkwzsmj.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrZnV5Z3l5Z3JhcG5ya3d6c21qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDc0NzYsImV4cCI6MjA5MDM4MzQ3Nn0.jl0FHAFzmWl8wLeWuKS0N8S_qFC92_WSHszdQhWYxCo';
@@ -498,7 +503,17 @@ function draftKey(){ return `${DRAFT_PREFIX}${currentDay}_${todayKey()}`; }
 function saveDraftLocal(){ try{ localStorage.setItem(draftKey(),JSON.stringify(draft)); }catch{} }
 function clearDraftLocal(){ try{ localStorage.removeItem(draftKey()); }catch{} }
 function loadDraftLocal(){ try{ const raw=localStorage.getItem(draftKey()); return raw?JSON.parse(raw):null; }catch{ return null; } }
-function pruneOldDrafts(){ try{ const today=todayKey(); for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&k.startsWith(DRAFT_PREFIX)&&!k.endsWith(today)) localStorage.removeItem(k); } }catch{} }
+function pruneOldDrafts(){ try{ const today=todayKey(); for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&(k.startsWith(DRAFT_PREFIX)||k.startsWith(SWAP_PREFIX))&&!k.endsWith(today)) localStorage.removeItem(k); } }catch{} }
+
+// ── Library + today's swaps ──
+let LIB = {};            // exercise id -> exercise (library; archived ones too once loaded)
+let LIB_STATS = {};      // exercise id -> {n, last, days}
+let libraryLoading = null;
+const SWAP_PREFIX='ironlog_swaps_';
+function swapKey(day){ return `${SWAP_PREFIX}${day}_${todayKey()}`; }
+function loadSwaps(day){ try{ const o=JSON.parse(localStorage.getItem(swapKey(day))||'null'); return (o&&o.s)?{s:o.s,x:Array.isArray(o.x)?o.x:[]}:emptySwaps(); }catch{ return emptySwaps(); } }
+function saveSwaps(day,sw){ try{ if(!Object.keys(sw.s).length && !sw.x.length) localStorage.removeItem(swapKey(day)); else localStorage.setItem(swapKey(day),JSON.stringify(sw)); }catch{} }
+function applyDay(day){ if(PROGRAM[day]) PROGRAM[day].exercises = buildDayList(PROGRAM[day].slots||[], LIB, loadSwaps(day)); }
 function fmtDate(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}); }
 function fmtShort(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
 function fmtSecs(s){
@@ -806,6 +821,92 @@ function clusterSupersets(list){
     });
   });
   return out;
+}
+
+// ─── Program: days link to library exercises ────────────────────────────────
+// A day is a list of slots {slotId, exId, ssGroup}. Today-only changes live in
+// a per-day "swaps" object {s:{slotId:exId}, x:[exId]}: s = slot swapped to a
+// different exercise, x = extra exercises added for today only.
+function emptySwaps(){ return {s:{}, x:[]}; }
+function exFromRow(e){
+  const ex = {
+    id: e.id, name: e.name, ds: e.ds, rt: e.rt,
+    dw: parseFloat(e.dw) || 0, u: e.u || '',
+    step: Number.isFinite(parseFloat(e.step)) ? parseFloat(e.step) : undefined,
+    rest: Number.isInteger(e.rest_s) ? e.rest_s : undefined,
+    repMin: Number.isInteger(e.rep_min) ? e.rep_min : undefined,
+    repMax: Number.isInteger(e.rep_max) ? e.rep_max : undefined,
+    targetType: e.target_type || undefined,
+    muscle: e.muscle || '',
+    archived: !!e.is_deleted,
+    _historicalNames: Array.isArray(e.historical_names) ? e.historical_names : [],
+  };
+  if(e.alt) ex.alt = e.alt;
+  return ex;
+}
+function buildDayList(slots, lib, swaps){
+  const sw = swaps || emptySwaps();
+  const out = [], seen = new Set();
+  (slots||[]).forEach(sl=>{
+    const want = (sw.s && sw.s[sl.slotId]!=null) ? sw.s[sl.slotId] : sl.exId;
+    const ex = lib[want] || lib[sl.exId];
+    if(!ex || seen.has(ex.id)) return;
+    seen.add(ex.id);
+    out.push(Object.assign({}, ex, { slotId:sl.slotId, defaultId:sl.exId,
+      ssGroup: sl.ssGroup==null ? undefined : sl.ssGroup,
+      swappedFrom: ex.id!==sl.exId ? sl.exId : undefined }));
+  });
+  (sw.x||[]).forEach(id=>{
+    const ex = lib[id];
+    if(!ex || seen.has(id)) return;
+    seen.add(id);
+    out.push(Object.assign({}, ex, { slotId:null, extra:true }));
+  });
+  return clusterSupersets(out);
+}
+// Sets logged today for exercises not on today's list (e.g. swapped on another
+// device): put each into a same-muscle slot that has nothing logged yet,
+// otherwise keep it as a today-only extra. Never drops logged work.
+function inferSwaps(slots, lib, swaps, loggedIds){
+  const sw = { s: Object.assign({}, (swaps&&swaps.s)||{}), x: ((swaps&&swaps.x)||[]).slice() };
+  const logged = new Set(loggedIds||[]);
+  const onList = new Set(buildDayList(slots, lib, sw).map(e=>e.id));
+  [...logged].filter(id=>!onList.has(id) && lib[id]).forEach(id=>{
+    const m = lib[id].muscle;
+    const target = buildDayList(slots, lib, sw)
+      .find(e=>e.slotId!=null && !logged.has(e.id) && m && e.muscle===m);
+    if(target) sw.s[target.slotId] = id; else sw.x.push(id);
+  });
+  return sw;
+}
+// Library choices for the picker: same muscle as the slot first, then the rest
+// grouped by muscle. Archived exercises and ones already on the day are hidden.
+function pickerOptions(lib, opts){
+  const o = opts || {};
+  const excl = new Set(o.exclude||[]);
+  const q = String(o.q||'').toLowerCase().trim();
+  const hit = e => !q || e.name.toLowerCase().includes(q) || (e.alt||'').toLowerCase().includes(q) || (e.muscle||'').toLowerCase().includes(q);
+  const items = Object.values(lib||{}).filter(e=>!e.archived && !excl.has(e.id) && hit(e));
+  const byName = (a,b)=>a.name.localeCompare(b.name);
+  const same = o.muscle ? items.filter(e=>e.muscle===o.muscle).sort(byName) : [];
+  const rest = items.filter(e=>!o.muscle || e.muscle!==o.muscle)
+    .sort((a,b)=>(a.muscle||'~').localeCompare(b.muscle||'~') || byName(a,b));
+  return { same, rest };
+}
+// One logged session's rows grouped per exercise: today's day order first,
+// then anything else (swapped/removed exercises) in first-logged order.
+function sessionExerciseGroups(rows, order){
+  const by = new Map();
+  (rows||[]).forEach(r=>{
+    const k = r.exercise_id!=null ? r.exercise_id : ('name:'+r.exercise);
+    if(!by.has(k)) by.set(k, []);
+    by.get(k).push(r);
+  });
+  const rank = new Map((order||[]).map((id,i)=>[id,i]));
+  return [...by.entries()]
+    .map(([k,rs],i)=>({ id: typeof k==='number'?k:null, rows: rs.slice().sort((a,b)=>a.set_number-b.set_number), _i:i }))
+    .sort((a,b)=> (rank.has(a.id)?rank.get(a.id):1e6+a._i) - (rank.has(b.id)?rank.get(b.id):1e6+b._i))
+    .map(({id,rows})=>({id,rows}));
 }
 // @@TESTABLE-END
 
@@ -1342,16 +1443,22 @@ function renderExercises(){
       ${ssTag}
       <div class="card-head">
         <div style="display:flex;align-items:flex-start;gap:4px">
-          <div><div class="ex-name">${escapeHtml(ex.name)}</div>${ex.alt?`<div class="ex-alt">or: ${escapeHtml(ex.alt)}</div>`:''}</div>
-          <button class="card-edit-btn" onclick="openEditModal(${ex.id})" title="Edit exercise">✏️</button>
+          <div style="flex:1;min-width:0"><div class="ex-name">${escapeHtml(ex.name)}</div>${ex.alt?`<div class="ex-alt">or: ${escapeHtml(ex.alt)}</div>`:''}${
+            ex.swappedFrom!=null?`<div class="ex-swapped">⇄ swapped in today · usual: ${escapeHtml((LIB[ex.swappedFrom]||{}).name||'')}</div>`:''}${
+            ex.extra?`<div class="ex-swapped">+ added for today only</div>`:''}</div>
+          <button class="card-swap-btn" onclick="openPicker('swap',${ex.id})" title="Swap for another exercise" style="color:${ac};border-color:${ac}55">⇄</button>
+          <a class="card-edit-btn" href="./exercises.html?edit=${ex.id}" title="Edit in library">✎</a>
         </div>
         <div class="ex-target" style="color:${ac}">${escapeHtml(buildLastBadge(ex))}</div>
         ${Number.isInteger(ex.rest) ? `<div class="ex-rest">rest ${fmtSecs(ex.rest)}</div>` : ''}
         ${suggestions[ex.id] ? `<div class="ex-suggest" style="color:${suggestions[ex.id].color};font-size:11px;margin-top:3px;font-weight:600;letter-spacing:.01em">next: ${escapeHtml(suggestions[ex.id].text)}</div>` : ''}
       </div>
       <div class="reorder-controls">
-        <button class="reorder-arrow" onclick="moveExercise(${ex.id},-1)" ${prog.exercises[0].id===ex.id?'disabled':''}>↑ up</button>
-        <button class="reorder-arrow" onclick="moveExercise(${ex.id},1)" ${prog.exercises[prog.exercises.length-1].id===ex.id?'disabled':''}>↓ down</button>
+        <button class="reorder-arrow" onclick="moveExercise(${ex.id},-1)" ${(exIdx===0||ex.extra)?'disabled':''}>↑</button>
+        <button class="reorder-arrow" onclick="moveExercise(${ex.id},1)" ${(exIdx===exArr.length-1||ex.extra||(exArr[exIdx+1]&&exArr[exIdx+1].extra))?'disabled':''}>↓</button>
+        ${(ex.slotId!=null && exArr[exIdx+1] && exArr[exIdx+1].slotId!=null) ? (()=>{ const linked = ex.ssGroup!=null && exArr[exIdx+1].ssGroup===ex.ssGroup;
+          return `<button class="reorder-arrow ss-btn${linked?' on':''}" onclick="toggleSuperset(${ex.id})">${linked?'⛓ unlink ↓':'⛓ superset ↓'}</button>`; })() : ''}
+        <button class="reorder-arrow slot-rm" onclick="removeFromDay(${ex.id})" title="Remove from this day">✕</button>
       </div>
       ${timingBar}
       <div class="set-header">
@@ -1373,234 +1480,257 @@ function renderExercises(){
   cb.style.color=PROGRAM[currentDay].accent; cb.style.borderColor=PROGRAM[currentDay].accent+'50';
   const ab=document.getElementById('add-ex-btn');
   ab.style.color=PROGRAM[currentDay].accent; ab.style.borderColor=PROGRAM[currentDay].accent+'50';
-  const msb=document.getElementById('modal-save-btn');
-  msb.style.background=PROGRAM[currentDay].accent;
+  if(!prog.exercises.length){
+    document.getElementById('ex-list').innerHTML=`<div class="empty" style="margin-top:24px">No exercises on ${currentDay} yet.<br><br><button class="add-ex-btn" style="color:${ac};border-color:${ac}50" onclick="openPicker('add')">+ add from library</button></div>`;
+  }
 
   startLiveTimer();
   syncRestTicker();
 }
 
-// ─── Reorder mode ─────────────────────────────────────────────────────────────
+// ─── Edit-day mode: order, supersets, remove ──────────────────────────────────
 let reordering = false;
-
+let dayDirty = false;
 function toggleReorderMode(){
   reordering = !reordering;
   const btn = document.getElementById('reorder-btn');
-  if(reordering){
-    document.body.classList.add('reordering');
-    btn.classList.add('active');
-    btn.textContent = '✓ done';
-  } else {
-    document.body.classList.remove('reordering');
-    btn.classList.remove('active');
-    btn.textContent = '🔀 reorder';
-    // Persist all sort_orders to Supabase
-    persistOrder();
-  }
+  document.body.classList.toggle('reordering', reordering);
+  btn.classList.toggle('active', reordering);
+  btn.textContent = reordering ? '✓ done' : '✎ edit day';
+  if(!reordering && dayDirty) persistDay();
+  renderExercises();
 }
-
+// Mirror the on-screen order back onto the day's slots, then re-derive the list
+// (which re-clusters supersets) from slots + today's swaps.
+function syncSlotsFromList(day){
+  const p = PROGRAM[day];
+  const byId = new Map((p.slots||[]).map(sl=>[sl.slotId, sl]));
+  const ordered = p.exercises.filter(e=>e.slotId!=null).map(e=>byId.get(e.slotId)).filter(Boolean);
+  (p.slots||[]).forEach(sl=>{ if(!ordered.includes(sl)) ordered.push(sl); });
+  p.slots = ordered;
+  applyDay(day);
+}
+// ↑/↓ inside a superset reorders its members; at the block's edge the whole
+// block moves past the neighbouring card (or neighbouring block).
 function moveExercise(exId, delta){
   const exs = PROGRAM[currentDay].exercises;
   const idx = exs.findIndex(e=>e.id===exId);
-  if(idx<0) return;
-  const newIdx = idx + delta;
-  if(newIdx < 0 || newIdx >= exs.length) return;
-  // Swap
-  [exs[idx], exs[newIdx]] = [exs[newIdx], exs[idx]];
-  renderExercises();
-}
-
-async function persistOrder(){
-  const exs = PROGRAM[currentDay].exercises;
-  showToast('Saving order...','#60a5fa');
-  try {
-    const orders = exs.map((ex, i) => ({ id: ex.id, sort_order: i }));
-    await apiPost({action:'reorder_exercises'}, { orders });
-    showToast('Order saved!','#4ade80');
-  } catch(e) {
-    showToast('Order save failed: '+e.message,'#f87171');
-  }
-}
-
-// ─── Modal state ──────────────────────────────────────────────────────────────
-let modalMode = 'add'; // 'add' | 'edit'
-let modalEditId = null;
-
-function openAddModal(){
-  modalMode='add'; modalEditId=null;
-  document.getElementById('modal-title').textContent='Add Exercise';
-  document.getElementById('modal-name').value='';
-  document.getElementById('modal-alt').value='';
-  document.getElementById('modal-sets').value='3';
-  document.getElementById('modal-reps').value='8-10';
-  document.getElementById('modal-weight').value='';
-  document.getElementById('modal-unit').value='lb';
-  document.getElementById('modal-del-btn').style.display='none';
-  document.getElementById('modal-overlay').classList.add('open');
-  setTimeout(()=>document.getElementById('modal-name').focus(),100);
-}
-
-function openEditModal(exId){
-  const prog=PROGRAM[currentDay];
-  const ex=prog.exercises.find(e=>e.id===exId);
-  if(!ex) return;
-  modalMode='edit'; modalEditId=exId;
-  document.getElementById('modal-title').textContent='Edit Exercise';
-  document.getElementById('modal-name').value=ex.name;
-  document.getElementById('modal-alt').value=ex.alt||'';
-  document.getElementById('modal-sets').value=ex.ds;
-  document.getElementById('modal-reps').value=ex.rt;
-  document.getElementById('modal-weight').value=ex.dw===0?'':ex.dw;
-  document.getElementById('modal-unit').value=ex.u||'lb';
-  document.getElementById('modal-del-btn').style.display='block';
-  document.getElementById('modal-overlay').classList.add('open');
-  setTimeout(()=>document.getElementById('modal-name').focus(),100);
-}
-
-function closeModal(e){
-  if(e && e.target!==document.getElementById('modal-overlay')) return;
-  document.getElementById('modal-overlay').classList.remove('open');
-}
-
-async function saveModal(){
-  const name   = document.getElementById('modal-name').value.trim();
-  const alt    = document.getElementById('modal-alt').value.trim();
-  const ds     = parseInt(document.getElementById('modal-sets').value)||3;
-  const rt     = document.getElementById('modal-reps').value.trim()||'8-10';
-  const dw     = parseFloat(document.getElementById('modal-weight').value)||0;
-  const u      = document.getElementById('modal-unit').value.trim()||'lb';
-  if(!name){ document.getElementById('modal-name').style.borderColor='#f87171'; return; }
-
-  const prog=PROGRAM[currentDay];
-
-  if(modalMode==='add'){
-    // Save first to get a real DB-assigned integer id
-    const tempEx = {name,ds,rt,dw,u};
-    if(alt) tempEx.alt = alt;
-    const saved = await saveExercise(tempEx);
-    if(!saved){
-      document.getElementById('modal-overlay').classList.remove('open');
-      return;
-    }
-    const newEx = {
-      id: saved.id, name: saved.name, ds: saved.ds, rt: saved.rt,
-      dw: parseFloat(saved.dw)||0, u: saved.u,
-      step: Number.isFinite(parseFloat(saved.step)) ? parseFloat(saved.step) : undefined,
-      rest: Number.isInteger(saved.rest_s) ? saved.rest_s : undefined,
-      repMin: Number.isInteger(saved.rep_min) ? saved.rep_min : undefined,
-      repMax: Number.isInteger(saved.rep_max) ? saved.rep_max : undefined,
-      targetType: saved.target_type || undefined,
-      _historicalNames: saved.historical_names || [],
-    };
-    if(saved.alt) newEx.alt = saved.alt;
-    prog.exercises.push(newEx);
-    if(!draft[newEx.id]) draft[newEx.id] = Array.from({length:ds},()=>({w:dw===0?'':String(dw),r:'',done:false,startedAt:null,completedAt:null}));
-    saveDraftLocal();
-    document.getElementById('modal-overlay').classList.remove('open');
-    renderExercises();
-    return;
+  if(idx<0 || exs[idx].extra) return;
+  const g = exs[idx].ssGroup;
+  const inBlock = j => g!=null && exs[j] && exs[j].ssGroup===g;
+  if(inBlock(idx+delta)){
+    [exs[idx], exs[idx+delta]] = [exs[idx+delta], exs[idx]];
   } else {
-    const ex=prog.exercises.find(e=>e.id===modalEditId);
-    if(ex){
-      ex.name=name; ex.alt=alt||undefined; ex.ds=ds; ex.rt=rt; ex.dw=dw; ex.u=u;
-      const cur=draft[ex.id]||[];
-      while(cur.length<ds) cur.push({w:dw===0?'':String(dw),r:'',done:false,startedAt:null,completedAt:null});
-      draft[ex.id]=cur;
-      saveDraftLocal();
-      document.getElementById('modal-overlay').classList.remove('open');
-      renderExercises();
-      // Persist update (server will append old name to historical_names if changed)
-      saveExercise(ex);
-      return;
+    let lo=idx, hi=idx;
+    if(g!=null){ while(inBlock(lo-1)) lo--; while(inBlock(hi+1)) hi++; }
+    if(delta<0){
+      let nlo=lo-1; if(nlo<0) return;
+      const ng=exs[nlo].ssGroup; if(ng!=null) while(nlo-1>=0 && exs[nlo-1].ssGroup===ng) nlo--;
+      const block=exs.splice(lo, hi-lo+1); exs.splice(nlo, 0, ...block);
+    } else {
+      let nhi=hi+1; if(nhi>=exs.length || exs[nhi].extra) return;
+      const ng=exs[nhi].ssGroup; if(ng!=null) while(nhi+1<exs.length && exs[nhi+1].ssGroup===ng) nhi++;
+      const nb=exs.splice(hi+1, nhi-hi); exs.splice(lo, 0, ...nb);
     }
   }
-
-  document.getElementById('modal-overlay').classList.remove('open');
+  dayDirty = true;
+  syncSlotsFromList(currentDay);
   renderExercises();
 }
-
-async function deleteExerciseFromProgram(){
-  if(modalEditId == null) return;
-  const prog=PROGRAM[currentDay];
-  const ex=prog.exercises.find(e=>e.id===modalEditId);
-  if(!ex) return;
-  if(!confirm(`Delete "${ex.name}" from ${currentDay}? Past sessions stay intact.`)) return;
-
-  const idx=prog.exercises.findIndex(e=>e.id===modalEditId);
-  if(idx>=0) prog.exercises.splice(idx,1);
-  delete draft[modalEditId];
-
-  document.getElementById('modal-overlay').classList.remove('open');
-  renderExercises();
-
-  try{
-    await apiPost({action:'delete_exercise'}, {id: modalEditId});
-    showToast('Exercise deleted','#f87171');
-  }catch(e){ showToast('Delete failed: '+e.message,'#f87171'); }
+// Drop superset groups that are down to a single member.
+function tidyGroups(day){
+  const slots = PROGRAM[day].slots||[];
+  const count = {};
+  slots.forEach(sl=>{ if(sl.ssGroup!=null) count[sl.ssGroup]=(count[sl.ssGroup]||0)+1; });
+  slots.forEach(sl=>{ if(sl.ssGroup!=null && count[sl.ssGroup]<2) sl.ssGroup=null; });
+  applyDay(day);
 }
-
-// Persist a single exercise's customization
-async function saveExercise(ex){
-  const idx = PROGRAM[currentDay].exercises.findIndex(e => e.id === ex.id);
-  const payload = {
-    day: currentDay, name: ex.name, alt: ex.alt || null,
-    ds: ex.ds, rt: ex.rt, dw: ex.dw, u: ex.u || 'lb',
-    sort_order: idx >= 0 ? idx : 999,
-  };
-  // Only include id if it's already a real DB id (number). Omit for new exercises.
-  if (typeof ex.id === 'number') payload.id = ex.id;
-  try{
-    return await apiPost({action:'save_exercise'}, payload);
-  }catch(e){
-    showToast('Save failed: '+e.message,'#f87171');
-    return null;
+function toggleSuperset(exId){
+  const day=currentDay, list=PROGRAM[day].exercises, slots=PROGRAM[day].slots||[];
+  const i=list.findIndex(e=>e.id===exId), cur=list[i], nxt=list[i+1];
+  if(!cur || !nxt || cur.slotId==null || nxt.slotId==null) return;
+  const sl = id => slots.find(x=>x.slotId===id);
+  if(cur.ssGroup!=null && nxt.ssGroup===cur.ssGroup){
+    // Unlink: split the block between this card and the next.
+    const g = cur.ssGroup, fresh = Math.max(0, ...slots.map(x=>x.ssGroup||0)) + 1;
+    list.slice(i+1).filter(e=>e.ssGroup===g).forEach(e=>{ const s2=sl(e.slotId); if(s2) s2.ssGroup=fresh; });
+  } else {
+    const g = cur.ssGroup ?? nxt.ssGroup ?? (Math.max(0, ...slots.map(x=>x.ssGroup||0)) + 1);
+    const old = nxt.ssGroup;
+    slots.forEach(x=>{ if(old!=null && x.ssGroup===old) x.ssGroup=g; });
+    sl(cur.slotId).ssGroup = g; sl(nxt.slotId).ssGroup = g;
   }
+  dayDirty = true;
+  tidyGroups(day);
+  renderExercises();
+}
+async function persistDay(){
+  const day = currentDay;
+  dayDirty = false;
+  syncSlotsFromList(day);
+  const updates = (PROGRAM[day].slots||[]).map((sl,i)=>({ id:sl.slotId, sort_order:i, superset_group: sl.ssGroup==null?null:sl.ssGroup }));
+  showToast('Saving day…','#60a5fa');
+  try{ await apiPost({action:'update_slots'},{updates}); showToast(`${day} saved`); }
+  catch(e){ dayDirty = true; showToast('Save failed: '+e.message,'#f87171'); }
+}
+async function removeFromDay(exId){
+  const day=currentDay, ex=PROGRAM[day].exercises.find(e=>e.id===exId);
+  if(!ex) return;
+  const sw=loadSwaps(day);
+  if(ex.extra){
+    sw.x = sw.x.filter(i=>i!==exId); saveSwaps(day,sw);
+  } else {
+    const usual = LIB[ex.defaultId] || ex;
+    if(!confirm(`Remove “${usual.name}” from ${day}?\n\nIt stays in the library with all its history — you can swap it back in or re-add it any time.`)) return;
+    try{ await apiPost({action:'remove_slot'},{id:ex.slotId}); }
+    catch(e){ showToast('Remove failed: '+e.message,'#f87171'); return; }
+    PROGRAM[day].slots = (PROGRAM[day].slots||[]).filter(sl=>sl.slotId!==ex.slotId);
+    delete sw.s[ex.slotId]; saveSwaps(day,sw);
+  }
+  delete draft[exId]; saveDraftLocal();
+  tidyGroups(day);
+  if((PROGRAM[day].slots||[]).some(sl=>sl.ssGroup!=null)) dayDirty = true;
+  renderExercises();
 }
 
-// Load all exercises from the canonical `exercises` table and populate PROGRAM
-async function loadExercises(){
+// ─── Program + library loading ────────────────────────────────────────────────
+async function loadProgram(){
   try{
-    const data = await apiGet({action:'get_exercises'});
+    const data = await apiGet({action:'get_program'});
     if(!Array.isArray(data)) return;
-
-    // Reset all day buckets
-    Object.keys(PROGRAM).forEach(day => { PROGRAM[day].exercises = []; });
-
-    // Bucket by day, ordered by sort_order
-    data.forEach(e => {
-      if(!PROGRAM[e.day]) return;
-      const ex = {
-        id: e.id,                         // integer
-        name: e.name,
-        ds: e.ds,
-        rt: e.rt,
-        dw: parseFloat(e.dw) || 0,
-        u: e.u || '',
-        step: Number.isFinite(parseFloat(e.step)) ? parseFloat(e.step) : undefined,
-        rest: Number.isInteger(e.rest_s) ? e.rest_s : undefined,
-        repMin: Number.isInteger(e.rep_min) ? e.rep_min : undefined,
-        repMax: Number.isInteger(e.rep_max) ? e.rep_max : undefined,
-        targetType: e.target_type || undefined,
-        ssGroup: Number.isInteger(e.superset_group) ? e.superset_group : undefined,
-        _historicalNames: Array.isArray(e.historical_names) ? e.historical_names : [],
-      };
-      if(e.alt) ex.alt = e.alt;
-      PROGRAM[e.day].exercises.push(ex);
+    Object.keys(PROGRAM).forEach(d=>{ PROGRAM[d].slots=[]; });
+    data.forEach(s=>{
+      if(!PROGRAM[s.day] || !s.exercise) return;
+      LIB[s.exercise.id] = exFromRow(s.exercise);
+      PROGRAM[s.day].slots.push({ slotId:s.id, exId:s.exercise_id, ssGroup:Number.isInteger(s.superset_group)?s.superset_group:null });
     });
+    Object.keys(PROGRAM).forEach(applyDay);
+  }catch(e){ console.warn('loadProgram failed', e); }
+}
+// Full library (archived included, plus logged-set stats). Loaded on demand:
+// the picker, history and charts need it; the log itself doesn't.
+function ensureLibrary(){
+  if(!libraryLoading){
+    libraryLoading = apiGet({action:'get_library'}).then(d=>{
+      (d.exercises||[]).forEach(e=>{ LIB[e.id]=exFromRow(e); LIB_STATS[e.id]={ n:e.n_sets||0, last:e.last_date||null, days:e.days||[] }; });
+      return LIB;
+    }).catch(e=>{ libraryLoading=null; throw e; });
+  }
+  return libraryLoading;
+}
 
-    // Sort by sort_order (already ordered by API but be explicit)
-    Object.values(PROGRAM).forEach(p => {
-      p.exercises.sort((a,b) => {
-        const av = data.find(d => d.id === a.id)?.sort_order ?? 999;
-        const bv = data.find(d => d.id === b.id)?.sort_order ?? 999;
-        return av - bv;
-      });
-    });
-
-    // Superset members render as one joined block, so keep them adjacent
-    // regardless of what the stored sort_order happens to be.
-    Object.values(PROGRAM).forEach(p => { p.exercises = clusterSupersets(p.exercises); });
-  }catch(e){ console.warn('loadExercises failed', e); }
+// ─── Exercise picker: swap a slot, or add to the day ─────────────────────────
+let picker = null;   // {mode:'swap'|'add', exId}
+async function openPicker(mode, exId){
+  const day=currentDay, ac=PROGRAM[day].accent;
+  const cur = mode==='swap' ? PROGRAM[day].exercises.find(e=>e.id===exId) : null;
+  if(mode==='swap' && !cur) return;
+  picker = { mode, exId: cur ? cur.id : null };
+  document.getElementById('pick-title').textContent = cur ? `Swap ${cur.name}` : `Add to ${day}`;
+  document.getElementById('pick-sub').textContent = cur
+    ? (cur.muscle ? `${cur.muscle} options first · history follows each exercise` : 'History follows each exercise')
+    : 'Pick from the library';
+  const optWrap=document.getElementById('pick-opt-wrap'), opt=document.getElementById('pick-opt');
+  opt.checked=false;
+  optWrap.style.display = (cur && cur.extra) ? 'none' : '';
+  document.getElementById('pick-opt-lbl').textContent = cur ? `Make it the usual one for ${day}` : 'Today only (don’t add to the program)';
+  document.getElementById('pick-new').href = `./exercises.html?new=1&day=${day}&return=1`;
+  document.getElementById('pick-q').value='';
+  document.getElementById('pick-overlay').style.setProperty('--ac', ac);
+  document.getElementById('pick-overlay').classList.add('open');
+  document.getElementById('pick-list').innerHTML='<div class="loading">Loading library…</div>';
+  try{ await ensureLibrary(); }catch(e){ /* fall back to what the program already loaded */ }
+  if(picker) renderPicker();
+}
+function closePicker(e){
+  if(e && e.target!==document.getElementById('pick-overlay')) return;
+  document.getElementById('pick-overlay').classList.remove('open');
+  picker=null;
+}
+function pickRowHtml(e){
+  const st=LIB_STATS[e.id];
+  const meta=[`${e.ds}×${e.rt}`];
+  if(st && st.last) meta.push(`last ${fmtShort(st.last)}`); else if(st) meta.push('never logged');
+  if(st && st.days && st.days.length) meta.push(st.days.join(' '));
+  return `<button class="pick-row" onclick="pickExercise(${e.id})"><span class="pick-name">${escapeHtml(e.name)}</span><span class="pick-meta">${escapeHtml(meta.join(' · '))}</span></button>`;
+}
+function renderPicker(){
+  if(!picker) return;
+  const day=currentDay;
+  const cur = picker.mode==='swap' ? PROGRAM[day].exercises.find(e=>e.id===picker.exId) : null;
+  const q=document.getElementById('pick-q').value;
+  const exclude=PROGRAM[day].exercises.map(e=>e.id);
+  const {same,rest}=pickerOptions(LIB,{exclude, muscle:cur?cur.muscle:'', q});
+  let html='';
+  if(cur && cur.swappedFrom!=null && LIB[cur.swappedFrom] && !q){
+    html+=`<button class="pick-row revert" onclick="pickExercise(${cur.swappedFrom})"><span class="pick-name">↺ Back to ${escapeHtml(LIB[cur.swappedFrom].name)}</span><span class="pick-meta">the usual one for ${day}</span></button>`;
+  }
+  if(same.length) html+=`<div class="pick-group">${escapeHtml(cur.muscle)}</div>`+same.map(pickRowHtml).join('');
+  let lastM=null;
+  rest.forEach(e=>{ const m=e.muscle||'Unassigned'; if(m!==lastM){ html+=`<div class="pick-group">${escapeHtml(m)}</div>`; lastM=m; } html+=pickRowHtml(e); });
+  if(!same.length && !rest.length) html+=`<div class="empty" style="margin:20px 0">Nothing matches “${escapeHtml(q)}”.</div>`;
+  document.getElementById('pick-list').innerHTML=html;
+}
+// Seed a just-added exercise: progression from its own history (any day),
+// otherwise its library defaults.
+async function prepareExercise(day, id){
+  try{
+    const rows = await fetchSuggestionRows(day, [id]);
+    Object.assign(suggestions, computeSuggestions(rows, day));
+    Object.assign(lastSessions, computeLastSessions(rows, day));
+  }catch{}
+  if(draft[id] && draft[id].length) return;
+  const s=suggestions[id], ex=LIB[id]||{};
+  draft[id] = (s && s.sets && s.sets.length)
+    ? s.sets.map(x=>({ w:(x.w!=null&&!isNaN(x.w))?String(x.w):'', r:(x.r!=null&&!isNaN(x.r))?String(x.r):'', done:false, startedAt:null, completedAt:null, rir:null }))
+    : Array.from({length:ex.ds||3},()=>({ w:ex.dw?String(ex.dw):'', r:'', done:false, startedAt:null, completedAt:null, rir:null }));
+}
+async function pickExercise(newId){
+  if(!picker) return;
+  const day=currentDay, opt=document.getElementById('pick-opt').checked;
+  const sw=loadSwaps(day);
+  let msg='';
+  if(picker.mode==='swap'){
+    const cur=PROGRAM[day].exercises.find(e=>e.id===picker.exId);
+    if(!cur){ closePicker(); return; }
+    const engaged=(draft[cur.id]||[]).filter(x=>x.done||x.startedAt).length;
+    if(engaged && !confirm(`You've already logged ${engaged} set${engaged>1?'s':''} of “${cur.name}”. Swap anyway and discard ${engaged>1?'them':'it'}?`)) return;
+    if(cur.extra){
+      sw.x = sw.x.map(i=>i===cur.id?newId:i);
+    } else if(opt && newId!==cur.defaultId){
+      try{ await apiPost({action:'set_slot_exercise'},{id:cur.slotId, exercise_id:newId}); }
+      catch(e){ showToast('Could not change the usual exercise: '+e.message,'#f87171'); return; }
+      const sl=(PROGRAM[day].slots||[]).find(x=>x.slotId===cur.slotId); if(sl) sl.exId=newId;
+      delete sw.s[cur.slotId];
+      msg=`${LIB[newId].name} is now the usual one on ${day}`;
+    } else if(newId===cur.defaultId){
+      delete sw.s[cur.slotId];
+      msg=`Back to ${LIB[newId].name}`;
+    } else {
+      sw.s[cur.slotId]=newId;
+      msg=`Swapped for today: ${LIB[newId].name}`;
+    }
+    delete draft[cur.id];
+  } else if(opt){
+    if(!sw.x.includes(newId)) sw.x.push(newId);
+    msg=`Added for today: ${LIB[newId].name}`;
+  } else {
+    try{
+      const slot=await apiPost({action:'add_slot'},{day, exercise_id:newId});
+      (PROGRAM[day].slots ||= []).push({ slotId:slot.id, exId:newId, ssGroup:null });
+      msg=`Added ${LIB[newId].name} to ${day}`;
+    }catch(e){ showToast('Add failed: '+e.message,'#f87171'); return; }
+  }
+  saveSwaps(day,sw);
+  applyDay(day);
+  document.getElementById('pick-overlay').classList.remove('open');
+  picker=null;
+  renderExercises();
+  await prepareExercise(day,newId);
+  saveDraftLocal();
+  renderExercises();
+  const card=document.getElementById(`card-${newId}`); if(card) card.scrollIntoView({behavior:'smooth',block:'center'});
+  if(msg) showToast(msg);
 }
 
 function startLiveTimer(){
@@ -1631,14 +1761,13 @@ function renderHistory(){
   const filtered=histData.filter(s=>s.day===histDay);
   if(!filtered.length){ list.innerHTML=`<div class="empty">No ${histDay} sessions found.</div>`; return; }
   const p=PROGRAM[histDay];
+  const order=(p.exercises||[]).map(e=>e.id);
   list.innerHTML=filtered.map((sess,si)=>{
-    const exHtml=p.exercises.map(ex=>{
-      // Match by exercise_id (preferred) or by name + historical names (legacy fallback)
-      const namesForEx = [ex.name, ...(ex._historicalNames || [])];
-      const rows=(sess.rows||[]).filter(r =>
-        r.exercise_id === ex.id ||
-        (r.exercise_id == null && namesForEx.includes(r.exercise))
-      ).sort((a,b)=>a.set_number-b.set_number);
+    // Every exercise logged that session, including ones since swapped out
+    // or removed from the day; names come from the library.
+    const exHtml=sessionExerciseGroups(sess.rows, order).map(g=>{
+      const rows=g.rows;
+      const ex={ id:g.id, name:(g.id!=null && LIB[g.id]) ? LIB[g.id].name : rows[0].exercise };
       if(!rows.length) return '';
       // Compute stats from started_at / completed_at
       let statsStr='';
@@ -1660,7 +1789,7 @@ function renderHistory(){
         return `<span class="hist-set" style="background:${r.done?p.accent+'20':'rgba(255,255,255,.04)'};color:${r.done?p.accent:'#475569'};border:1px solid ${r.done?p.accent+'40':'rgba(255,255,255,.06)'}">${label}</span>`;
       }).join('');
       return `<div class="hist-ex">
-        <div class="hist-ex-name">${escapeHtml(ex.name)}<span style="color:var(--muted);font-weight:400">${statsStr}</span><button class="prog-btn" onclick="event.stopPropagation();openChartModal(${ex.id})">📈</button></div>
+        <div class="hist-ex-name">${escapeHtml(ex.name)}<span style="color:var(--muted);font-weight:400">${statsStr}</span>${ex.id!=null?`<button class="prog-btn" onclick="event.stopPropagation();openChartModal(${ex.id})">📈</button>`:''}</div>
         <div class="hist-sets">${setsHtml}</div>
       </div>`;
     }).join('');
@@ -1754,23 +1883,9 @@ function rmSetObj(id,setObj){
   if(i>=0) rmSet(id,i);
 }
 
-// Fetch the rows the progression engine needs. Primary source is this split's
-// history; if any exercise on the day has NO rows there (e.g. it was moved from
-// another day), we lazily pull the other splits and merge in just that
-// exercise's history, so progression follows the exercise rather than the day.
-async function fetchSuggestionRows(day){
-  const rows = (await apiGet({action:'get_by_day', day})) || [];
-  const seen = new Set(rows.map(r=>r.exercise_id));
-  const missing = ((PROGRAM[day]&&PROGRAM[day].exercises)||[]).filter(ex=>!seen.has(ex.id));
-  if(!missing.length) return rows;
-  const ids = new Set(missing.map(ex=>ex.id));
-  const others = Object.keys(PROGRAM).filter(d=>d!==day);
-  const extra = await Promise.all(others.map(d=>apiGet({action:'get_by_day',day:d}).catch(()=>[])));
-  return rows.concat(extra.flat().filter(r=>r && ids.has(r.exercise_id)));
-}
-
 // ─── Supabase ─────────────────────────────────────────────────────────────────
 async function loadDraft(){
+  applyDay(currentDay);
   document.getElementById('ex-loading').style.display='block';
   document.getElementById('ex-list').style.display='none';
   await fetchBodyComp();   // non-fatal; powers BW-aware engine + header trend line
@@ -1801,6 +1916,18 @@ async function loadDraft(){
     // 1. Try today's in-progress session first
     const todayRows=await apiGet({action:'get_today',day:currentDay,date:todayKey()});
     if(Array.isArray(todayRows)&&todayRows.length){
+      // Sets saved today for something that isn't on the list (swapped on
+      // another device / after clearing storage): put it back where it belongs.
+      const onList=new Set(PROGRAM[currentDay].exercises.map(e=>e.id));
+      const strays=[...new Set(todayRows.map(r=>r.exercise_id))].filter(id=>id!=null && !onList.has(id));
+      if(strays.length){
+        try{ await ensureLibrary(); }catch{}
+        const sw=inferSwaps(PROGRAM[currentDay].slots||[], LIB, loadSwaps(currentDay), todayRows.map(r=>r.exercise_id));
+        saveSwaps(currentDay,sw); applyDay(currentDay);
+        try{ const extra=await fetchSuggestionRows(currentDay,strays);
+             Object.assign(suggestions,computeSuggestions(extra,currentDay));
+             Object.assign(lastSessions,computeLastSessions(extra,currentDay)); }catch{}
+      }
       draft=rowsToDraft(todayRows,currentDay);
     } else if(Object.keys(suggestions).length){
       // 2. No session today — prefill with next-target progression suggestions
@@ -1827,6 +1954,7 @@ async function loadDraft(){
 async function loadHistory(){
   document.getElementById('hist-loading').style.display='block';
   document.getElementById('hist-list').innerHTML='';
+  try{ await ensureLibrary(); }catch{}
   try{
     const rows=await apiGet({action:'get_by_day',day:histDay});
     const map={};
@@ -1910,14 +2038,11 @@ function exportCSV(){
 function exportAllCSV(){
   const lines=['Date,Day,Exercise,Set,Weight,Reps,Done,StartedAt,CompletedAt'];
   histData.forEach(sess=>{
-    const p=PROGRAM[sess.day]; if(!p) return;
-    p.exercises.forEach(ex=>{
-      const namesForEx = [ex.name, ...(ex._historicalNames || [])];
-      (sess.rows||[]).filter(r =>
-        r.exercise_id === ex.id ||
-        (r.exercise_id == null && namesForEx.includes(r.exercise))
-      ).sort((a,b)=>a.set_number-b.set_number).forEach(r=>{
-        lines.push(`${r.date},${r.day},${csvCell(r.exercise)},${r.set_number},${r.weight??''},${r.reps??''},${r.done?'yes':'no'},${r.started_at||''},${r.completed_at||''}`);
+    const order=((PROGRAM[sess.day]||{}).exercises||[]).map(e=>e.id);
+    sessionExerciseGroups(sess.rows, order).forEach(g=>{
+      g.rows.forEach(r=>{
+        const name=(r.exercise_id!=null && LIB[r.exercise_id]) ? LIB[r.exercise_id].name : r.exercise;
+        lines.push(`${r.date},${r.day},${csvCell(name)},${r.set_number},${r.weight??''},${r.reps??''},${r.done?'yes':'no'},${r.started_at||''},${r.completed_at||''}`);
       });
     });
   });
@@ -1989,8 +2114,7 @@ let chartAllRows = [];
 let chartExNames = []; // [currentName, ...historicalNames]
 async function openChartModal(exId) {
   // exId is the integer DB id; look up the exercise to get its display name + historical names
-  const prog = PROGRAM[histDay];
-  const ex = prog?.exercises.find(e => e.id === exId);
+  const ex = LIB[exId];
   const exName = ex?.name || `Exercise #${exId}`;
   chartExId    = exId;
   chartExName  = exName;
@@ -1998,13 +2122,15 @@ async function openChartModal(exId) {
   chartMetric  = 'maxWeight';
   chartWmaPeriod = 3;
   try {
-    const rows = await apiGet({ action: 'get_by_day', day: histDay });
+    // Every day it was logged under — the chart follows the exercise.
+    const rows = await apiGet({ action: 'get_by_exercises', ids: String(exId) });
     chartAllRows = rows || [];
   } catch { chartAllRows = []; }
   document.getElementById('chart-ex-title').textContent = exName;
+  const daysSeen = [...new Set(chartAllRows.map(r => r.day))].join(' · ');
   const subtitle = chartExNames.length > 1
-    ? `${histDay} — incl. ${chartExNames.length - 1} prior name${chartExNames.length > 2 ? 's' : ''}`
-    : `${histDay} — weight progression`;
+    ? `${daysSeen} — incl. ${chartExNames.length - 1} prior name${chartExNames.length > 2 ? 's' : ''}`
+    : `${daysSeen || 'all days'} — weight progression`;
   document.getElementById('chart-ex-sub').textContent = subtitle;
   document.getElementById('chart-modal-overlay').classList.add('open');
   updateChartControls();
@@ -2304,7 +2430,7 @@ function resetSwipe(id, si) {
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 (async () => {
   pruneOldDrafts();
-  await loadExercises();
+  await loadProgram();
   renderAll();
   applyFestive();
   await loadDraft();

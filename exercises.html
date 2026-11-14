@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#080d18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>IRON LOG · Library</title>
+<style>
+  :root{
+    --bg:#080d18;--bg2:rgba(255,255,255,0.025);--border:rgba(255,255,255,0.07);
+    --text:#e2e8f0;--muted:#64748b;--dim:#334155;--accent:#a78bfa;
+    --font:'DM Mono','Fira Code',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;max-width:680px;margin:0 auto;padding-bottom:90px;}
+  button{font-family:var(--font);}
+
+  .header{padding:14px 14px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--bg);z-index:5;}
+  .title{font-size:14px;font-weight:800;letter-spacing:.22em;color:#f8fafc;}
+  .sub{font-size:10px;color:var(--muted);margin-top:2px;}
+  .nav{display:flex;gap:6px;}
+  .nav a,.nav button{background:none;border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:6px 11px;color:var(--text);font-size:10px;font-weight:700;letter-spacing:.1em;cursor:pointer;text-decoration:none;}
+  .nav .primary{background:var(--accent);border-color:var(--accent);color:#0a0f1a;}
+
+  .tools{padding:10px 14px 4px;display:flex;flex-direction:column;gap:8px;}
+  .search{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 11px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;}
+  .search:focus{border-color:var(--accent);}
+  .chips{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{flex:0 0 auto;background:none;border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:4px 10px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.06em;cursor:pointer;white-space:nowrap;}
+  .chip.on{color:#0a0f1a;background:var(--text);border-color:var(--text);}
+  .chip.day.on{color:#0a0f1a;}
+
+  .group{padding:12px 14px 2px;font-size:10px;font-weight:800;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between;}
+  .list{padding:0 10px;display:flex;flex-direction:column;gap:6px;}
+  .row{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 11px;cursor:pointer;display:flex;gap:10px;align-items:flex-start;}
+  .row:active{background:rgba(255,255,255,.05);}
+  .row.archived{opacity:.55;}
+  .row-main{flex:1;min-width:0;}
+  .row-name{font-size:12.5px;font-weight:700;color:#f1f5f9;}
+  .row-alt{font-size:10px;color:var(--muted);margin-top:1px;}
+  .row-meta{font-size:10.5px;color:#94a3b8;margin-top:4px;}
+  .row-stats{font-size:10px;color:var(--muted);margin-top:2px;}
+  .row-days{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:40%;}
+  .dtag{font-size:9px;font-weight:800;letter-spacing:.06em;border:1px solid;border-radius:4px;padding:1px 5px;}
+  .dup{color:#fbbf24;font-size:10px;font-weight:700;margin-top:3px;}
+  .empty{color:var(--muted);text-align:center;margin-top:40px;font-size:12px;line-height:1.6;padding:0 20px;}
+  .loading{padding:32px;text-align:center;color:var(--muted);font-size:12px;}
+
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:50;justify-content:center;align-items:flex-end;}
+  .overlay.open{display:flex;}
+  .sheet{background:#0f1829;border:1px solid var(--border);border-radius:14px 14px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom));width:100%;max-width:680px;max-height:92vh;overflow-y:auto;}
+  .sheet-title{font-size:13px;font-weight:800;color:#f1f5f9;margin-bottom:4px;}
+  .sheet-sub{font-size:10px;color:var(--muted);margin-bottom:14px;}
+  .field{margin-bottom:10px;}
+  .label{font-size:10px;color:var(--muted);letter-spacing:.08em;margin-bottom:4px;text-transform:uppercase;}
+  .input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;}
+  .input:focus{border-color:var(--accent);}
+  .input.err{border-color:#f87171;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .hint{font-size:10px;color:var(--muted);margin-top:3px;}
+  .days{display:flex;gap:6px;flex-wrap:wrap;}
+  .daybtn{border:1px solid rgba(255,255,255,.12);background:none;border-radius:6px;padding:7px 10px;font-size:11px;font-weight:800;letter-spacing:.06em;cursor:pointer;color:var(--muted);}
+  .btns{display:flex;gap:8px;margin-top:16px;}
+  .btn{flex:1;padding:11px;border-radius:8px;border:none;font-size:12px;font-weight:800;cursor:pointer;letter-spacing:.04em;}
+  .btn.ghost{background:rgba(255,255,255,.06);color:var(--muted);}
+  .btn.go{background:var(--accent);color:#0a0f1a;}
+  .btn:disabled{opacity:.5;cursor:default;}
+  .danger-zone{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;}
+  .btn.warn{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);color:#f87171;}
+  .btn.soft{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.3);color:#fbbf24;}
+  .btn.ok{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.3);color:#4ade80;}
+  .merge-box{display:none;gap:8px;flex-direction:column;}
+  .merge-box.open{display:flex;}
+
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);max-width:90vw;padding:9px 14px;border-radius:8px;border:1px solid #4ade80;color:#4ade80;background:rgba(0,0,0,.9);font-size:12px;font-weight:700;text-align:center;display:none;z-index:80;}
+  .toast.show{display:block;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="title">LIBRARY</div>
+    <div class="sub" id="sub">exercise database</div>
+  </div>
+  <div class="nav">
+    <a href="./index.html" id="back-link">← LOG</a>
+    <button class="primary" onclick="openEditor(null)">+ NEW</button>
+  </div>
+</div>
+
+<div class="tools">
+  <input class="search" id="q" type="search" placeholder="Search exercises…" autocomplete="off" oninput="setQuery(this.value)">
+  <div class="chips" id="muscle-chips"></div>
+  <div class="chips" id="day-chips"></div>
+</div>
+
+<div id="loading" class="loading">Loading library…</div>
+<div id="out"></div>
+
+<div class="overlay" id="editor" onclick="if(event.target.id==='editor')closeEditor()">
+  <div class="sheet">
+    <div class="sheet-title" id="ed-title">New exercise</div>
+    <div class="sheet-sub" id="ed-sub"></div>
+
+    <div class="field">
+      <div class="label">Name</div>
+      <input class="input" id="f-name" type="text" placeholder="e.g. Cable Overhead Triceps Extension">
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <div class="label">Muscle</div>
+        <input class="input" id="f-muscle" list="muscle-list" placeholder="Triceps">
+        <datalist id="muscle-list"></datalist>
+      </div>
+      <div class="field">
+        <div class="label">Alt name (optional)</div>
+        <input class="input" id="f-alt" type="text" placeholder="or: …">
+      </div>
+    </div>
+    <div class="grid3">
+      <div class="field">
+        <div class="label">Sets</div>
+        <input class="input" id="f-ds" type="number" inputmode="numeric" min="1" max="20" placeholder="3">
+      </div>
+      <div class="field">
+        <div class="label">Reps</div>
+        <input class="input" id="f-rt" type="text" placeholder="8-12">
+      </div>
+      <div class="field">
+        <div class="label">Rest (s)</div>
+        <input class="input" id="f-rest" type="number" inputmode="numeric" min="0" placeholder="105">
+      </div>
+    </div>
+    <div class="grid3">
+      <div class="field">
+        <div class="label">Start wt</div>
+        <input class="input" id="f-dw" type="number" inputmode="decimal" placeholder="0">
+      </div>
+      <div class="field">
+        <div class="label">Unit</div>
+        <input class="input" id="f-u" list="unit-list" placeholder="lb">
+        <datalist id="unit-list"><option value="lb"><option value="lb/hand"><option value="lb assist"><option value="kg"><option value="BW"></datalist>
+      </div>
+      <div class="field">
+        <div class="label">Step</div>
+        <input class="input" id="f-step" type="number" inputmode="decimal" step="0.5" min="0.5" placeholder="5">
+      </div>
+    </div>
+    <div class="hint" style="margin:-4px 0 12px">Start weight is only used until the exercise has history; after that the app suggests the next load from your last session. Step is the weight jump when every set hits the top of the rep range.</div>
+
+    <div class="field">
+      <div class="label">Used on</div>
+      <div class="days" id="f-days"></div>
+      <div class="hint">Tick a day to add this exercise to the end of it. You can still swap it in on any day from the log.</div>
+    </div>
+
+    <div class="btns">
+      <button class="btn ghost" onclick="closeEditor()">Cancel</button>
+      <button class="btn go" id="save-btn" onclick="saveEditor()">Save</button>
+    </div>
+
+    <div class="danger-zone" id="danger">
+      <button class="btn soft" id="merge-toggle" onclick="toggleMerge()">⇢ Merge into another exercise…</button>
+      <div class="merge-box" id="merge-box">
+        <select class="input" id="merge-target"></select>
+        <div class="hint" id="merge-hint"></div>
+        <button class="btn soft" onclick="doMerge()">Merge — move history, archive this one</button>
+      </div>
+      <button class="btn warn" id="archive-btn" onclick="doArchive()">Archive (keeps history, removes from all days)</button>
+      <button class="btn ok" id="restore-btn" onclick="doRestore()">Restore</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── API ──────────────────────────────────────────────────────────────────────
+const SB_URL = 'https://skfuygyygrapnrkwzsmj.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrZnV5Z3l5Z3JhcG5ya3d6c21qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDc0NzYsImV4cCI6MjA5MDM4MzQ3Nn0.jl0FHAFzmWl8wLeWuKS0N8S_qFC92_WSHszdQhWYxCo';
+const EDGE   = `${SB_URL}/functions/v1/workouts`;
+const HDRS   = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`};
+async function call(method, action, body){
+  const ctl = new AbortController(); const t = setTimeout(()=>ctl.abort(), 20000);
+  try{
+    const r = await fetch(`${EDGE}?action=${encodeURIComponent(action)}`, {method, headers:HDRS, signal:ctl.signal, ...(body?{body:JSON.stringify(body)}:{})});
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+    return data;
+  } finally { clearTimeout(t); }
+}
+
+const DAY_META = {
+  PUSH:{accent:'#fb923c'}, PULL:{accent:'#60a5fa'}, LEGS:{accent:'#4ade80'},
+  FULL:{accent:'#f472b6'}, HOME:{accent:'#22d3ee'},
+};
+const DAYS = Object.keys(DAY_META);
+
+// @@TESTABLE-START  (pure functions — unit-tested by tests/run.js)
+const MUSCLE_ORDER = ['Chest','Shoulders','Side delts','Rear delts','Traps','Back','Biceps','Triceps','Quads','Hamstrings','Glutes','Calves','Core'];
+// Duplicate detection key: case, punctuation and spacing don't make a new exercise.
+function normName(s){ return String(s||'').toLowerCase().normalize('NFKD').replace(/[‘’']/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+// ids of live exercises whose name collides with another live exercise
+function findDuplicates(exs){
+  const by = {};
+  (exs||[]).filter(e=>!e.is_deleted).forEach(e=>{ (by[normName(e.name)] ||= []).push(e.id); });
+  const out = new Set();
+  Object.values(by).forEach(ids=>{ if(ids.length>1) ids.forEach(i=>out.add(i)); });
+  return out;
+}
+function muscleRank(m){ const i = MUSCLE_ORDER.indexOf(m); return i<0 ? (m ? 50 : 99) : i; }
+// Filter + group for the list. Groups follow MUSCLE_ORDER, unknown muscles after,
+// unassigned last; exercises inside a group are alphabetical.
+function filterLibrary(exs, {q='', muscle='', day='', archived=false}={}){
+  const nq = normName(q);
+  return (exs||[]).filter(e => (archived ? e.is_deleted : !e.is_deleted)
+    && (!muscle || (e.muscle||'') === muscle)
+    && (!day || (e.days||[]).includes(day))
+    && (!nq || normName(e.name).includes(nq) || normName(e.alt).includes(nq)
+           || (e.historical_names||[]).some(h=>normName(h).includes(nq))));
+}
+function groupByMuscle(exs){
+  const g = {};
+  exs.forEach(e=>{ (g[e.muscle||''] ||= []).push(e); });
+  return Object.keys(g)
+    .sort((a,b)=> muscleRank(a)-muscleRank(b) || a.localeCompare(b))
+    .map(m => ({ muscle:m, items:g[m].sort((a,b)=>a.name.localeCompare(b.name)) }));
+}
+function fmtRest(s){ if(!Number.isInteger(s)) return ''; const m=Math.floor(s/60), r=s%60; return m ? `${m}:${String(r).padStart(2,'0')}` : `${r}s`; }
+function prescription(e){
+  const parts = [`${e.ds}×${e.rt}`];
+  const dw = parseFloat(e.dw);
+  if(dw) parts.push(`${dw} ${e.u||''}`.trim()); else if(e.u) parts.push(e.u);
+  if(Number.isInteger(e.rest_s)) parts.push(`rest ${fmtRest(e.rest_s)}`);
+  const st = parseFloat(e.step);
+  if(st && st!==5) parts.push(`step ${st}`);
+  return parts.join(' · ');
+}
+// @@TESTABLE-END
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let LIB = [];
+let view = { q:'', muscle:'', day:'', archived:false };
+let editing = null;          // exercise object or null for new
+let edDays = new Set();
+let dupIds = new Set();
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmtShort(iso){ return iso ? new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}) : ''; }
+function toast(msg, color){ const t=document.getElementById('toast'); t.textContent=msg; t.style.borderColor=t.style.color=color||'#4ade80'; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),3500); }
+
+async function load(){
+  try{
+    const d = await call('GET','get_library');
+    LIB = d.exercises || [];
+    dupIds = findDuplicates(LIB);
+    document.getElementById('loading').style.display='none';
+    render();
+    const live = LIB.filter(e=>!e.is_deleted).length;
+    document.getElementById('sub').textContent = `${live} exercises · ${LIB.length-live} archived`;
+  }catch(e){
+    document.getElementById('loading').textContent = 'Could not load the library — '+e.message;
+  }
+}
+
+function setQuery(v){ view.q=v; render(); }
+function setMuscle(m){ view.muscle = view.muscle===m ? '' : m; render(); }
+function setDay(d){ view.day = view.day===d ? '' : d; render(); }
+function toggleArchived(){ view.archived=!view.archived; render(); }
+
+function render(){
+  const live = LIB.filter(e=>!e.is_deleted);
+  const muscles = [...new Set(live.map(e=>e.muscle).filter(Boolean))].sort((a,b)=>muscleRank(a)-muscleRank(b)||a.localeCompare(b));
+  document.getElementById('muscle-chips').innerHTML =
+    `<button class="chip ${!view.muscle?'on':''}" onclick="setMuscle('')">ALL</button>` +
+    muscles.map(m=>`<button class="chip ${view.muscle===m?'on':''}" onclick="setMuscle('${esc(m)}')">${esc(m.toUpperCase())}</button>`).join('');
+  document.getElementById('muscle-list').innerHTML = [...new Set([...MUSCLE_ORDER, ...muscles])].map(m=>`<option value="${esc(m)}">`).join('');
+  document.getElementById('day-chips').innerHTML =
+    DAYS.map(d=>{ const on=view.day===d, a=DAY_META[d].accent;
+      return `<button class="chip day ${on?'on':''}" style="${on?`background:${a};border-color:${a}`:`color:${a};border-color:${a}55`}" onclick="setDay('${d}')">${d}</button>`; }).join('') +
+    `<button class="chip ${view.archived?'on':''}" onclick="toggleArchived()">ARCHIVED</button>`;
+
+  const items = filterLibrary(LIB, view);
+  const out = document.getElementById('out');
+  if(!items.length){
+    out.innerHTML = `<div class="empty">${view.archived ? 'No archived exercises match.' : 'Nothing matches.'}<br>${view.q ? `<button class="chip" style="margin-top:10px" onclick="openEditor(null, document.getElementById('q').value)">+ create “${esc(view.q)}”</button>` : ''}</div>`;
+    return;
+  }
+  out.innerHTML = groupByMuscle(items).map(g => `
+    <div class="group"><span>${esc(g.muscle || 'Unassigned')}</span><span>${g.items.length}</span></div>
+    <div class="list">${g.items.map(rowHtml).join('')}</div>`).join('');
+}
+
+function rowHtml(e){
+  const days = (e.days||[]).map(d=>`<span class="dtag" style="color:${DAY_META[d]?.accent||'#94a3b8'};border-color:${(DAY_META[d]?.accent||'#94a3b8')}66">${d}</span>`).join('');
+  const stats = e.n_sets ? `${e.n_sessions} session${e.n_sessions===1?'':'s'} · ${e.n_sets} sets · last ${fmtShort(e.last_date)}` : 'never logged';
+  return `<div class="row${e.is_deleted?' archived':''}" onclick="openEditor(${e.id})">
+    <div class="row-main">
+      <div class="row-name">${esc(e.name)}</div>
+      ${e.alt?`<div class="row-alt">or: ${esc(e.alt)}</div>`:''}
+      <div class="row-meta">${esc(prescription(e))}</div>
+      <div class="row-stats">${stats}</div>
+      ${dupIds.has(e.id)?'<div class="dup">⚠ same name as another exercise — consider merging</div>':''}
+    </div>
+    <div class="row-days">${days}</div>
+  </div>`;
+}
+
+// ─── Editor ───────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+function openEditor(id, presetName){
+  editing = id==null ? null : LIB.find(e=>e.id===id) || null;
+  const e = editing || { name: presetName||'', alt:'', muscle: view.muscle||'', ds:3, rt:'8-12', dw:0, u:'lb', step:5, rest_s:105, days: view.day?[view.day]:(PRESET_DAY?[PRESET_DAY]:[]) };
+  $('ed-title').textContent = editing ? 'Edit exercise' : 'New exercise';
+  $('ed-sub').textContent = editing
+    ? (editing.n_sets ? `${editing.n_sets} logged sets · last ${fmtShort(editing.last_date)}` : 'never logged') + ((editing.historical_names||[]).length ? ` · formerly ${editing.historical_names.join(', ')}` : '')
+    : 'Adds it to the library; tick days below to put it in the program.';
+  $('f-name').value = e.name; $('f-name').classList.remove('err');
+  $('f-alt').value = e.alt||'';
+  $('f-muscle').value = e.muscle||'';
+  $('f-ds').value = e.ds; $('f-rt').value = e.rt;
+  $('f-dw').value = parseFloat(e.dw) ? parseFloat(e.dw) : '';
+  $('f-u').value = e.u||''; $('f-step').value = parseFloat(e.step)||5;
+  $('f-rest').value = Number.isInteger(e.rest_s) ? e.rest_s : '';
+  edDays = new Set(e.days||[]);
+  renderDayButtons();
+  $('danger').style.display = editing ? '' : 'none';
+  $('archive-btn').style.display = editing && !editing.is_deleted ? '' : 'none';
+  $('restore-btn').style.display = editing && editing.is_deleted ? '' : 'none';
+  $('merge-toggle').style.display = editing && !editing.is_deleted ? '' : 'none';
+  $('merge-box').classList.remove('open');
+  $('f-days').parentElement.style.display = editing && editing.is_deleted ? 'none' : '';
+  $('editor').classList.add('open');
+  if(!editing) setTimeout(()=>$('f-name').focus(), 80);
+}
+function closeEditor(){ $('editor').classList.remove('open'); editing=null; }
+function renderDayButtons(){
+  $('f-days').innerHTML = DAYS.map(d=>{ const on=edDays.has(d), a=DAY_META[d].accent;
+    return `<button class="daybtn" style="${on?`background:${a};border-color:${a};color:#0a0f1a`:`color:${a};border-color:${a}55`}" onclick="toggleDay('${d}')">${on?'✓ ':''}${d}</button>`; }).join('');
+}
+function toggleDay(d){ edDays.has(d) ? edDays.delete(d) : edDays.add(d); renderDayButtons(); }
+
+async function saveEditor(){
+  const name = $('f-name').value.trim();
+  if(!name){ $('f-name').classList.add('err'); $('f-name').focus(); return; }
+  const clash = LIB.find(x=>!x.is_deleted && x.id!==(editing&&editing.id) && normName(x.name)===normName(name));
+  if(clash && !confirm(`“${clash.name}” already exists${clash.days.length?` (on ${clash.days.join(', ')})`:''}. Create a second one anyway?\n\nTip: one exercise can be on several days.`)) return;
+  const restRaw = $('f-rest').value.trim();
+  const payload = {
+    name, alt: $('f-alt').value.trim(), muscle: $('f-muscle').value.trim(),
+    ds: parseInt($('f-ds').value,10)||3, rt: $('f-rt').value.trim()||'8-12',
+    dw: parseFloat($('f-dw').value)||0, u: $('f-u').value.trim(),
+    step: parseFloat($('f-step').value)||5,
+    rest_s: restRaw==='' ? null : parseInt(restRaw,10),
+  };
+  if(editing) payload.id = editing.id;
+  const btn=$('save-btn'); btn.disabled=true; btn.textContent='Saving…';
+  try{
+    const saved = await call('POST','save_exercise', payload);
+    const before = new Set(editing ? editing.days||[] : []);
+    const changed = before.size!==edDays.size || [...edDays].some(d=>!before.has(d));
+    if(changed && !(editing && editing.is_deleted)) await call('POST','set_exercise_days', {exercise_id:saved.id, days:[...edDays]});
+    toast(editing ? 'Saved' : `Added “${saved.name}”`);
+    closeEditor();
+    await load();
+    if(RETURN_TO_LOG && !editing) location.href = './index.html';
+  }catch(e){ toast('Save failed: '+e.message,'#f87171'); }
+  finally{ btn.disabled=false; btn.textContent='Save'; }
+}
+
+async function doArchive(){
+  if(!editing) return;
+  const where = (editing.days||[]).length ? ` It will be removed from ${editing.days.join(', ')}.` : '';
+  if(!confirm(`Archive “${editing.name}”?${where} Logged history stays and you can restore it later.`)) return;
+  try{ await call('POST','archive_exercise',{id:editing.id}); toast('Archived','#fbbf24'); closeEditor(); await load(); }
+  catch(e){ toast('Archive failed: '+e.message,'#f87171'); }
+}
+async function doRestore(){
+  if(!editing) return;
+  try{ await call('POST','restore_exercise',{id:editing.id}); toast('Restored — tick days to use it again'); closeEditor(); await load(); }
+  catch(e){ toast('Restore failed: '+e.message,'#f87171'); }
+}
+
+function toggleMerge(){
+  const box=$('merge-box'); box.classList.toggle('open');
+  if(!box.classList.contains('open') || !editing) return;
+  const key = normName(editing.name);
+  const others = LIB.filter(x=>!x.is_deleted && x.id!==editing.id)
+    .sort((a,b)=> (normName(b.name)===key) - (normName(a.name)===key)
+               || ((b.muscle===editing.muscle) - (a.muscle===editing.muscle))
+               || a.name.localeCompare(b.name));
+  $('merge-target').innerHTML = others.map(x=>`<option value="${x.id}">${esc(x.name)}${x.days.length?` — ${x.days.join(', ')}`:''}${x.n_sets?` · ${x.n_sets} sets`:''}</option>`).join('');
+  $('merge-target').onchange = mergeHint; mergeHint();
+}
+function mergeHint(){
+  const into = LIB.find(x=>x.id===parseInt($('merge-target').value,10));
+  if(!into||!editing) return;
+  $('merge-hint').textContent = `${editing.n_sets} logged sets of “${editing.name}” move to “${into.name}”, which then carries both histories for progression and charts. “${editing.name}” becomes an old name of it and is archived.`;
+}
+async function doMerge(){
+  const into = LIB.find(x=>x.id===parseInt($('merge-target').value,10));
+  if(!editing||!into) return;
+  if(!confirm(`Merge “${editing.name}” into “${into.name}”?\n\n${editing.n_sets} sets of history move over. This can't be undone from the app.`)) return;
+  try{ const r = await call('POST','merge_exercises',{from:editing.id, into:into.id});
+       toast(`Merged — ${r.moved_sets} sets moved`); closeEditor(); await load(); }
+  catch(e){ toast(e.message,'#f87171'); }
+}
+
+// Deep links from the log: ?edit=ID opens that exercise, ?new=1&day=PUSH opens
+// a blank form with the day pre-ticked and returns to the log after saving.
+const params = new URLSearchParams(location.search);
+const PRESET_DAY = DAYS.includes(params.get('day')) ? params.get('day') : null;
+const RETURN_TO_LOG = params.has('return');
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeEditor(); });
+load().then(()=>{
+  const id = parseInt(params.get('edit'),10);
+  if(id) openEditor(id);
+  else if(params.has('new')) openEditor(null, params.get('name')||'');
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
+}
+</script>
+</body>
+</html>

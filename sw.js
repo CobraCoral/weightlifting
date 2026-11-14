@@ -10,8 +10,8 @@
    Bump CACHE only if you change this file's strategy; page freshness does
    not depend on it because pages are always refetched when online.
    ───────────────────────────────────────────────────────────────────────────── */
-const CACHE = 'ironlog-sw-v2';
-const PRECACHE = ['./', './index.html', './bjj.html'];
+const CACHE = 'ironlog-sw-v3';
+const PRECACHE = ['./', './index.html', './bjj.html', './exercises.html'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
