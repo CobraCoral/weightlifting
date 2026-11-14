@@ -1589,7 +1589,9 @@ async function removeFromDay(exId){
   }
   delete draft[exId]; saveDraftLocal();
   tidyGroups(day);
-  if((PROGRAM[day].slots||[]).some(sl=>sl.ssGroup!=null)) dayDirty = true;
+  // Always re-save after removing a slot: if it was half of a superset, the
+  // partner's link has to be cleared in the DB too, not just on screen.
+  if(!ex.extra) dayDirty = true;
   renderExercises();
 }
 
@@ -1818,6 +1820,8 @@ function switchView(v){
 }
 async function selectDay(d){
   if(d===currentDay && currentView==='log') return;
+  // Unsaved edit-day changes belong to the day being left — save them first.
+  if(dayDirty) await persistDay();
   currentDay=d;
   draft={}; // clear stale draft immediately so we don't show prior day's data
   renderAll();

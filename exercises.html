@@ -278,7 +278,7 @@ function render(){
   const muscles = [...new Set(live.map(e=>e.muscle).filter(Boolean))].sort((a,b)=>muscleRank(a)-muscleRank(b)||a.localeCompare(b));
   document.getElementById('muscle-chips').innerHTML =
     `<button class="chip ${!view.muscle?'on':''}" onclick="setMuscle('')">ALL</button>` +
-    muscles.map(m=>`<button class="chip ${view.muscle===m?'on':''}" onclick="setMuscle('${esc(m)}')">${esc(m.toUpperCase())}</button>`).join('');
+    muscles.map(m=>`<button class="chip ${view.muscle===m?'on':''}" data-m="${esc(m)}" onclick="setMuscle(this.dataset.m)">${esc(m.toUpperCase())}</button>`).join('');
   document.getElementById('muscle-list').innerHTML = [...new Set([...MUSCLE_ORDER, ...muscles])].map(m=>`<option value="${esc(m)}">`).join('');
   document.getElementById('day-chips').innerHTML =
     DAYS.map(d=>{ const on=view.day===d, a=DAY_META[d].accent;

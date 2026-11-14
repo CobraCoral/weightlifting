@@ -191,10 +191,11 @@ Deno.serve(async (req) => {
       const { from, into } = await req.json();
       if (!isId(from) || !isId(into) || from === into) return bad('from and into must be two different ids');
       const { data: pair, error: pErr } = await supabase.from('exercises')
-        .select('id, name, historical_names').in('id', [from, into]);
+        .select('id, name, historical_names, is_deleted').in('id', [from, into]);
       if (pErr) throw pErr;
       const src = pair?.find(e => e.id === from), dst = pair?.find(e => e.id === into);
       if (!src || !dst) return bad('exercise not found');
+      if (src.is_deleted || dst.is_deleted) return bad('Restore an archived exercise before merging it.');
 
       // Refuse if both were logged in the same session — the sets would collide.
       const key = (r: { date: string; day: string }) => `${r.date}|${r.day}`;
@@ -242,7 +243,10 @@ Deno.serve(async (req) => {
       const { data, error } = await supabase.from('program_slots')
         .insert({ day, exercise_id, sort_order: await nextSortOrder(day) })
         .select('id, day, sort_order, superset_group, exercise_id, exercise:exercises(*)').single();
-      if (error) throw error;
+      if (error) {
+        if ((error as { code?: string }).code === '23505') return json({ error: 'That exercise is already on this day.' }, 409);
+        throw error;
+      }
       return json(data);
     }
 
