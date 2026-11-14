@@ -46,6 +46,8 @@
   .row-days{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:40%;}
   .dtag{font-size:9px;font-weight:800;letter-spacing:.06em;border:1px solid;border-radius:4px;padding:1px 5px;}
   .dup{color:#fbbf24;font-size:10px;font-weight:700;margin-top:3px;}
+  .banner{margin:8px 10px 0;padding:9px 11px;border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.06);border-radius:8px;font-size:11px;line-height:1.45;color:#cbd5e1;cursor:pointer;}
+  .banner b{color:#fbbf24;}
   .empty{color:var(--muted);text-align:center;margin-top:40px;font-size:12px;line-height:1.6;padding:0 20px;}
   .loading{padding:32px;text-align:center;color:var(--muted);font-size:12px;}
 
@@ -76,9 +78,10 @@
   .merge-box{display:none;gap:8px;flex-direction:column;}
   .merge-box.open{display:flex;}
 
-  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);max-width:90vw;padding:9px 14px;border-radius:8px;border:1px solid #4ade80;color:#4ade80;background:rgba(0,0,0,.9);font-size:12px;font-weight:700;text-align:center;display:none;z-index:80;}
+  .toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:90vw;padding:9px 14px;border-radius:8px;border:1px solid #4ade80;color:#4ade80;background:rgba(0,0,0,.9);font-size:12px;font-weight:700;text-align:center;display:none;z-index:80;}
   .toast.show{display:block;}
 </style>
+<link rel="stylesheet" href="./shared.css">
 </head>
 <body>
 
@@ -86,9 +89,9 @@
   <div>
     <div class="title">LIBRARY</div>
     <div class="sub" id="sub">exercise database</div>
+    <div class="festive" id="festive-banner" style="display:none" onclick="toggleFestive()"></div>
   </div>
   <div class="nav">
-    <a href="./index.html" id="back-link">← LOG</a>
     <button class="primary" onclick="openEditor(null)">+ NEW</button>
   </div>
 </div>
@@ -99,6 +102,7 @@
   <div class="chips" id="day-chips"></div>
 </div>
 
+<div id="banner"></div>
 <div id="loading" class="loading">Loading library…</div>
 <div id="out"></div>
 
@@ -179,6 +183,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="./shared.js"></script>
 <script>
 // ─── API ──────────────────────────────────────────────────────────────────────
 const SB_URL = 'https://skfuygyygrapnrkwzsmj.supabase.co';
@@ -216,9 +221,13 @@ function findDuplicates(exs){
 function muscleRank(m){ const i = MUSCLE_ORDER.indexOf(m); return i<0 ? (m ? 50 : 99) : i; }
 // Filter + group for the list. Groups follow MUSCLE_ORDER, unknown muscles after,
 // unassigned last; exercises inside a group are alphabetical.
-function filterLibrary(exs, {q='', muscle='', day='', archived=false}={}){
+// dups: Set of ids to keep (duplicate review); staleBefore: 'YYYY-MM-DD' keeps
+// exercises never logged or not logged since that date.
+function filterLibrary(exs, {q='', muscle='', day='', archived=false, dups=null, staleBefore=''}={}){
   const nq = normName(q);
   return (exs||[]).filter(e => (archived ? e.is_deleted : !e.is_deleted)
+    && (!dups || dups.has(e.id))
+    && (!staleBefore || !e.last_date || e.last_date < staleBefore)
     && (!muscle || (e.muscle||'') === muscle)
     && (!day || (e.days||[]).includes(day))
     && (!nq || normName(e.name).includes(nq) || normName(e.alt).includes(nq)
@@ -230,6 +239,17 @@ function groupByMuscle(exs){
   return Object.keys(g)
     .sort((a,b)=> muscleRank(a)-muscleRank(b) || a.localeCompare(b))
     .map(m => ({ muscle:m, items:g[m].sort((a,b)=>a.name.localeCompare(b.name)) }));
+}
+// Duplicate groups for the review banner: [[exercise, exercise, ...], ...]
+function duplicateGroups(exs){
+  const by = {};
+  (exs||[]).filter(e=>!e.is_deleted).forEach(e=>{ (by[normName(e.name)] ||= []).push(e); });
+  return Object.values(by).filter(g=>g.length>1);
+}
+function daysAgoIso(todayIso, n){
+  const d = new Date(todayIso+'T12:00:00'); d.setDate(d.getDate()-n);
+  const p = x => String(x).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
 }
 function fmtRest(s){ if(!Number.isInteger(s)) return ''; const m=Math.floor(s/60), r=s%60; return m ? `${m}:${String(r).padStart(2,'0')}` : `${r}s`; }
 function prescription(e){
@@ -245,7 +265,8 @@ function prescription(e){
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let LIB = [];
-let view = { q:'', muscle:'', day:'', archived:false };
+let view = { q:'', muscle:'', day:'', archived:false, dupsOnly:false, stale:false };
+function todayIso(){ const d=new Date(), p=x=>String(x).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
 let editing = null;          // exercise object or null for new
 let edDays = new Set();
 let dupIds = new Set();
@@ -272,6 +293,9 @@ function setQuery(v){ view.q=v; render(); }
 function setMuscle(m){ view.muscle = view.muscle===m ? '' : m; render(); }
 function setDay(d){ view.day = view.day===d ? '' : d; render(); }
 function toggleArchived(){ view.archived=!view.archived; render(); }
+function toggleDups(){ view.dupsOnly=!view.dupsOnly; if(view.dupsOnly){ view.archived=false; view.muscle=''; view.day=''; } render(); }
+function toggleStale(){ view.stale=!view.stale; render(); }
+function quickMerge(id){ openEditor(id); toggleMerge(); const b=document.getElementById('merge-box'); if(b) b.scrollIntoView({block:'center'}); }
 
 function render(){
   const live = LIB.filter(e=>!e.is_deleted);
@@ -283,9 +307,16 @@ function render(){
   document.getElementById('day-chips').innerHTML =
     DAYS.map(d=>{ const on=view.day===d, a=DAY_META[d].accent;
       return `<button class="chip day ${on?'on':''}" style="${on?`background:${a};border-color:${a}`:`color:${a};border-color:${a}55`}" onclick="setDay('${d}')">${d}</button>`; }).join('') +
+    `<button class="chip ${view.stale?'on':''}" onclick="toggleStale()">UNUSED 90D</button>` +
+    (dupIds.size?`<button class="chip ${view.dupsOnly?'on':''}" style="${view.dupsOnly?'':'color:#fbbf24;border-color:rgba(251,191,36,.4)'}" onclick="toggleDups()">DUPLICATES ${duplicateGroups(LIB).length}</button>`:'') +
     `<button class="chip ${view.archived?'on':''}" onclick="toggleArchived()">ARCHIVED</button>`;
 
-  const items = filterLibrary(LIB, view);
+  const groups = duplicateGroups(LIB);
+  document.getElementById('banner').innerHTML = (groups.length && !view.dupsOnly && !view.archived && !view.q)
+    ? `<div class="banner" onclick="toggleDups()"><b>${groups.length} exercise${groups.length>1?'s':''} exist twice</b> with separate histories (${esc(groups.slice(0,3).map(g=>g[0].name).join(', '))}${groups.length>3?'…':''}). Tap to review and merge the ones that are the same machine.</div>` : '';
+
+  const items = filterLibrary(LIB, { q:view.q, muscle:view.muscle, day:view.day, archived:view.archived,
+    dups: view.dupsOnly ? dupIds : null, staleBefore: view.stale ? daysAgoIso(todayIso(), 90) : '' });
   const out = document.getElementById('out');
   if(!items.length){
     out.innerHTML = `<div class="empty">${view.archived ? 'No archived exercises match.' : 'Nothing matches.'}<br>${view.q ? `<button class="chip" style="margin-top:10px" onclick="openEditor(null, document.getElementById('q').value)">+ create “${esc(view.q)}”</button>` : ''}</div>`;
@@ -299,13 +330,15 @@ function render(){
 function rowHtml(e){
   const days = (e.days||[]).map(d=>`<span class="dtag" style="color:${DAY_META[d]?.accent||'#94a3b8'};border-color:${(DAY_META[d]?.accent||'#94a3b8')}66">${d}</span>`).join('');
   const stats = e.n_sets ? `${e.n_sessions} session${e.n_sessions===1?'':'s'} · ${e.n_sets} sets · last ${fmtShort(e.last_date)}` : 'never logged';
+  const best = (e.best_weight && !/assist|bodyweight|\bbw\b/i.test(e.u||'')) ? `🏆 best ${e.best_weight} ${esc(e.u||'')}${e.best_e1rm?` · e1RM ${Math.round(e.best_e1rm)}`:''}` : '';
   return `<div class="row${e.is_deleted?' archived':''}" onclick="openEditor(${e.id})">
     <div class="row-main">
       <div class="row-name">${esc(e.name)}</div>
       ${e.alt?`<div class="row-alt">or: ${esc(e.alt)}</div>`:''}
       <div class="row-meta">${esc(prescription(e))}</div>
       <div class="row-stats">${stats}</div>
-      ${dupIds.has(e.id)?'<div class="dup">⚠ same name as another exercise — consider merging</div>':''}
+      ${best?`<div class="row-stats" style="color:#b59a4a">${best}</div>`:''}
+      ${dupIds.has(e.id)?`<div class="dup">⚠ same name as another exercise <button class="chip" style="margin-left:6px;color:#fbbf24;border-color:rgba(251,191,36,.4)" onclick="event.stopPropagation();quickMerge(${e.id})">merge…</button></div>`:''}
     </div>
     <div class="row-days">${days}</div>
   </div>`;

@@ -1,0 +1,68 @@
+/* Iron Log — shared styles: festive weeks + bottom navigation. */
+/* ── Festive weeks ── */
+/* Colour schemes override the root tokens for the week. The per-day training
+   accent (PROGRAM[day].accent) is deliberately left alone so the app stays
+   legible — the theme wraps around it rather than replacing it. */
+body[data-theme="birthday"]    {--bg:#120a18;--bg2:rgba(244,114,182,.05); --border:rgba(244,114,182,.18);}
+body[data-theme="xmas"]        {--bg:#07110c;--bg2:rgba(74,222,128,.045); --border:rgba(248,113,113,.22);}
+body[data-theme="halloween"]   {--bg:#120804;--bg2:rgba(251,146,60,.05);  --border:rgba(251,146,60,.22);--muted:#7c5a3c;}
+body[data-theme="thanksgiving"]{--bg:#140e06;--bg2:rgba(245,158,11,.05);  --border:rgba(245,158,11,.2);}
+body[data-theme="newyear"]     {--bg:#07071a;--bg2:rgba(250,204,21,.045); --border:rgba(250,204,21,.22);}
+body[data-theme="valentine"]   {--bg:#16070e;--bg2:rgba(244,63,94,.05);   --border:rgba(244,63,94,.22);}
+body[data-theme="stpatrick"]   {--bg:#05120a;--bg2:rgba(34,197,94,.05);   --border:rgba(34,197,94,.22);}
+body[data-theme="july4"]       {--bg:#070b1a;--bg2:rgba(96,165,250,.05);  --border:rgba(248,113,113,.2);}
+body[data-theme="easter"]      {--bg:#0e0d18;--bg2:rgba(192,132,252,.05); --border:rgba(192,132,252,.2);}
+
+/* Banner under the title. Tap toggles the decorations; the text stays. */
+.festive{font-size:10px;font-weight:700;letter-spacing:.04em;margin-top:3px;color:#fbbf24;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.festive.off{opacity:.45;font-weight:500;}
+.festive .hint{font-weight:400;color:var(--muted);margin-left:6px;letter-spacing:0;}
+
+/* Overlay: fixed, full-viewport, never catches taps. Particles are emoji so
+   there is nothing to host and they render identically on every phone. */
+.festive-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:40;}
+.fp{position:absolute;left:0;line-height:1;will-change:transform,opacity;
+    animation-duration:var(--dur,8s);animation-delay:var(--delay,0s);animation-iteration-count:infinite;}
+
+@keyframes fp-fall   {0%{transform:translate3d(0,-12vh,0) rotate(0)}      100%{transform:translate3d(var(--sway,0px),112vh,0) rotate(360deg)}}
+@keyframes fp-rise   {0%{transform:translate3d(0,112vh,0) rotate(-6deg)}  100%{transform:translate3d(var(--sway,0px),-14vh,0) rotate(6deg)}}
+@keyframes fp-drift  {0%{transform:translate3d(-14vw,0,0)} 50%{transform:translate3d(50vw,-6vh,0)} 100%{transform:translate3d(114vw,0,0)}}
+@keyframes fp-flap   {0%{transform:translate3d(-12vw,0,0) scaleX(1)} 25%{transform:translate3d(20vw,-4vh,0) scaleX(.55)} 50%{transform:translate3d(52vw,2vh,0) scaleX(1)} 75%{transform:translate3d(84vw,-5vh,0) scaleX(.55)} 100%{transform:translate3d(116vw,0,0) scaleX(1)}}
+@keyframes fp-bob    {0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)}}
+@keyframes fp-burst  {0%{transform:scale(.2);opacity:0} 15%{opacity:1} 60%{transform:scale(1.15);opacity:.9} 100%{transform:scale(1.35);opacity:0}}
+@keyframes fp-blink  {0%,100%{opacity:1;box-shadow:0 0 6px 1px currentColor} 50%{opacity:.2;box-shadow:none}}
+@keyframes fp-thread {0%,100%{height:14px} 45%,55%{height:var(--drop,160px)}}
+
+.fp.fall  {top:0;animation-name:fp-fall;animation-timing-function:linear;}
+.fp.rise  {bottom:0;animation-name:fp-rise;animation-timing-function:linear;}
+.fp.drift {animation-name:fp-drift;animation-timing-function:ease-in-out;animation-direction:alternate;}
+.fp.flap  {animation-name:fp-flap;animation-timing-function:linear;}
+.fp.bob   {animation-name:fp-bob;animation-timing-function:ease-in-out;}
+.fp.burst {animation-name:fp-burst;animation-timing-function:ease-out;}
+
+/* Spider: the thread grows from the top edge and the spider rides its end. */
+.fp.spider{top:0;display:flex;flex-direction:column;align-items:center;}
+.fp.spider::before{content:'';display:block;width:1px;background:rgba(226,232,240,.5);
+  animation:fp-thread ease-in-out infinite;animation-duration:var(--dur,11s);animation-delay:var(--delay,0s);}
+
+/* Christmas tree with blinking lights laid over the glyph. */
+.fp.tree{left:auto;right:6px;bottom:10px;font-size:64px;}
+.fp.tree i{position:absolute;width:6px;height:6px;border-radius:50%;animation-name:fp-blink;animation-timing-function:ease-in-out;}
+
+/* Corner cobwebs, static. */
+.fp.web{top:-6px;font-size:54px;opacity:.28;}
+.fp.web.l{left:-8px;transform:scaleX(-1);}
+.fp.web.r{left:auto;right:-8px;}
+
+@media (prefers-reduced-motion: reduce){
+  .festive-layer .fp,.festive-layer .fp::before{animation:none!important;}
+  .festive-layer .fp.fall,.festive-layer .fp.rise,.festive-layer .fp.drift,.festive-layer .fp.flap,.festive-layer .fp.burst,.festive-layer .fp.spider{display:none;}
+}
+
+/* ── Bottom navigation ── */
+body{padding-bottom:calc(132px + env(safe-area-inset-bottom))!important;}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;justify-content:center;background:rgba(8,13,24,.96);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.09);padding-bottom:env(safe-area-inset-bottom);}
+.bnav a{flex:1;max-width:170px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 7px;color:#64748b;text-decoration:none;font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.12em;-webkit-tap-highlight-color:transparent;}
+.bnav a .bnav-i{font-size:16px;line-height:1;}
+.bnav a.on{color:#f8fafc;}
+.bnav a.on .bnav-i{color:#fb923c;}

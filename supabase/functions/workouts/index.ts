@@ -94,13 +94,21 @@ Deno.serve(async (req) => {
       const { data: slots, error: sErr } = await supabase.from('program_slots')
         .select('id, day, sort_order, exercise_id, superset_group').order('day').order('sort_order');
       if (sErr) throw sErr;
-      const rows = await fetchAll<{ exercise_id: number; date: string }>((a, b) =>
-        supabase.from('workouts').select('exercise_id, date').order('id').range(a, b));
-      const stats: Record<number, { sets: number; last: string | null; sessions: Set<string> }> = {};
+      type StatRow = { exercise_id: number; date: string; weight: number | null; reps: number | null; is_warmup: boolean; done: boolean };
+      const rows = await fetchAll<StatRow>((a, b) =>
+        supabase.from('workouts').select('exercise_id, date, weight, reps, is_warmup, done').order('id').range(a, b));
+      const stats: Record<number, { sets: number; last: string | null; sessions: Set<string>; bestW: number | null; bestE: number | null }> = {};
       for (const r of rows) {
-        const s = (stats[r.exercise_id] ||= { sets: 0, last: null, sessions: new Set() });
+        const s = (stats[r.exercise_id] ||= { sets: 0, last: null, sessions: new Set(), bestW: null, bestE: null });
         s.sets++; s.sessions.add(r.date);
         if (!s.last || r.date > s.last) s.last = r.date;
+        // Records: completed working sets only. e1RM = Epley, w * (1 + reps/30).
+        const w = Number(r.weight), n = Number(r.reps);
+        if (r.done && !r.is_warmup && w > 0 && n > 0) {
+          if (s.bestW == null || w > s.bestW) s.bestW = w;
+          const e = w * (1 + Math.min(n, 30) / 30);
+          if (s.bestE == null || e > s.bestE) s.bestE = e;
+        }
       }
       return json({
         exercises: (exs ?? []).map(e => ({
@@ -109,6 +117,8 @@ Deno.serve(async (req) => {
           n_sets: stats[e.id]?.sets ?? 0,
           n_sessions: stats[e.id]?.sessions.size ?? 0,
           last_date: stats[e.id]?.last ?? null,
+          best_weight: stats[e.id]?.bestW ?? null,
+          best_e1rm: stats[e.id]?.bestE != null ? Math.round(stats[e.id].bestE! * 10) / 10 : null,
         })),
         slots: slots ?? [],
       });
@@ -369,6 +379,53 @@ Deno.serve(async (req) => {
       return json(data);
     }
 
+    // Every set logged between two dates (inclusive), any day — weekly volume.
+    if (req.method === 'GET' && action === 'get_range') {
+      const from = url.searchParams.get('from') || '', to = url.searchParams.get('to') || '';
+      const isDate = (d: string) => /^\d{4}-\d{2}-\d{2}$/.test(d);
+      if (!isDate(from) || !isDate(to)) return bad('from and to (YYYY-MM-DD) are required');
+      const data = await fetchAll((a, b) => supabase
+        .from('workouts').select('date, day, exercise_id, set_number, weight, reps, done, is_warmup')
+        .gte('date', from).lte('date', to).order('date').order('id').range(a, b));
+      return json(data);
+    }
+
+    // ── Day templates ──────────────────────────────────────────────────────
+    if (req.method === 'GET' && action === 'get_templates') {
+      const day = url.searchParams.get('day');
+      let q = supabase.from('day_templates').select('*').order('name');
+      if (day) q = q.eq('day', day);
+      const { data, error } = await q;
+      if (error) throw error;
+      return json(data);
+    }
+
+    if (req.method === 'POST' && action === 'save_template') {
+      const { day, name, swaps } = await req.json();
+      const nm = typeof name === 'string' ? name.trim().slice(0, 60) : '';
+      if (!DAYS.includes(day) || !nm) return bad('day and name required');
+      const sw = (swaps && typeof swaps === 'object') ? swaps : {};
+      const ids = (a: unknown) => Array.isArray(a) ? a.filter(isId).slice(0, 50) : [];
+      const sMap: Record<string, number> = {};
+      for (const [k, v] of Object.entries((sw as { s?: Record<string, unknown> }).s ?? {})) {
+        if (/^\d+$/.test(k) && isId(v)) sMap[k] = v;
+      }
+      const clean = { s: sMap, x: ids((sw as { x?: unknown }).x), h: ids((sw as { h?: unknown }).h) };
+      const { data, error } = await supabase.from('day_templates')
+        .upsert({ day, name: nm, swaps: clean, updated_at: new Date().toISOString() }, { onConflict: 'day,name' })
+        .select().single();
+      if (error) throw error;
+      return json(data);
+    }
+
+    if (req.method === 'POST' && action === 'delete_template') {
+      const { id } = await req.json();
+      if (!isId(id)) return bad('id required');
+      const { error } = await supabase.from('day_templates').delete().eq('id', id);
+      if (error) throw error;
+      return json({ success: true });
+    }
+
     if (req.method === 'POST' && action === 'save_session') {
       const { date, day, rows } = await req.json();
       if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date) || typeof day !== 'string' || !day) {
@@ -421,6 +478,8 @@ Deno.serve(async (req) => {
         reps:   intOrNull(r.reps, 0, 10000),
         done:   r.done === true,
         rir:    intOrNull(r.rir, 0, 5),
+        is_warmup: r.is_warmup === true,
+        note: (typeof r.note === 'string' && r.note.trim()) ? r.note.trim().slice(0, 300) : null,
         started_at:   tsOrNull(r.started_at),
         completed_at: tsOrNull(r.completed_at),
         saved_at: new Date().toISOString(),

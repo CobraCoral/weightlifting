@@ -53,66 +53,59 @@
 .card.ss-mid,.card.ss-last{margin-top:-10px;border-top-left-radius:0;border-top-right-radius:0;border-top:1px dashed rgba(167,139,250,.35);}
 .ss-tag{font-size:8px;font-weight:700;letter-spacing:.09em;color:#a78bfa;text-transform:uppercase;margin-bottom:4px;}
 
-/* ── Festive weeks ── */
-/* Colour schemes override the root tokens for the week. The per-day training
-   accent (PROGRAM[day].accent) is deliberately left alone so the app stays
-   legible — the theme wraps around it rather than replacing it. */
-body[data-theme="birthday"]    {--bg:#120a18;--bg2:rgba(244,114,182,.05); --border:rgba(244,114,182,.18);}
-body[data-theme="xmas"]        {--bg:#07110c;--bg2:rgba(74,222,128,.045); --border:rgba(248,113,113,.22);}
-body[data-theme="halloween"]   {--bg:#120804;--bg2:rgba(251,146,60,.05);  --border:rgba(251,146,60,.22);--muted:#7c5a3c;}
-body[data-theme="thanksgiving"]{--bg:#140e06;--bg2:rgba(245,158,11,.05);  --border:rgba(245,158,11,.2);}
-body[data-theme="newyear"]     {--bg:#07071a;--bg2:rgba(250,204,21,.045); --border:rgba(250,204,21,.22);}
-body[data-theme="valentine"]   {--bg:#16070e;--bg2:rgba(244,63,94,.05);   --border:rgba(244,63,94,.22);}
-body[data-theme="stpatrick"]   {--bg:#05120a;--bg2:rgba(34,197,94,.05);   --border:rgba(34,197,94,.22);}
-body[data-theme="july4"]       {--bg:#070b1a;--bg2:rgba(96,165,250,.05);  --border:rgba(248,113,113,.2);}
-body[data-theme="easter"]      {--bg:#0e0d18;--bg2:rgba(192,132,252,.05); --border:rgba(192,132,252,.2);}
-
-/* Banner under the title. Tap toggles the decorations; the text stays. */
-.festive{font-size:10px;font-weight:700;letter-spacing:.04em;margin-top:3px;color:#fbbf24;cursor:pointer;user-select:none;-webkit-user-select:none;}
-.festive.off{opacity:.45;font-weight:500;}
-.festive .hint{font-weight:400;color:var(--muted);margin-left:6px;letter-spacing:0;}
-
-/* Overlay: fixed, full-viewport, never catches taps. Particles are emoji so
-   there is nothing to host and they render identically on every phone. */
-.festive-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:40;}
-.fp{position:absolute;left:0;line-height:1;will-change:transform,opacity;
-    animation-duration:var(--dur,8s);animation-delay:var(--delay,0s);animation-iteration-count:infinite;}
-
-@keyframes fp-fall   {0%{transform:translate3d(0,-12vh,0) rotate(0)}      100%{transform:translate3d(var(--sway,0px),112vh,0) rotate(360deg)}}
-@keyframes fp-rise   {0%{transform:translate3d(0,112vh,0) rotate(-6deg)}  100%{transform:translate3d(var(--sway,0px),-14vh,0) rotate(6deg)}}
-@keyframes fp-drift  {0%{transform:translate3d(-14vw,0,0)} 50%{transform:translate3d(50vw,-6vh,0)} 100%{transform:translate3d(114vw,0,0)}}
-@keyframes fp-flap   {0%{transform:translate3d(-12vw,0,0) scaleX(1)} 25%{transform:translate3d(20vw,-4vh,0) scaleX(.55)} 50%{transform:translate3d(52vw,2vh,0) scaleX(1)} 75%{transform:translate3d(84vw,-5vh,0) scaleX(.55)} 100%{transform:translate3d(116vw,0,0) scaleX(1)}}
-@keyframes fp-bob    {0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)}}
-@keyframes fp-burst  {0%{transform:scale(.2);opacity:0} 15%{opacity:1} 60%{transform:scale(1.15);opacity:.9} 100%{transform:scale(1.35);opacity:0}}
-@keyframes fp-blink  {0%,100%{opacity:1;box-shadow:0 0 6px 1px currentColor} 50%{opacity:.2;box-shadow:none}}
-@keyframes fp-thread {0%,100%{height:14px} 45%,55%{height:var(--drop,160px)}}
-
-.fp.fall  {top:0;animation-name:fp-fall;animation-timing-function:linear;}
-.fp.rise  {bottom:0;animation-name:fp-rise;animation-timing-function:linear;}
-.fp.drift {animation-name:fp-drift;animation-timing-function:ease-in-out;animation-direction:alternate;}
-.fp.flap  {animation-name:fp-flap;animation-timing-function:linear;}
-.fp.bob   {animation-name:fp-bob;animation-timing-function:ease-in-out;}
-.fp.burst {animation-name:fp-burst;animation-timing-function:ease-out;}
-
-/* Spider: the thread grows from the top edge and the spider rides its end. */
-.fp.spider{top:0;display:flex;flex-direction:column;align-items:center;}
-.fp.spider::before{content:'';display:block;width:1px;background:rgba(226,232,240,.5);
-  animation:fp-thread ease-in-out infinite;animation-duration:var(--dur,11s);animation-delay:var(--delay,0s);}
-
-/* Christmas tree with blinking lights laid over the glyph. */
-.fp.tree{left:auto;right:6px;bottom:10px;font-size:64px;}
-.fp.tree i{position:absolute;width:6px;height:6px;border-radius:50%;animation-name:fp-blink;animation-timing-function:ease-in-out;}
-
-/* Corner cobwebs, static. */
-.fp.web{top:-6px;font-size:54px;opacity:.28;}
-.fp.web.l{left:-8px;transform:scaleX(-1);}
-.fp.web.r{left:auto;right:-8px;}
-
-@media (prefers-reduced-motion: reduce){
-  .festive-layer .fp,.festive-layer .fp::before{animation:none!important;}
-  .festive-layer .fp.fall,.festive-layer .fp.rise,.festive-layer .fp.drift,.festive-layer .fp.flap,.festive-layer .fp.burst,.festive-layer .fp.spider{display:none;}
-}
-.card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.card-head{display:block;margin-bottom:6px;}
+.ch-line{font-size:10.5px;margin-top:3px;line-height:1.35;}
+.ch-dim{color:#64748b;}
+.ex-suggest{font-size:11px;margin-top:2px;font-weight:600;letter-spacing:.01em;line-height:1.35;}
+.ex-note-last{font-size:10px;color:#94a3b8;margin-top:3px;font-style:italic;}
+.note-add{background:none;border:none;color:#475569;font-family:var(--font);font-size:10px;padding:3px 0 0;cursor:pointer;}
+.note-input{width:100%;margin-top:5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:5px;padding:5px 7px;color:var(--text);font-family:var(--font);font-size:11px;outline:none;}
+.pr-chip{font-size:9px;font-weight:800;color:#fbbf24;border:1px solid rgba(251,191,36,.45);border-radius:4px;padding:1px 4px;white-space:nowrap;letter-spacing:.03em;}
+button.set-num{background:none;border:none;font-family:var(--font);cursor:pointer;padding:6px 0;}
+button.set-num.wu{font-weight:800;}
+.card.done-card{display:flex;align-items:center;gap:9px;padding:8px 11px;cursor:pointer;opacity:.82;}
+.dc-chk{font-weight:800;font-size:13px;}
+.dc-main{flex:1;min-width:0;}
+.dc-name{font-size:11.5px;font-weight:700;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dc-sets{font-size:10px;color:#64748b;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums;}
+.dc-open{color:#475569;font-size:11px;}
+.tool-row{display:flex;gap:6px;align-items:center;padding:8px 14px 0;flex-wrap:wrap;}
+.tool-chip{background:none;border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:4px 10px;color:#94a3b8;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tool-chip.on{color:#a78bfa;border-color:rgba(167,139,250,.5);}
+.save-state{margin-left:auto;font-size:9.5px;color:#475569;white-space:nowrap;}
+.bc-spark{vertical-align:-3px;margin-right:7px;}
+.rest-bar{position:fixed;left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom));z-index:44;max-width:680px;margin:0 auto;display:none;background:rgba(15,24,41,.97);border-top:1px solid rgba(251,191,36,.45);cursor:pointer;overflow:hidden;}
+.rest-bar.show{display:block;}
+.rest-bar .rb-fill{position:absolute;left:0;top:0;bottom:0;background:rgba(251,191,36,.12);transition:width 1s linear;}
+.rest-bar.ready{border-top-color:#4ade80;}
+.rest-bar.ready .rb-fill{background:rgba(74,222,128,.16);}
+.rest-bar.next{border-top-color:rgba(255,255,255,.15);}
+.rb-row{position:relative;display:flex;align-items:center;gap:10px;padding:8px 14px;}
+.rb-time{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;color:#fbbf24;}
+.rest-bar.ready .rb-time{color:#4ade80;} .rest-bar.next .rb-time{color:#94a3b8;font-size:13px;}
+.rb-time small{font-size:10px;font-weight:600;color:#64748b;}
+.rb-what{flex:1;min-width:0;font-size:11px;font-weight:600;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rb-bell{background:none;border:none;font-size:14px;cursor:pointer;padding:2px 4px;}
+.fin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.fin-grid .ds-tile{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;}
+.fin-grid .ds-val{font-size:14px;font-weight:800;color:#f1f5f9;} .fin-grid .ds-lbl{font-size:9.5px;color:#64748b;margin-top:2px;}
+.fin-sub{font-size:10.5px;color:#64748b;margin-top:8px;line-height:1.45;}
+.fin-h{font-size:12px;font-weight:800;color:#fbbf24;margin:14px 0 6px;}
+.fin-pr{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:5px 0;border-top:1px solid var(--border);}
+.fin-pr span{color:#94a3b8;text-align:right;}
+.wk-legend{font-size:10px;color:#94a3b8;margin:2px 2px 10px;}
+.wk-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:11px;}
+.wk-m{flex:0 0 84px;color:#cbd5e1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wk-bar{position:relative;flex:1;height:14px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden;}
+.wk-bar i{position:absolute;top:0;bottom:0;display:block;}
+.wk-zone{background:rgba(255,255,255,.07);} .wk-fill{left:0;opacity:.85;border-radius:3px;}
+.wk-prev{width:2px;background:#94a3b8;}
+.wk-n{flex:0 0 22px;text-align:right;font-weight:800;font-variant-numeric:tabular-nums;}
+.wk-p{flex:0 0 20px;text-align:right;color:#475569;font-variant-numeric:tabular-nums;}
+.plan-row{display:flex;gap:6px;align-items:stretch;} .plan-row .pick-row{flex:1;}
+.plan-del{flex:0 0 38px;margin-bottom:5px;background:none;border:1px solid rgba(248,113,113,.25);border-radius:8px;color:#f87171;cursor:pointer;font-family:var(--font);}
+.plan-save{display:flex;gap:8px;}
+.pick-row.skip{border-style:dashed;}
 .ex-name{font-size:12px;font-weight:700;color:#f1f5f9;}
 .ex-alt{font-size:10px;color:var(--muted);margin-top:1px;}
 .ex-target{font-size:10px;font-weight:600;text-align:right;}
@@ -137,7 +130,7 @@ body[data-theme="easter"]      {--bg:#0e0d18;--bg2:rgba(192,132,252,.05); --bord
 .swipe-wrap{position:relative;overflow:hidden;border-radius:4px;margin:1px 0;}
 .swipe-delete-bg{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:flex-end;padding-right:14px;border-radius:4px;pointer-events:none;min-width:80px;}
 .swipe-delete-label{font-size:10px;font-weight:800;letter-spacing:.08em;color:#fff;opacity:0;transition:opacity .1s;}
-.swipe-inner{position:relative;transition:transform .2s cubic-bezier(.25,.46,.45,.94);touch-action:pan-y;will-change:transform;}
+.swipe-inner{position:relative;background:var(--card-solid,#0b111c);transition:transform .2s cubic-bezier(.25,.46,.45,.94);touch-action:pan-y;will-change:transform;}
 .set-time{font-size:9px;color:var(--muted);flex-shrink:0;white-space:nowrap;}
 
 /* ── Rest / exercise badges ── */
@@ -226,7 +219,7 @@ canvas#wma-canvas{width:100%;display:block;border-radius:8px;background:rgba(255
 .day-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px 14px 0;}
 .day-summary .ds-tile{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:7px 4px;text-align:center;min-width:0;}
 .day-summary .ds-val{font-size:13px;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.day-summary .ds-lbl{font-size:11px;color:#64748b;margin-top:2px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.day-summary .ds-lbl{font-size:9.5px;color:#64748b;margin-top:2px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ex-section-header{display:flex;justify-content:space-between;align-items:center;padding:8px 14px 2px;}
 .ex-section-label{font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;}
 .add-ex-btn{background:none;border:1px solid;border-radius:6px;padding:4px 10px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.06em;}
@@ -275,6 +268,7 @@ a.nav-btn{text-decoration:none;display:inline-flex;align-items:center;}
 .card-edit-btn:hover{color:var(--text);}
 
 </style>
+<link rel="stylesheet" href="./shared.css">
 </head>
 <body>
 
@@ -284,11 +278,6 @@ a.nav-btn{text-decoration:none;display:inline-flex;align-items:center;}
     <div class="sub"><span id="today-label"></span><span class="dot">● SUPABASE</span></div>
     <div class="festive" id="festive-banner" style="display:none" onclick="toggleFestive()"></div>
   </div>
-  <div class="nav-btns">
-    <button class="nav-btn active" onclick="switchView('log')" id="btn-log">LOG</button>
-    <button class="nav-btn" onclick="switchView('history')" id="btn-history">HISTORY</button>
-    <a class="nav-btn" href="./exercises.html" id="btn-library">LIBRARY</a>
-  </div>
 </div>
 
 <div class="strip" id="week-strip"></div>
@@ -297,6 +286,7 @@ a.nav-btn{text-decoration:none;display:inline-flex;align-items:center;}
   <div class="day-tabs" id="day-tabs"></div>
   <div class="bc-line" id="bc-line"></div>
   <div class="day-summary" id="day-summary" aria-live="polite"></div>
+  <div class="tool-row" id="tool-row"></div>
   <div class="ex-section-header">
     <span class="ex-section-label">EXERCISES</span>
     <div>
@@ -310,9 +300,43 @@ a.nav-btn{text-decoration:none;display:inline-flex;align-items:center;}
   <div class="action-row">
     <button class="exp-btn" id="whoop-btn" onclick="copyForWhoop()">copy WHOOP</button>
     <button class="exp-btn" id="csv-btn" onclick="exportCSV()">export CSV</button>
-    <button class="save-btn" id="save-btn" onclick="saveSession()">SAVE</button>
+    <button class="save-btn" id="save-btn" onclick="saveSession()">FINISH</button>
   </div>
   <div class="toast" id="toast"></div>
+</div>
+
+<div class="rest-bar" id="rest-bar" onclick="restBarTap()"></div>
+
+<!-- ── Session finished ── -->
+<div class="modal-overlay" id="fin-overlay" onclick="closeFinish(event)">
+  <div class="modal">
+    <div class="modal-title" id="fin-title">Done</div>
+    <div id="fin-body"></div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-cancel" onclick="copyForWhoop()" id="fin-whoop">copy WHOOP</button>
+      <button class="modal-btn modal-btn-cancel" onclick="exportCSV()">CSV</button>
+      <button class="modal-btn" style="background:var(--ac);color:#0a0f1a" onclick="closeFinish()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Week volume ── -->
+<div class="modal-overlay" id="week-overlay" onclick="closeWeek(event)">
+  <div class="modal pick-modal">
+    <div class="modal-title">This week by muscle</div>
+    <div class="pick-list" id="week-body"></div>
+    <div class="pick-foot"><span></span><button class="modal-btn modal-btn-cancel" style="flex:0 0 auto;padding:9px 16px" onclick="closeWeek()">Close</button></div>
+  </div>
+</div>
+
+<!-- ── Day plans ── -->
+<div class="modal-overlay" id="plan-overlay" onclick="closePlans(event)">
+  <div class="modal pick-modal">
+    <div class="modal-title">Plan for today</div>
+    <div class="pick-sub">Named variants of this day. Applying one changes today only.</div>
+    <div class="pick-list" id="plan-body"></div>
+    <div class="pick-foot"><span></span><button class="modal-btn modal-btn-cancel" style="flex:0 0 auto;padding:9px 16px" onclick="closePlans()">Close</button></div>
+  </div>
 </div>
 
 <!-- ── Exercise picker (swap / add from library) ── -->
@@ -376,6 +400,7 @@ a.nav-btn{text-decoration:none;display:inline-flex;align-items:center;}
   </div>
 </div>
 
+<script src="./shared.js"></script>
 <script>
 // Rows the progression engine needs: every earlier session of each exercise on
 // the day's list, whichever day it was logged under. Today is excluded so a
@@ -503,7 +528,7 @@ function draftKey(){ return `${DRAFT_PREFIX}${currentDay}_${todayKey()}`; }
 function saveDraftLocal(){ try{ localStorage.setItem(draftKey(),JSON.stringify(draft)); }catch{} }
 function clearDraftLocal(){ try{ localStorage.removeItem(draftKey()); }catch{} }
 function loadDraftLocal(){ try{ const raw=localStorage.getItem(draftKey()); return raw?JSON.parse(raw):null; }catch{ return null; } }
-function pruneOldDrafts(){ try{ const today=todayKey(); for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&(k.startsWith(DRAFT_PREFIX)||k.startsWith(SWAP_PREFIX))&&!k.endsWith(today)) localStorage.removeItem(k); } }catch{} }
+function pruneOldDrafts(){ try{ const today=todayKey(); for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&(k.startsWith(DRAFT_PREFIX)||k.startsWith(SWAP_PREFIX)||k.startsWith(NOTE_PREFIX))&&!k.endsWith(today)) localStorage.removeItem(k); } }catch{} }
 
 // ── Library + today's swaps ──
 let LIB = {};            // exercise id -> exercise (library; archived ones too once loaded)
@@ -511,8 +536,20 @@ let LIB_STATS = {};      // exercise id -> {n, last, days}
 let libraryLoading = null;
 const SWAP_PREFIX='ironlog_swaps_';
 function swapKey(day){ return `${SWAP_PREFIX}${day}_${todayKey()}`; }
-function loadSwaps(day){ try{ const o=JSON.parse(localStorage.getItem(swapKey(day))||'null'); return (o&&o.s)?{s:o.s,x:Array.isArray(o.x)?o.x:[]}:emptySwaps(); }catch{ return emptySwaps(); } }
-function saveSwaps(day,sw){ try{ if(!Object.keys(sw.s).length && !sw.x.length) localStorage.removeItem(swapKey(day)); else localStorage.setItem(swapKey(day),JSON.stringify(sw)); }catch{} }
+function loadSwaps(day){ try{ const o=JSON.parse(localStorage.getItem(swapKey(day))||'null'); return (o&&o.s)?{s:o.s,x:Array.isArray(o.x)?o.x:[],h:Array.isArray(o.h)?o.h:[],plan:o.plan||''}:emptySwaps(); }catch{ return emptySwaps(); } }
+function saveSwaps(day,sw){ try{ if(!Object.keys(sw.s).length && !sw.x.length && !(sw.h||[]).length) localStorage.removeItem(swapKey(day)); else localStorage.setItem(swapKey(day),JSON.stringify(sw)); }catch{} }
+// Per-exercise notes for today's session (kept beside the draft).
+const NOTE_PREFIX='ironlog_notes_';
+let notes = {};          // exId -> text, today
+let lastNotes = {};      // exId -> {note, date} from earlier sessions
+let bests = {};          // exId -> {w, e1} all-time, before today
+let histRows = [];       // earlier sessions of today's exercises (finish screen)
+let expanded = new Set();// finished cards reopened by hand
+let collapsed = new Set();// finished cards folded by hand before RIR was logged
+let noteOpen = new Set();
+function noteKey(){ return `${NOTE_PREFIX}${currentDay}_${todayKey()}`; }
+function saveNotesLocal(){ try{ if(Object.keys(notes).length) localStorage.setItem(noteKey(),JSON.stringify(notes)); else localStorage.removeItem(noteKey()); }catch{} }
+function loadNotesLocal(){ try{ return JSON.parse(localStorage.getItem(noteKey())||'{}')||{}; }catch{ return {}; } }
 function applyDay(day){ if(PROGRAM[day]) PROGRAM[day].exercises = buildDayList(PROGRAM[day].slots||[], LIB, loadSwaps(day)); }
 function fmtDate(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}); }
 function fmtShort(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
@@ -663,6 +700,7 @@ function sessionsByExercise(rows){
   const byEx = {};
   (rows||[]).forEach(r=>{
     if(r.exercise_id==null) return;
+    if(r.is_warmup) return;                     // warm-ups never drive progression
     (byEx[r.exercise_id] ||= {})[r.date] ||= [];
     byEx[r.exercise_id][r.date].push(r);
   });
@@ -798,7 +836,7 @@ function rowsToDraft(rows,day){
     const er=rows.filter(r=>r.exercise_id===ex.id).sort((a,b)=>a.set_number-b.set_number);
     if(!er.length) return;                       // untouched exercise -> keep the prefill
     const planned=d[ex.id]||[];
-    const merged=er.map(r=>({w:numToStr(r.weight),r:numToStr(r.reps),done:r.done,startedAt:r.started_at||null,completedAt:r.completed_at||null,rir:(r.rir==null?null:r.rir)}));
+    const merged=er.map(r=>({w:numToStr(r.weight),r:numToStr(r.reps),done:r.done,startedAt:r.started_at||null,completedAt:r.completed_at||null,rir:(r.rir==null?null:r.rir),wu:!!r.is_warmup}));
     for(let i=merged.length;i<planned.length;i++) merged.push(planned[i]);
     d[ex.id]=merged;
   });
@@ -827,7 +865,7 @@ function clusterSupersets(list){
 // A day is a list of slots {slotId, exId, ssGroup}. Today-only changes live in
 // a per-day "swaps" object {s:{slotId:exId}, x:[exId]}: s = slot swapped to a
 // different exercise, x = extra exercises added for today only.
-function emptySwaps(){ return {s:{}, x:[]}; }
+function emptySwaps(){ return {s:{}, x:[], h:[]}; }
 function exFromRow(e){
   const ex = {
     id: e.id, name: e.name, ds: e.ds, rt: e.rt,
@@ -847,7 +885,9 @@ function exFromRow(e){
 function buildDayList(slots, lib, swaps){
   const sw = swaps || emptySwaps();
   const out = [], seen = new Set();
+  const hidden = new Set(sw.h||[]);            // slots skipped for today
   (slots||[]).forEach(sl=>{
+    if(hidden.has(sl.slotId)) return;
     const want = (sw.s && sw.s[sl.slotId]!=null) ? sw.s[sl.slotId] : sl.exId;
     const ex = lib[want] || lib[sl.exId];
     if(!ex || seen.has(ex.id)) return;
@@ -868,7 +908,7 @@ function buildDayList(slots, lib, swaps){
 // device): put each into a same-muscle slot that has nothing logged yet,
 // otherwise keep it as a today-only extra. Never drops logged work.
 function inferSwaps(slots, lib, swaps, loggedIds){
-  const sw = { s: Object.assign({}, (swaps&&swaps.s)||{}), x: ((swaps&&swaps.x)||[]).slice() };
+  const sw = { s: Object.assign({}, (swaps&&swaps.s)||{}), x: ((swaps&&swaps.x)||[]).slice(), h: ((swaps&&swaps.h)||[]).slice() };
   const logged = new Set(loggedIds||[]);
   const onList = new Set(buildDayList(slots, lib, sw).map(e=>e.id));
   [...logged].filter(id=>!onList.has(id) && lib[id]).forEach(id=>{
@@ -893,6 +933,111 @@ function pickerOptions(lib, opts){
     .sort((a,b)=>(a.muscle||'~').localeCompare(b.muscle||'~') || byName(a,b));
   return { same, rest };
 }
+// ─── Records, notes, weekly volume, rest state ───────────────────────────────
+// Estimated 1RM (Epley). Reps are capped at 30 so endurance sets don't inflate it.
+function e1rm(w, r){ return (w>0 && r>0) ? w*(1+Math.min(r,30)/30) : 0; }
+// All-time bests per exercise from completed working sets: {w: top weight, e1: top e1RM}.
+function computeBests(rows){
+  const out = {};
+  (rows||[]).forEach(r=>{
+    if(r.exercise_id==null || r.is_warmup || r.done===false) return;
+    const w=parseFloat(r.weight), n=parseFloat(r.reps);
+    if(!(w>0) || !(n>0)) return;
+    const b = (out[r.exercise_id] ||= {w:0, e1:0});
+    if(w>b.w) b.w=w;
+    const e=e1rm(w,n); if(e>b.e1) b.e1=e;
+  });
+  return out;
+}
+// Is this set a record against the stored bests? 'weight' beats the heaviest
+// load ever; 'e1rm' beats the best estimated 1RM at an equal or lighter load.
+// No history -> null (a first session is a baseline, not a PR).
+function prCheck(best, w, r){
+  w=parseFloat(w); r=parseFloat(r);
+  if(!best || !(best.w>0) || !(w>0) || !(r>0)) return null;
+  if(w > best.w) return 'weight';
+  if(e1rm(w,r) > best.e1 + 0.05) return 'e1rm';
+  return null;
+}
+// Best completed working set of an exercise in the current draft (by e1RM).
+function topSet(sets){
+  let best=null;
+  (sets||[]).forEach((s,i)=>{
+    if(!s.done || s.wu) return;
+    const w=parseFloat(s.w), r=parseFloat(s.r);
+    if(!(w>0) || !(r>0)) return;
+    const e=e1rm(w,r);
+    if(!best || e>best.e) best={i,w,r,e};
+  });
+  return best;
+}
+// Most recent note per exercise: {exId: {note, date}}.
+function computeLastNotes(rows){
+  const out = {};
+  (rows||[]).forEach(r=>{
+    if(r.exercise_id==null || !r.note) return;
+    const cur = out[r.exercise_id];
+    if(!cur || r.date > cur.date) out[r.exercise_id] = { note:r.note, date:r.date };
+  });
+  return out;
+}
+// Completed working sets per muscle: {Triceps: 16, ...}.
+function weeklyMuscleSets(rows, lib){
+  const out = {};
+  (rows||[]).forEach(r=>{
+    if(!r.done || r.is_warmup) return;
+    const m = (lib && lib[r.exercise_id] && lib[r.exercise_id].muscle) || 'Other';
+    out[m] = (out[m]||0) + 1;
+  });
+  return out;
+}
+const WEEK_SET_TARGET = { lo:10, hi:20 };     // hard sets / muscle / week
+function volumeBand(n){ return n < WEEK_SET_TARGET.lo ? 'low' : n > WEEK_SET_TARGET.hi ? 'high' : 'ok'; }
+function isFinished(sets){ return !!(sets && sets.length) && sets.every(s=>s.done); }
+// What the lifter is doing right now, for the floating rest bar.
+//   {kind:'rest', exId, name, set, since, tgt}  resting before the next set
+//   {kind:'next', exId, name, since}            exercise finished -> move on
+//   null                                         mid-set, or nothing logged yet
+function currentRest(list, draft){
+  let last=null;
+  (list||[]).forEach(ex=>{
+    (draft[ex.id]||[]).forEach((s,i)=>{
+      if(!s.done || !s.completedAt) return;
+      const t=new Date(s.completedAt).getTime();
+      if(!isNaN(t) && (!last || t>last.t)) last={t, ex, i};
+    });
+  });
+  if(!last) return null;
+  // A set started after that completion means work is in progress.
+  const working=(list||[]).some(ex=>(draft[ex.id]||[]).some(s=>!s.done && s.startedAt && new Date(s.startedAt).getTime()>=last.t));
+  if(working) return null;
+  const sets=draft[last.ex.id]||[];
+  const ni=sets.findIndex((s,i)=>i>last.i && !s.done);
+  if(ni>=0) return { kind:'rest', exId:last.ex.id, name:last.ex.name, set:ni+1, since:last.t,
+                     tgt:Number.isInteger(last.ex.rest)?last.ex.rest:null };
+  const idx=list.findIndex(e=>e.id===last.ex.id);
+  const order=list.slice(idx+1).concat(list.slice(0,idx));
+  const nx=order.find(ex=>(draft[ex.id]||[]).some(s=>!s.done));
+  return nx ? { kind:'next', exId:nx.id, name:nx.name, since:last.t } : null;
+}
+// Keep a saved day template usable after the program changed: drop slots and
+// exercises that no longer exist.
+function sanitizeSwaps(sw, slots, lib){
+  const ok=new Set((slots||[]).map(s=>String(s.slotId)));
+  const out=emptySwaps();
+  Object.entries((sw&&sw.s)||{}).forEach(([k,v])=>{ if(ok.has(String(k)) && lib[v] && !lib[v].archived) out.s[k]=v; });
+  out.x=((sw&&sw.x)||[]).filter(id=>lib[id] && !lib[id].archived);
+  out.h=((sw&&sw.h)||[]).filter(id=>ok.has(String(id)));
+  return out;
+}
+// Inline sparkline path for a series (oldest -> newest) in a w x h box.
+function sparkPath(vals, w, h){
+  const v=(vals||[]).filter(x=>Number.isFinite(x));
+  if(v.length<2) return '';
+  const lo=Math.min(...v), hi=Math.max(...v), span=(hi-lo)||1;
+  return v.map((x,i)=>`${i?'L':'M'}${(i*(w/(v.length-1))).toFixed(1)},${(h-1-((x-lo)/span)*(h-2)).toFixed(1)}`).join(' ');
+}
+
 // One logged session's rows grouped per exercise: today's day order first,
 // then anything else (swapped/removed exercises) in first-logged order.
 function sessionExerciseGroups(rows, order){
@@ -929,7 +1074,7 @@ function exStats(sets){
 // (bodyweight); only null/undefined become an empty input.
 function numToStr(v){ return (v==null || v==='') ? '' : String(v); }
 
-function draftToRows(day,date){
+function draftToRows(day,date,quiet){
   const rows=[];
   const skipped=[];
   PROGRAM[day].exercises.forEach(ex=>{
@@ -952,10 +1097,11 @@ function draftToRows(day,date){
         weight:Number.isFinite(wRaw)?Math.min(10000,Math.max(-1000,wRaw)):null,
         reps:Number.isFinite(rRaw)?Math.min(10000,Math.max(0,rRaw)):null,
         done:!!st.done,started_at:st.startedAt||null,completed_at:st.completedAt||null,
-        rir:Number.isFinite(rirRaw)?Math.min(5,Math.max(0,rirRaw)):null});
+        rir:Number.isFinite(rirRaw)?Math.min(5,Math.max(0,rirRaw)):null,
+        is_warmup:!!st.wu, note:(notes[ex.id]||'').trim()||null});
     });
   });
-  if (skipped.length) {
+  if (skipped.length && !quiet) {
     console.warn('Skipped exercises without DB id:', skipped);
     showToast(`Skipped ${skipped.length} unsaved exercise${skipped.length>1?'s':''}: ${skipped.join(', ')}`,'#fb923c');
   }
@@ -1046,7 +1192,7 @@ function dayStats(day, dateStr){
       const w=parseFloat(s.w), r=parseFloat(s.r);
       // bodyweight movement: effective load = BW + logged (negative = assist)
       const load=(bwEx && bwToday!=null && !isNaN(w)) ? bwToday+w : w;
-      const vol=(load>0&&r>0)?load*r*((VOLUME_COUNT_BOTH_HANDS&&perHand)?2:1):0;
+      const vol=(!s.wu&&load>0&&r>0)?load*r*((VOLUME_COUNT_BOTH_HANDS&&perHand)?2:1):0;
       done.push({st,en,vol});
     });
   });
@@ -1085,202 +1231,8 @@ function dayProjection(day, dateStr){
            finishAt: remainingSets ? new Date(Date.now()+remainingSecs*1000) : null };
 }
 
-// ── Festive weeks ────────────────────────────────────────────────────────────
-// Birthdays and holidays theme the app for the Mon–Sun week that contains
-// them. Pure date logic lives here so it is unit-tested; the DOM side
-// (applyFestive) is below the block.
-//
-// Each entry is either a fixed {m, d} or a {date: (year) => Date} resolver
-// for moveable feasts. Birthdays carry `y` so the banner can say "turns N".
-// `theme` picks the colour scheme + particle set in CSS/applyFestive.
-const FESTIVE_EVENTS = [
-  // birthdays
-  { kind:'birthday', name:'Arya',     m:7,  d:2,  y:2019, theme:'birthday', emoji:'🎂' },
-  { kind:'birthday', name:'Maya',     m:12, d:14, y:2021, theme:'birthday', emoji:'🎂' },
-  { kind:'birthday', name:'Priya',    m:5,  d:4,  y:1990, theme:'birthday', emoji:'🎂' },
-  { kind:'birthday', name:'Fernando', m:12, d:15, y:1976, theme:'birthday', emoji:'🎂' },
-  { kind:'birthday', name:'Marinice', m:4,  d:16, y:1954, theme:'birthday', emoji:'🎂' },
-  { kind:'birthday', name:'Daniel',   m:10, d:13, y:1987, theme:'birthday', emoji:'🎂' },
-  // fixed holidays
-  { kind:'holiday', name:'New Year',       m:1,  d:1,  theme:'newyear',   emoji:'🎆' },
-  { kind:'holiday', name:"Valentine's",    m:2,  d:14, theme:'valentine', emoji:'❤️' },
-  { kind:'holiday', name:"St. Patrick's",  m:3,  d:17, theme:'stpatrick', emoji:'☘️' },
-  { kind:'holiday', name:'Fourth of July', m:7,  d:4,  theme:'july4',     emoji:'🎆' },
-  { kind:'holiday', name:'Halloween',      m:10, d:31, theme:'halloween', emoji:'🎃' },
-  { kind:'holiday', name:'Christmas',      m:12, d:25, theme:'xmas',      emoji:'🎄' },
-  // moveable holidays
-  { kind:'holiday', name:'Easter',       date:(y)=>easterDate(y),          theme:'easter',       emoji:'🐣' },
-  { kind:'holiday', name:'Thanksgiving', date:(y)=>nthWeekday(y,11,4,4),   theme:'thanksgiving', emoji:'🦃' },
-];
-
-// Local-midnight Date for y/m/d (m is 1-based). Never UTC: a user in Miami
-// should see the week flip at their midnight, not at 8pm the night before.
-function localDate(y,m,d){ return new Date(y, m-1, d, 0,0,0,0); }
-
-// Nth occurrence (1-based) of a weekday (0=Sun..6=Sat) in a month.
-// nthWeekday(2026, 11, 4, 4) = fourth Thursday of November = Thanksgiving.
-function nthWeekday(y,m,weekday,n){
-  const first = localDate(y,m,1);
-  const offset = (weekday - first.getDay() + 7) % 7;
-  return localDate(y, m, 1 + offset + (n-1)*7);
-}
-
-// Anonymous Gregorian algorithm (Meeus/Jones/Butcher). Western Easter.
-function easterDate(y){
-  const a=y%19, b=Math.floor(y/100), c=y%100, d=Math.floor(b/4), e=b%4,
-        f=Math.floor((b+8)/25), g=Math.floor((b-f+1)/3), h=(19*a+b-d-g+15)%30,
-        i=Math.floor(c/4), k=c%4, l=(32+2*e+2*i-h-k)%7, m=Math.floor((a+11*h+22*l)/451),
-        month=Math.floor((h+l-7*m+114)/31), day=((h+l-7*m+114)%31)+1;
-  return localDate(y, month, day);
-}
-
-// Monday 00:00 → Sunday 23:59:59.999 of the week containing `date`, local time.
-function weekBounds(date){
-  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const dow = (d.getDay() + 6) % 7;          // Mon=0 … Sun=6
-  const start = new Date(d); start.setDate(d.getDate() - dow);
-  const end   = new Date(start); end.setDate(start.getDate() + 6); end.setHours(23,59,59,999);
-  return { start, end };
-}
-
-// Resolve an event's calendar date for a given year.
-function festiveDateFor(ev, y){ return ev.date ? ev.date(y) : localDate(y, ev.m, ev.d); }
-
-// All events whose date falls in the same Mon–Sun week as `date`, sorted by
-// date within the week. Birthdays first on ties so a shared week with a
-// holiday (Arya + Fourth of July, every year) leads with the person.
-// The week can straddle a year boundary, so three candidate years are tried.
-function eventsForWeek(date){
-  const { start, end } = weekBounds(date);
-  const yrs = [date.getFullYear()-1, date.getFullYear(), date.getFullYear()+1];
-  const out = [];
-  FESTIVE_EVENTS.forEach(ev => {
-    for (const y of yrs) {
-      const when = festiveDateFor(ev, y);
-      if (when >= start && when <= end) {
-        const hit = { kind: ev.kind, name: ev.name, theme: ev.theme, emoji: ev.emoji, when };
-        if (ev.kind === 'birthday') hit.age = y - ev.y;
-        out.push(hit);
-        break;
-      }
-    }
-  });
-  out.sort((a,b) => (a.when - b.when) || ((a.kind==='birthday'?0:1) - (b.kind==='birthday'?0:1)));
-  return out;
-}
-
-// Banner text: "🎂 Daniel turns 39" / "🎂 Maya turns 5 · Fernando turns 50" /
-// "🎂 Arya turns 7 · 🎆 Fourth of July". Birthdays share one leading emoji.
-function festiveLabel(events){
-  if (!events.length) return '';
-  const parts = [];
-  let lastEmoji = null;
-  events.forEach(ev => {
-    const text = ev.kind === 'birthday' ? `${ev.name} turns ${ev.age}` : ev.name;
-    parts.push((ev.emoji !== lastEmoji ? ev.emoji + ' ' : '') + text);
-    lastEmoji = ev.emoji;
-  });
-  return parts.join(' · ');
-}
-
-// Colour scheme comes from the primary event: the first birthday if any,
-// else the first holiday. Particles are drawn for every active theme.
-function festiveTheme(events){
-  if (!events.length) return null;
-  return (events.find(e => e.kind === 'birthday') || events[0]).theme;
-}
 // @@TESTABLE-END
 
-// ── Festive weeks: DOM side ──────────────────────────────────────────────────
-const FESTIVE_KEY = 'ironlog_festive';   // 'off' = user tapped the banner to hide decorations
-function festiveOn(){ try{ return localStorage.getItem(FESTIVE_KEY) !== 'off'; }catch{ return true; } }
-function toggleFestive(){ try{ localStorage.setItem(FESTIVE_KEY, festiveOn() ? 'off' : 'on'); }catch{} applyFestive(); }
-
-// Particle recipes per theme. Each returns {cls, txt, style[, lights]} items
-// that applyFestive turns into .fp nodes. Counts stay small (≤ ~16 moving
-// nodes per theme) so this is cheap on a phone GPU. Negative --delay starts
-// every animation mid-flight so the first paint is already populated.
-const _r  = (a,b) => a + Math.random()*(b-a);
-const _p  = v => `${v.toFixed(1)}%`;
-const _n  = (n,fn) => Array.from({length:n}, (_,i)=>fn(i));
-const _pk = arr => arr[Math.floor(Math.random()*arr.length)];
-const FESTIVE_PARTICLES = {
-  birthday: () => [
-    ..._n(7, ()=>({cls:'rise', txt:_pk(['🎈','🎈','🎈','🎉']), style:`left:${_p(_r(2,92))};font-size:${_r(18,30)|0}px;--dur:${_r(11,17).toFixed(1)}s;--delay:-${_r(0,16).toFixed(1)}s;--sway:${_r(-40,40)|0}px`})),
-    ..._n(10,()=>({cls:'fall', txt:'▪', style:`left:${_p(_r(0,98))};font-size:${_r(9,13)|0}px;color:hsl(${_r(0,360)|0} 90% 65%);--dur:${_r(7,12).toFixed(1)}s;--delay:-${_r(0,12).toFixed(1)}s;--sway:${_r(-60,60)|0}px`})),
-  ],
-  xmas: () => [
-    {cls:'tree', txt:'🎄', style:'', lights:['#f87171','#fbbf24','#60a5fa','#4ade80','#f472b6']},
-    ..._n(14,()=>({cls:'fall', txt:'❄', style:`left:${_p(_r(0,98))};font-size:${_r(10,18)|0}px;color:#e2e8f0;opacity:.85;--dur:${_r(9,16).toFixed(1)}s;--delay:-${_r(0,16).toFixed(1)}s;--sway:${_r(-30,30)|0}px`})),
-  ],
-  halloween: () => [
-    {cls:'web l', txt:'🕸️', style:''}, {cls:'web r', txt:'🕸️', style:''},
-    ..._n(2, i=>({cls:'drift', txt:'👻', style:`top:${_p(_r(18,60))};font-size:${_r(26,34)|0}px;opacity:.85;--dur:${_r(14,20).toFixed(1)}s;--delay:-${i*7}s`})),
-    ..._n(3, i=>({cls:'flap',  txt:'🦇', style:`top:${_p(_r(8,40))};font-size:${_r(18,26)|0}px;--dur:${_r(9,13).toFixed(1)}s;--delay:-${i*4}s`})),
-    {cls:'spider', txt:'🕷️', style:`left:${_p(_r(10,30))};font-size:22px;--dur:11s;--delay:-2s;--drop:${_r(120,220)|0}px`},
-    {cls:'spider', txt:'🕷️', style:`left:${_p(_r(65,88))};font-size:18px;--dur:14s;--delay:-7s;--drop:${_r(90,180)|0}px`},
-  ],
-  thanksgiving: () => [
-    {cls:'bob', txt:'🦃', style:'left:auto;right:10px;bottom:12px;font-size:48px;--dur:3s'},
-    ..._n(12,()=>({cls:'fall', txt:_pk(['🍂','🍁','🍃']), style:`left:${_p(_r(0,98))};font-size:${_r(14,22)|0}px;--dur:${_r(10,16).toFixed(1)}s;--delay:-${_r(0,16).toFixed(1)}s;--sway:${_r(-70,70)|0}px`})),
-  ],
-  newyear: () => [
-    ..._n(6, ()=>({cls:'burst', txt:_pk(['🎆','🎇','✨']), style:`left:${_p(_r(5,85))};top:${_p(_r(6,45))};font-size:${_r(26,44)|0}px;--dur:${_r(2.4,3.6).toFixed(1)}s;--delay:-${_r(0,3.5).toFixed(1)}s`})),
-    ..._n(10,()=>({cls:'fall', txt:'▪', style:`left:${_p(_r(0,98))};font-size:${_r(8,12)|0}px;color:${_pk(['#fbbf24','#f8fafc','#fde68a'])};--dur:${_r(7,12).toFixed(1)}s;--delay:-${_r(0,12).toFixed(1)}s;--sway:${_r(-50,50)|0}px`})),
-  ],
-  valentine: () => _n(9, ()=>({cls:'rise', txt:_pk(['❤️','💗','💕']), style:`left:${_p(_r(2,92))};font-size:${_r(14,26)|0}px;--dur:${_r(10,16).toFixed(1)}s;--delay:-${_r(0,16).toFixed(1)}s;--sway:${_r(-30,30)|0}px`})),
-  stpatrick: () => _n(10,()=>({cls:'fall', txt:_pk(['☘️','🍀']), style:`left:${_p(_r(0,98))};font-size:${_r(12,20)|0}px;--dur:${_r(9,15).toFixed(1)}s;--delay:-${_r(0,15).toFixed(1)}s;--sway:${_r(-50,50)|0}px`})),
-  july4: () => [
-    ..._n(5, ()=>({cls:'burst', txt:'🎆', style:`left:${_p(_r(5,85))};top:${_p(_r(6,40))};font-size:${_r(28,44)|0}px;--dur:${_r(2.4,3.6).toFixed(1)}s;--delay:-${_r(0,3.5).toFixed(1)}s`})),
-    ..._n(10,()=>({cls:'fall', txt:'▪', style:`left:${_p(_r(0,98))};font-size:${_r(8,12)|0}px;color:${_pk(['#f87171','#f8fafc','#60a5fa'])};--dur:${_r(7,12).toFixed(1)}s;--delay:-${_r(0,12).toFixed(1)}s;--sway:${_r(-50,50)|0}px`})),
-  ],
-  easter: () => _n(7, i=>({cls:'bob', txt:['🐣','🥚','🐰','🌷'][i%4], style:`left:${_p(8+i*13)};bottom:${_r(8,40)|0}px;font-size:${_r(20,30)|0}px;--dur:${_r(2.2,3.4).toFixed(1)}s;--delay:-${_r(0,3).toFixed(1)}s`})),
-};
-
-// Apply this week's theme: banner text always; colour scheme + overlay only
-// while the user has not hidden them. Idempotent — safe to call on boot, on
-// toggle, and when the PWA comes back to the foreground after a date change.
-function applyFestive(){
-  const events = eventsForWeek(new Date());
-  const theme  = festiveTheme(events);
-  const on     = festiveOn();
-  const banner = document.getElementById('festive-banner');
-  let   layer  = document.getElementById('festive-layer');
-
-  if (banner) {
-    if (!events.length) banner.style.display = 'none';
-    else {
-      banner.style.display = '';
-      banner.className = 'festive' + (on ? '' : ' off');
-      banner.innerHTML = `${escapeHtml(festiveLabel(events))}<span class="hint">${on ? 'tap to hide' : 'tap to show'}</span>`;
-    }
-  }
-
-  if (!theme || !on) {
-    document.body.removeAttribute('data-theme');
-    if (layer) layer.remove();
-    return;
-  }
-
-  document.body.dataset.theme = theme;
-  const key = events.map(e => e.theme + ':' + e.when.toDateString()).join('|');
-  if (layer && layer.dataset.built === key) return;          // already drawn for this exact week
-  if (!layer) { layer = document.createElement('div'); layer.id = 'festive-layer'; layer.className = 'festive-layer'; document.body.appendChild(layer); }
-
-  // Particles from every active theme, so a shared week (Arya + Fourth of
-  // July; Maya + Fernando) gets both sets. Colour scheme stays the primary's.
-  const themes = [...new Set(events.map(e => e.theme))];
-  const parts  = themes.flatMap(t => (FESTIVE_PARTICLES[t] || (() => []))());
-  layer.innerHTML = parts.map(p => {
-    const lights = p.lights ? p.lights.map((c,i) =>
-      `<i style="background:${c};color:${c};left:${[46,30,62,38,54][i]}%;top:${[28,48,52,70,74][i]}%;--dur:${(1.1+i*.23).toFixed(2)}s;--delay:-${(i*.37).toFixed(2)}s"></i>`).join('') : '';
-    return `<span class="fp ${p.cls}" style="${p.style}">${p.txt}${lights}</span>`;
-  }).join('');
-  layer.dataset.built = key;
-}
-
-// A PWA left open across Sunday midnight should pick up the new week.
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') applyFestive(); });
 
 function renderBodyCompLine(){
   const el=document.getElementById('bc-line'); if(!el) return;
@@ -1296,14 +1248,74 @@ function renderBodyCompLine(){
   if(then){ const d=w-parseFloat(then.weight_lb); const cls=d>0?'up':'down'; delta=` \u00b7 <span class="${cls}">${d>0?'\u25b2':'\u25bc'} ${Math.abs(d).toFixed(1)} lb / 30d</span>`; }
   const age=Math.round((new Date(todayKey()+'T12:00:00')-new Date(now.measure_date+'T12:00:00'))/86400000);
   const stale=age>7?` <span style="color:#fbbf24">(${age}d old)</span>`:'';
-  el.innerHTML=`<b>${w.toFixed(1)} lb</b>${isNaN(bf)?'':` \u00b7 <b>${bf.toFixed(1)}%</b> BF`}${isNaN(lean)?'':` \u00b7 lean <b>${Math.round(lean)}</b>`}${delta}${stale}`;
+  // 30-reading weight trend, oldest -> newest (history arrives newest first).
+  const series=h.slice(0,30).map(m=>parseFloat(m.weight_lb)).reverse();
+  const path=sparkPath(series,64,16);
+  const spark=path?`<svg class="bc-spark" viewBox="0 0 64 16" width="64" height="16" aria-hidden="true"><path d="${path}" fill="none" stroke="${series[series.length-1]<=series[0]?'#4ade80':'#fb923c'}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`:'';
+  el.innerHTML=`${spark}<b>${w.toFixed(1)} lb</b>${isNaN(bf)?'':` \u00b7 <b>${bf.toFixed(1)}%</b> BF`}${isNaN(lean)?'':` \u00b7 lean <b>${Math.round(lean)}</b>`}${delta}${stale}`;
 }
-// Re-render once a second only while a rest timer is actually pending, so the
-// live counter moves without burning cycles the rest of the time.
+// One 1s ticker updates the rest counters in place (no re-render, so an input
+// being typed in keeps its focus) and drives the floating rest bar.
+let restAlerted = null;      // completion timestamp we already buzzed for
+function tickRest(){
+  const now=Date.now();
+  document.querySelectorAll('.rest-live').forEach(el=>{
+    const since=+el.dataset.since, tgt=el.dataset.tgt===''?null:+el.dataset.tgt;
+    const secs=Math.max(0,Math.round((now-since)/1000));
+    el.style.color=(tgt==null||secs>=tgt)?'#4ade80':'#fbbf24';
+    el.textContent=`rest ${fmtSecs(secs)}${tgt!=null?` / ${fmtSecs(tgt)}`:''}`;
+  });
+  const bar=document.getElementById('rest-bar'); if(!bar) return;
+  const r=(currentView==='log' && !reordering) ? currentRest(PROGRAM[currentDay].exercises, draft) : null;
+  const secs=r ? Math.round((now-r.since)/1000) : 0;
+  if(!r || secs>900){ bar.classList.remove('show'); return; }
+  const ac=PROGRAM[currentDay].accent;
+  if(r.kind==='rest'){
+    const ready=r.tgt==null || secs>=r.tgt;
+    bar.className='rest-bar show'+(ready?' ready':'');
+    bar.style.setProperty('--ac', ac);
+    const pct=r.tgt?Math.min(100,Math.round(secs/r.tgt*100)):100;
+    bar.innerHTML=`<div class="rb-fill" style="width:${pct}%"></div><div class="rb-row"><span class="rb-time">${fmtSecs(secs)}${r.tgt!=null?`<small> / ${fmtSecs(r.tgt)}</small>`:''}</span><span class="rb-what">${ready?'GO · ':''}${escapeHtml(r.name)} · set ${r.set}</span><button class="rb-bell" onclick="event.stopPropagation();toggleRestBeep()">${restBeepOn()?'\u{1F514}':'\u{1F515}'}</button></div>`;
+    if(ready && r.tgt!=null && restAlerted!==r.since && secs<r.tgt+5){ restAlerted=r.since; restAlert(); }
+  } else {
+    bar.className='rest-bar show next';
+    bar.style.setProperty('--ac', ac);
+    bar.innerHTML=`<div class="rb-row"><span class="rb-time">${fmtSecs(secs)}</span><span class="rb-what">next → ${escapeHtml(r.name)}</span></div>`;
+  }
+  bar.dataset.ex=r.exId;
+}
+function restBarTap(){ const id=document.getElementById('rest-bar').dataset.ex; const c=document.getElementById(`card-${id}`); if(c){ expanded.add(+id); collapsed.delete(+id); renderExercises(); const c2=document.getElementById(`card-${id}`); if(c2) c2.scrollIntoView({behavior:'smooth',block:'center'}); } }
+const BEEP_KEY='ironlog_restbeep';
+function restBeepOn(){ try{ return localStorage.getItem(BEEP_KEY)!=='off'; }catch{ return true; } }
+function toggleRestBeep(){ try{ localStorage.setItem(BEEP_KEY, restBeepOn()?'off':'on'); }catch{} unlockAudio(); tickRest(); showToast(restBeepOn()?'Rest alert on':'Rest alert off','#60a5fa'); }
+let audioCtx=null;
+// Browsers only allow sound after a tap; create the context on one.
+function unlockAudio(){ try{ if(!audioCtx){ const C=window.AudioContext||window.webkitAudioContext; if(C) audioCtx=new C(); } if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); }catch{} }
+function restAlert(){
+  if(!restBeepOn()) return;
+  try{ if(navigator.vibrate) navigator.vibrate([120,80,120]); }catch{}
+  try{
+    if(!audioCtx) return;
+    [0,0.18].forEach(t=>{ const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+      o.frequency.value=880; g.gain.setValueAtTime(0.0001,audioCtx.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(0.25,audioCtx.currentTime+t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+t+0.14);
+      o.connect(g); g.connect(audioCtx.destination); o.start(audioCtx.currentTime+t); o.stop(audioCtx.currentTime+t+0.15); });
+  }catch{}
+}
 function syncRestTicker(){
-  const pending=document.querySelector('.rest-live');
-  if(pending && !restTicker){ restTicker=setInterval(()=>{ if(!_swipeAnimating) renderExercises(); },1000); }
-  else if(!pending && restTicker){ clearInterval(restTicker); restTicker=null; }
+  if(!restTicker) restTicker=setInterval(tickRest,1000);
+  tickRest();
+}
+// Plan + week chips under the summary tiles.
+function renderToolRow(){
+  const el=document.getElementById('tool-row'); if(!el) return;
+  const sw=loadSwaps(currentDay);
+  const changed=Object.keys(sw.s).length+sw.x.length+(sw.h||[]).length;
+  const label=sw.plan ? sw.plan : (changed ? 'custom today' : 'usual');
+  el.innerHTML=`<button class="tool-chip${changed?' on':''}" onclick="openPlans()">▤ plan: ${escapeHtml(label)}</button>
+    <button class="tool-chip" onclick="openWeek()">∑ week volume</button>
+    <span class="save-state" id="save-state">${escapeHtml(saveStateText)}</span>`;
 }
 function renderDaySummary(){
   renderBodyCompLine();
@@ -1313,23 +1325,41 @@ function renderDaySummary(){
   // All interpolated values are numbers/formatted strings — no user text, no escaping needed.
   el.innerHTML=`
     ${(()=>{ const p=dayProjection(currentDay);
-      if(!p.remainingSets) return `<div class="ds-tile"><div class="ds-val">${fmtSecs(s.totalTime)}</div><div class="ds-lbl">total \u00b7 ${s.done}/${s.total} sets</div></div>`;
-      const eta=p.finishAt.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
-      return `<div class="ds-tile"><div class="ds-val">~${fmtSecs(p.totalSecs)}</div><div class="ds-lbl">est \u00b7 done ${eta}</div></div>`;
+      if(!p.remainingSets) return `<div class="ds-tile"><div class="ds-val">${fmtSecs(s.totalTime)}</div><div class="ds-lbl">${s.done}/${s.total} sets</div></div>`;
+      const eta=p.finishAt.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}).replace(/\s?[AP]M$/i,'');
+      return `<div class="ds-tile"><div class="ds-val">~${fmtSecs(p.totalSecs)}</div><div class="ds-lbl">ends ${eta}</div></div>`;
     })()}
-    <div class="ds-tile"><div class="ds-val">${fmtSecs(s.avgRest)}</div><div class="ds-lbl">avg rest/set</div></div>
-    <div class="ds-tile"><div class="ds-val">${fmtSecs(s.avgSet)}</div><div class="ds-lbl">avg set time</div></div>
-    <div class="ds-tile"><div class="ds-val">${volStr}</div><div class="ds-lbl">volume load</div></div>`;
+    <div class="ds-tile"><div class="ds-val">${fmtSecs(s.avgRest)}</div><div class="ds-lbl">avg rest</div></div>
+    <div class="ds-tile"><div class="ds-val">${fmtSecs(s.avgSet)}</div><div class="ds-lbl">avg set</div></div>
+    <div class="ds-tile"><div class="ds-val">${volStr}</div><div class="ds-lbl">volume</div></div>`;
+  renderToolRow();
 }
 
 let restTicker=null;
+let lastDoneExId=null;
 function renderExercises(){
   renderDaySummary();
   const nowTs=Date.now();
+  const _cr=(()=>{ let t=0,id=null; PROGRAM[currentDay].exercises.forEach(ex=>(draft[ex.id]||[]).forEach(x=>{ if(x.done&&x.completedAt){ const v=new Date(x.completedAt).getTime(); if(v>t){t=v;id=ex.id;} } })); return id; })();
+  lastDoneExId=_cr;
   const prog=PROGRAM[currentDay], ac=prog.accent;
   document.getElementById('ex-list').innerHTML = prog.exercises.map((ex,exIdx,exArr)=>{
     const sets=draft[ex.id]||[];
     const stats=exStats(sets);
+    const top=topSet(sets);
+    const pr=(top && !isBodyweightEx(ex)) ? prCheck(bests[ex.id], top.w, top.r) : null;
+
+    // Finished exercises fold to one line once RIR is logged (or you've moved
+    // on), so the card you're working on stays near the top of the screen.
+    const lastSet=sets[sets.length-1];
+    if(!reordering && isFinished(sets) && !expanded.has(ex.id) && (collapsed.has(ex.id) || lastSet.rir!=null || lastDoneExId!==ex.id)){
+      const line=sets.map(x=>`${x.wu?'w ':''}${x.w===''?'BW':x.w}\u00d7${x.r===''?'?':x.r}`).join(', ');
+      return `<div class="card done-card" id="card-${ex.id}" onclick="expandCard(${ex.id})">
+        <span class="dc-chk" style="color:${ac}">\u2713</span>
+        <div class="dc-main"><div class="dc-name">${escapeHtml(ex.name)}${pr?' <span class="pr-chip">\u{1F3C6} PR</span>':''}</div>
+        <div class="dc-sets">${escapeHtml(line)}${lastSet.rir!=null?` \u00b7 ${lastSet.rir} RIR`:''}</div></div>
+        <span class="dc-open">\u25be</span></div>`;
+    }
 
     // Superset position. clusterSupersets() guarantees members are adjacent,
     // so the immediate neighbours are enough to work out where in the block
@@ -1391,7 +1421,7 @@ function renderExercises(){
           const tgt=Number.isInteger(ex.rest)?ex.rest:null;
           const el=Math.max(0,Math.round((nowTs-new Date(prev.completedAt).getTime())/1000));
           const ok=tgt==null||el>=tgt;
-          restLabel=`<span class="rest-live" style="color:${ok?'#4ade80':'#fbbf24'}">`
+          restLabel=`<span class="rest-live" data-since="${new Date(prev.completedAt).getTime()}" data-tgt="${tgt==null?'':tgt}" style="color:${ok?'#4ade80':'#fbbf24'}">`
             +`rest ${fmtSecs(el)}${tgt!=null?` / ${fmtSecs(tgt)}`:''}</span>`;
         }
       }
@@ -1420,13 +1450,13 @@ function renderExercises(){
           ontouchmove="swipeMove(event,${ex.id},${si})"
           ontouchend="swipeEnd(event,${ex.id},${si})">
           <div class="set-row" style="background:${st.done?ac+'15':st.startedAt?ac+'07':'transparent'}" id="setrow-${ex.id}-${si}">
-            <span class="set-num" style="color:${st.done?ac:st.startedAt?ac:'#475569'}">${si+1}</span>
+            <button class="set-num${st.wu?' wu':''}" style="color:${st.wu?'#fbbf24':st.done?ac:st.startedAt?ac:'#475569'}" onclick="toggleWarm(${ex.id},${si})" title="Tap to mark as warm-up">${st.wu?'W':si+1}</button>
             <input class="set-input" type="number" value="${st.w}" placeholder="wt"
               style="color:${ac};-webkit-text-fill-color:${ac}" oninput="updSet(${ex.id},${si},'w',this.value)">
             <input class="set-input" type="number" step="1" inputmode="numeric" value="${st.r}" placeholder="reps"
               style="-webkit-text-fill-color:#e2e8f0" oninput="updSet(${ex.id},${si},'r',this.value)">
             ${actionBtn}
-            ${timeLabel}${restLabel}
+            ${(pr && top.i===si)?`<span class="pr-chip">\u{1F3C6} ${pr==='weight'?'PR':'e1RM PR'}</span>`:''}${timeLabel}${restLabel}
           </div>
           ${(si===arr.length-1 && st.done) ? `
           <div class="rir-row">
@@ -1446,12 +1476,17 @@ function renderExercises(){
           <div style="flex:1;min-width:0"><div class="ex-name">${escapeHtml(ex.name)}</div>${ex.alt?`<div class="ex-alt">or: ${escapeHtml(ex.alt)}</div>`:''}${
             ex.swappedFrom!=null?`<div class="ex-swapped">⇄ swapped in today · usual: ${escapeHtml((LIB[ex.swappedFrom]||{}).name||'')}</div>`:''}${
             ex.extra?`<div class="ex-swapped">+ added for today only</div>`:''}</div>
+          ${isFinished(sets)?`<button class="card-swap-btn" onclick="collapseCard(${ex.id})" title="Collapse" style="color:${ac};border-color:${ac}55">\u25b4</button>`:''}
           <button class="card-swap-btn" onclick="openPicker('swap',${ex.id})" title="Swap for another exercise" style="color:${ac};border-color:${ac}55">⇄</button>
           <a class="card-edit-btn" href="./exercises.html?edit=${ex.id}" title="Edit in library">✎</a>
         </div>
-        <div class="ex-target" style="color:${ac}">${escapeHtml(buildLastBadge(ex))}</div>
-        ${Number.isInteger(ex.rest) ? `<div class="ex-rest">rest ${fmtSecs(ex.rest)}</div>` : ''}
-        ${suggestions[ex.id] ? `<div class="ex-suggest" style="color:${suggestions[ex.id].color};font-size:11px;margin-top:3px;font-weight:600;letter-spacing:.01em">next: ${escapeHtml(suggestions[ex.id].text)}</div>` : ''}
+        <div class="ch-line"><span style="color:${ac};font-weight:600">${escapeHtml(buildLastBadge(ex))}</span>${Number.isInteger(ex.rest) ? ` <span class="ch-dim">\u00b7 rest ${fmtSecs(ex.rest)}</span>` : ''}${
+          bests[ex.id]&&bests[ex.id].w&&!isBodyweightEx(ex) ? ` <span class="ch-dim">\u00b7 best ${progFmtW(bests[ex.id].w)}</span>` : ''}</div>
+        ${suggestions[ex.id] ? `<div class="ex-suggest" style="color:${suggestions[ex.id].color}">next: ${escapeHtml(suggestions[ex.id].text)}</div>` : ''}
+        ${lastNotes[ex.id] ? `<div class="ex-note-last">\u270d ${escapeHtml(fmtShort(lastNotes[ex.id].date))}: ${escapeHtml(lastNotes[ex.id].note)}</div>` : ''}
+        ${(notes[ex.id]||noteOpen.has(ex.id))
+          ? `<input class="note-input" type="text" maxlength="300" placeholder="note for this session (seat, pin, how it felt\u2026)" value="${escapeHtml(notes[ex.id]||'')}" onchange="setNote(${ex.id},this.value)">`
+          : `<button class="note-add" onclick="openNote(${ex.id})">+ note</button>`}
       </div>
       <div class="reorder-controls">
         <button class="reorder-arrow" onclick="moveExercise(${ex.id},-1)" ${(exIdx===0||ex.extra)?'disabled':''}>↑</button>
@@ -1475,7 +1510,7 @@ function renderExercises(){
 
   // Buttons
   const sb=document.getElementById('save-btn');
-  if(sb.textContent==='SAVE'){ sb.style.background=PROGRAM[currentDay].accent; sb.style.color='#0a0f1a'; }
+  if(sb.textContent==='FINISH'){ sb.style.background=PROGRAM[currentDay].accent; sb.style.color='#0a0f1a'; }
   const cb=document.getElementById('csv-btn');
   cb.style.color=PROGRAM[currentDay].accent; cb.style.borderColor=PROGRAM[currentDay].accent+'50';
   const ab=document.getElementById('add-ex-btn');
@@ -1621,6 +1656,17 @@ function ensureLibrary(){
   return libraryLoading;
 }
 
+// Fold freshly fetched history rows into everything derived from them.
+function absorbHistory(rows, day){
+  if(!rows || !rows.length) return;
+  const have=new Set(histRows.map(r=>r.id));
+  rows.forEach(r=>{ if(r.id==null || !have.has(r.id)) histRows.push(r); });
+  Object.assign(suggestions, computeSuggestions(rows, day));
+  Object.assign(lastSessions, computeLastSessions(rows, day));
+  Object.assign(bests, computeBests(rows));
+  Object.assign(lastNotes, computeLastNotes(rows));
+}
+
 // ─── Exercise picker: swap a slot, or add to the day ─────────────────────────
 let picker = null;   // {mode:'swap'|'add', exId}
 async function openPicker(mode, exId){
@@ -1664,6 +1710,9 @@ function renderPicker(){
   const exclude=PROGRAM[day].exercises.map(e=>e.id);
   const {same,rest}=pickerOptions(LIB,{exclude, muscle:cur?cur.muscle:'', q});
   let html='';
+  if(cur && !q){
+    html+=`<button class="pick-row skip" onclick="skipToday()"><span class="pick-name">\u2298 Skip today</span><span class="pick-meta">leave ${escapeHtml(cur.name)} out of this session only</span></button>`;
+  }
   if(cur && cur.swappedFrom!=null && LIB[cur.swappedFrom] && !q){
     html+=`<button class="pick-row revert" onclick="pickExercise(${cur.swappedFrom})"><span class="pick-name">↺ Back to ${escapeHtml(LIB[cur.swappedFrom].name)}</span><span class="pick-meta">the usual one for ${day}</span></button>`;
   }
@@ -1675,12 +1724,10 @@ function renderPicker(){
 }
 // Seed a just-added exercise: progression from its own history (any day),
 // otherwise its library defaults.
-async function prepareExercise(day, id){
-  try{
-    const rows = await fetchSuggestionRows(day, [id]);
-    Object.assign(suggestions, computeSuggestions(rows, day));
-    Object.assign(lastSessions, computeLastSessions(rows, day));
-  }catch{}
+async function prepareExercise(day, id, haveHistory){
+  if(!haveHistory){
+    try{ absorbHistory(await fetchSuggestionRows(day, [id]), day); }catch{}
+  }
   if(draft[id] && draft[id].length) return;
   const s=suggestions[id], ex=LIB[id]||{};
   draft[id] = (s && s.sets && s.sets.length)
@@ -1723,6 +1770,7 @@ async function pickExercise(newId){
       msg=`Added ${LIB[newId].name} to ${day}`;
     }catch(e){ showToast('Add failed: '+e.message,'#f87171'); return; }
   }
+  sw.plan='';
   saveSwaps(day,sw);
   applyDay(day);
   document.getElementById('pick-overlay').classList.remove('open');
@@ -1731,6 +1779,7 @@ async function pickExercise(newId){
   await prepareExercise(day,newId);
   saveDraftLocal();
   renderExercises();
+  scheduleAutoSave();
   const card=document.getElementById(`card-${newId}`); if(card) card.scrollIntoView({behavior:'smooth',block:'center'});
   if(msg) showToast(msg);
 }
@@ -1787,12 +1836,13 @@ function renderHistory(){
         statsStr=` · ${fmtSecs(total)}${avg!=null?' · avg rest '+fmtSecs(avg):''}`;
       }
       const setsHtml=rows.map(r=>{
-        const label=r.weight?`${r.weight}×${r.reps||'?'}`:r.reps?`${r.reps}reps`:`set${r.set_number}`;
+        const label=(r.is_warmup?'w ':'')+(r.weight?`${r.weight}×${r.reps||'?'}`:r.reps?`${r.reps}reps`:`set${r.set_number}`);
         return `<span class="hist-set" style="background:${r.done?p.accent+'20':'rgba(255,255,255,.04)'};color:${r.done?p.accent:'#475569'};border:1px solid ${r.done?p.accent+'40':'rgba(255,255,255,.06)'}">${label}</span>`;
       }).join('');
       return `<div class="hist-ex">
         <div class="hist-ex-name">${escapeHtml(ex.name)}<span style="color:var(--muted);font-weight:400">${statsStr}</span>${ex.id!=null?`<button class="prog-btn" onclick="event.stopPropagation();openChartModal(${ex.id})">📈</button>`:''}</div>
         <div class="hist-sets">${setsHtml}</div>
+        ${(rows.find(r=>r.note)||{}).note?`<div class="ex-note-last">\u270d ${escapeHtml(rows.find(r=>r.note).note)}</div>`:''}
       </div>`;
     }).join('');
     return `<div class="hist-card" onclick="toggleHist(${si})">
@@ -1811,8 +1861,7 @@ function switchView(v){
   currentView=v;
   document.getElementById('view-log').style.display    =v==='log'?'':'none';
   document.getElementById('view-history').style.display=v==='history'?'':'none';
-  document.getElementById('btn-log').classList.toggle('active',v==='log');
-  document.getElementById('btn-history').classList.toggle('active',v==='history');
+  if(typeof setNavActive==='function') setNavActive(v);
   // Clear live timer when leaving log view
   if(v!=='log' && liveTimer){ clearInterval(liveTimer); liveTimer=null; }
   if(v==='history') loadHistory();
@@ -1822,6 +1871,7 @@ async function selectDay(d){
   if(d===currentDay && currentView==='log') return;
   // Unsaved edit-day changes belong to the day being left — save them first.
   if(dayDirty) await persistDay();
+  await flushAutoSave();
   currentDay=d;
   draft={}; // clear stale draft immediately so we don't show prior day's data
   renderAll();
@@ -1839,9 +1889,32 @@ function setRir(id,si,v){
   const st=draft[id][si];
   st.rir = (String(st.rir)===String(v)) ? null : v;
   saveDraftLocal();
+  expanded.delete(id);
   renderExercises();
+  scheduleAutoSave();
+  // Exercise wrapped up -> bring the next unfinished one into view.
+  if(st.rir!=null && isFinished(draft[id])){
+    const list=PROGRAM[currentDay].exercises, i=list.findIndex(e=>e.id===id);
+    const nx=list.slice(i+1).concat(list.slice(0,i)).find(e=>!isFinished(draft[e.id]));
+    const c=nx && document.getElementById(`card-${nx.id}`);
+    if(c) c.scrollIntoView({behavior:'smooth',block:'start'});
+  }
 }
-function updSet(id,si,f,v){ if(draft[id]){ draft[id][si][f]=v; saveDraftLocal(); } }
+function expandCard(id){ expanded.add(id); collapsed.delete(id); renderExercises(); }
+function collapseCard(id){ expanded.delete(id); collapsed.add(id); renderExercises(); }
+function toggleWarm(id,si){
+  if(!draft[id]||!draft[id][si]) return;
+  draft[id][si].wu=!draft[id][si].wu;
+  saveDraftLocal(); renderExercises(); scheduleAutoSave();
+  if(draft[id][si].wu) showToast('Warm-up: logged, but not counted for progression, volume or PRs','#fbbf24');
+}
+function openNote(id){ noteOpen.add(id); renderExercises(); const el=document.querySelector(`#card-${id} .note-input`); if(el) el.focus(); }
+function setNote(id,v){
+  v=String(v||'').trim();
+  if(v) notes[id]=v; else { delete notes[id]; noteOpen.delete(id); }
+  saveNotesLocal(); scheduleAutoSave();
+}
+function updSet(id,si,f,v){ if(draft[id]){ draft[id][si][f]=v; saveDraftLocal(); if(draft[id][si].done) scheduleAutoSave(); } }
 
 function startSet(id,si){
   // Stamp startedAt — rest ends here, exercise begins
@@ -1862,8 +1935,15 @@ function toggleDone(id,si){
   } else {
     st.completedAt=null;
   }
+  unlockAudio();
   saveDraftLocal();
   renderExercises();
+  scheduleAutoSave();
+  if(st.done && !st.wu){
+    const ex=PROGRAM[currentDay].exercises.find(e=>e.id===id);
+    const kind=(ex && !isBodyweightEx(ex)) ? prCheck(bests[id], st.w, st.r) : null;
+    if(kind) showToast(kind==='weight' ? `\u{1F3C6} Weight PR \u2014 ${st.w} ${ex.u||''} (was ${progFmtW(bests[id].w)})` : `\u{1F3C6} e1RM PR \u2014 ${st.w}\u00d7${st.r}`,'#fbbf24');
+  }
 }
 
 function addSet(id,dw){
@@ -1877,6 +1957,7 @@ function rmSet(id,si){
   draft[id].splice(si,1);
   saveDraftLocal();
   renderExercises();
+  scheduleAutoSave();
 }
 // Swipe-to-delete resolves the row by identity when its timer fires, so two
 // quick swipes (or a re-render in between) can't shift the index onto the
@@ -1888,7 +1969,16 @@ function rmSetObj(id,setObj){
 }
 
 // ─── Supabase ─────────────────────────────────────────────────────────────────
+function deriveFromHistory(rows, day){
+  histRows=rows||[];
+  suggestions=computeSuggestions(histRows,day);
+  lastSessions=computeLastSessions(histRows,day);
+  bests=computeBests(histRows);
+  lastNotes=computeLastNotes(histRows);
+}
 async function loadDraft(){
+  syncOk=false; setSaveState('');
+  expanded=new Set(); collapsed=new Set(); noteOpen=new Set(); notes=loadNotesLocal();
   applyDay(currentDay);
   document.getElementById('ex-loading').style.display='block';
   document.getElementById('ex-list').style.display='none';
@@ -1899,10 +1989,9 @@ async function loadDraft(){
     draft=cached;
     // Recompute suggestions so a restored draft still shows progression badges.
     // Non-fatal: on failure the sets render exactly as they were, just unbadged.
-    try{ const hr=await fetchSuggestionRows(currentDay)||[];
-         suggestions=computeSuggestions(hr,currentDay);
-         lastSessions=computeLastSessions(hr,currentDay); }
-    catch{ suggestions={}; lastSessions={}; }
+    try{ deriveFromHistory(await fetchSuggestionRows(currentDay)||[],currentDay); }
+    catch{ suggestions={}; lastSessions={}; bests={}; lastNotes={}; histRows=[]; }
+    syncOk=true;
     document.getElementById('ex-loading').style.display='none';
     document.getElementById('ex-list').style.display='';
     renderExercises();
@@ -1912,14 +2001,16 @@ async function loadDraft(){
   try{
     // Progression suggestions from this split's history (non-fatal; powers badges + prefill)
     try{
-      const histRows=await fetchSuggestionRows(currentDay)||[];
-      suggestions=computeSuggestions(histRows,currentDay);
-      lastSessions=computeLastSessions(histRows,currentDay);
-    }catch{ suggestions={}; }
+      deriveFromHistory(await fetchSuggestionRows(currentDay)||[],currentDay);
+    }catch{ suggestions={}; lastSessions={}; bests={}; lastNotes={}; histRows=[]; }
 
     // 1. Try today's in-progress session first
     const todayRows=await apiGet({action:'get_today',day:currentDay,date:todayKey()});
+    syncOk=true;                               // server state for today is known
     if(Array.isArray(todayRows)&&todayRows.length){
+      // Notes saved with today's sets (local edits, if any, win).
+      const srvNotes={}; todayRows.forEach(r=>{ if(r.note && r.exercise_id!=null) srvNotes[r.exercise_id]=r.note; });
+      notes=Object.assign(srvNotes, notes);
       // Sets saved today for something that isn't on the list (swapped on
       // another device / after clearing storage): put it back where it belongs.
       const onList=new Set(PROGRAM[currentDay].exercises.map(e=>e.id));
@@ -1928,9 +2019,7 @@ async function loadDraft(){
         try{ await ensureLibrary(); }catch{}
         const sw=inferSwaps(PROGRAM[currentDay].slots||[], LIB, loadSwaps(currentDay), todayRows.map(r=>r.exercise_id));
         saveSwaps(currentDay,sw); applyDay(currentDay);
-        try{ const extra=await fetchSuggestionRows(currentDay,strays);
-             Object.assign(suggestions,computeSuggestions(extra,currentDay));
-             Object.assign(lastSessions,computeLastSessions(extra,currentDay)); }catch{}
+        try{ absorbHistory(await fetchSuggestionRows(currentDay,strays),currentDay); }catch{}
       }
       draft=rowsToDraft(todayRows,currentDay);
     } else if(Object.keys(suggestions).length){
@@ -1969,26 +2058,220 @@ async function loadHistory(){
   renderHistory();
 }
 
+// ─── Auto-save ────────────────────────────────────────────────────────────────
+// Every checked set is pushed to Supabase a moment later, so a dead phone or a
+// cleared browser can't take the session with it. Only armed once today's
+// server state is known (syncOk): a save replaces the day's rows, and saving a
+// draft built while offline could otherwise drop sets logged elsewhere.
+let syncOk=false, autoTimer=null, saving=false, saveStateText='';
+function setSaveState(t){ saveStateText=t; const el=document.getElementById('save-state'); if(el) el.textContent=t; }
+function scheduleAutoSave(){
+  if(!syncOk) return;
+  clearTimeout(autoTimer);
+  autoTimer=setTimeout(autoSave,2500);
+}
+async function autoSave(){
+  clearTimeout(autoTimer); autoTimer=null;
+  if(!syncOk) return;
+  if(saving){ autoTimer=setTimeout(autoSave,1500); return; }
+  const day=currentDay, date=todayKey();
+  const rows=draftToRows(day,date,true);
+  if(!rows.length) return;
+  saving=true; setSaveState('saving…');
+  try{
+    await apiPost({action:'save_session'},{date,day,rows});
+    setSaveState('saved '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}));
+  }catch(e){ setSaveState('not saved — will retry'); autoTimer=setTimeout(autoSave,15000); }
+  finally{ saving=false; }
+}
+async function flushAutoSave(){ if(autoTimer){ await autoSave(); } }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden' && autoTimer) autoSave(); });
+
+// Volume of saved rows using the same rules as the live summary (per-hand
+// doubled, bodyweight added to assisted/bodyweight moves, warm-ups excluded).
+function rowsVolume(rows){
+  return (rows||[]).reduce((a,r)=>{
+    if(!r.done || r.is_warmup) return a;
+    const ex=LIB[r.exercise_id]||{}; const w=parseFloat(r.weight), n=parseFloat(r.reps);
+    const bw=isBodyweightEx(ex) ? bodyWeightOn(r.date) : null;
+    const load=(bw!=null && !isNaN(w)) ? bw+w : w;
+    return a + ((load>0&&n>0) ? load*n*((VOLUME_COUNT_BOTH_HANDS&&/\/hand/i.test(ex.u||''))?2:1) : 0);
+  },0);
+}
+function sessionPRs(){
+  return PROGRAM[currentDay].exercises.map(ex=>{
+    const t=topSet(draft[ex.id]); const k=(t && !isBodyweightEx(ex)) ? prCheck(bests[ex.id],t.w,t.r) : null;
+    return k ? { name:ex.name, kind:k, w:t.w, r:t.r, u:ex.u||'', was:bests[ex.id] } : null;
+  }).filter(Boolean);
+}
+function openFinish(){
+  const day=currentDay, ac=PROGRAM[day].accent, st=dayStats(day);
+  // Previous session of this same day, from the history already loaded.
+  const prevDate=histRows.filter(r=>r.day===day).map(r=>r.date).sort().pop();
+  const prevVol=prevDate ? rowsVolume(histRows.filter(r=>r.day===day && r.date===prevDate)) : 0;
+  const dv=prevVol>0 ? (st.volume-prevVol)/prevVol*100 : null;
+  const prs=sessionPRs();
+  const skipped=st.total-st.done;
+  document.getElementById('fin-body').innerHTML=`
+    <div class="fin-grid">
+      <div class="ds-tile"><div class="ds-val">${fmtSecs(st.totalTime)}</div><div class="ds-lbl">duration</div></div>
+      <div class="ds-tile"><div class="ds-val">${st.done}${skipped>0?`<small style="color:var(--muted)">/${st.total}</small>`:''}</div><div class="ds-lbl">sets</div></div>
+      <div class="ds-tile"><div class="ds-val">${st.volume>0?Math.round(st.volume).toLocaleString():'—'}</div><div class="ds-lbl">volume lb</div></div>
+      <div class="ds-tile"><div class="ds-val" style="color:${dv==null?'var(--muted)':dv>=0?'#4ade80':'#fb923c'}">${dv==null?'—':(dv>=0?'+':'')+dv.toFixed(1)+'%'}</div><div class="ds-lbl">${prevDate?'vs '+fmtShort(prevDate):'no prior'}</div></div>
+    </div>
+    <div class="fin-sub">avg rest ${fmtSecs(st.avgRest)} · avg set ${fmtSecs(st.avgSet)}</div>
+    ${prs.length?`<div class="fin-h">\u{1F3C6} ${prs.length} record${prs.length>1?'s':''}</div>`+prs.map(p=>`<div class="fin-pr"><b>${escapeHtml(p.name)}</b><span>${p.kind==='weight'?`${p.w} ${escapeHtml(p.u)} · was ${progFmtW(p.was.w)}`:`${p.w}×${p.r} · e1RM ${Math.round(e1rm(p.w,p.r))} (was ${Math.round(p.was.e1)})`}</span></div>`).join(''):'<div class="fin-sub">No records today — the work still counts.</div>'}`;
+  document.getElementById('fin-title').textContent=`${day} — done`;
+  document.getElementById('fin-overlay').style.setProperty('--ac',ac);
+  document.getElementById('fin-overlay').classList.add('open');
+}
+function closeFinish(e){ if(e && e.target!==document.getElementById('fin-overlay')) return; document.getElementById('fin-overlay').classList.remove('open'); }
+
 async function saveSession(){
+  clearTimeout(autoTimer); autoTimer=null;
   const rows=draftToRows(currentDay,todayKey());
   if(!rows.length){
-    showToast('Nothing to save \u2014 start (\u25b6) or check (\u2713) a set first','#fb923c');
+    showToast('Nothing to save — start (▶) or check (✓) a set first','#fb923c');
     return;
   }
   const btn=document.getElementById('save-btn');
   btn.textContent='saving...'; btn.disabled=true;
   try{
     const res=await apiPost({action:'save_session'},{date:todayKey(),day:currentDay,rows});
+    syncOk=true;
+    setSaveState('saved '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}));
     btn.style.background='#14532d'; btn.style.color='#4ade80'; btn.textContent='SAVED ✓';
     clearDraftLocal();
     if(res && res.warning) showToast(res.warning,'#fb923c');
-    else showToast('Saved to Supabase!');
-    setTimeout(()=>{ btn.style.background=PROGRAM[currentDay].accent; btn.style.color='#0a0f1a'; btn.textContent='SAVE'; btn.disabled=false; },3000);
+    openFinish();
+    setTimeout(()=>{ btn.style.background=PROGRAM[currentDay].accent; btn.style.color='#0a0f1a'; btn.textContent='FINISH'; btn.disabled=false; },3000);
   }catch(e){
     btn.style.background='#7f1d1d'; btn.style.color='#fca5a5'; btn.textContent='FAILED';
     showToast('Save failed: '+e.message,'#f87171');
-    setTimeout(()=>{ btn.style.background=PROGRAM[currentDay].accent; btn.style.color='#0a0f1a'; btn.textContent='SAVE'; btn.disabled=false; },4000);
+    setTimeout(()=>{ btn.style.background=PROGRAM[currentDay].accent; btn.style.color='#0a0f1a'; btn.textContent='FINISH'; btn.disabled=false; },4000);
   }
+}
+
+// ─── Week volume by muscle ────────────────────────────────────────────────────
+async function openWeek(){
+  const ov=document.getElementById('week-overlay'), body=document.getElementById('week-body');
+  ov.classList.add('open'); body.innerHTML='<div class="loading">Loading the week…</div>';
+  try{
+    const {start,end}=weekBounds(new Date());
+    const prevStart=new Date(start); prevStart.setDate(prevStart.getDate()-7);
+    const [rows]=await Promise.all([apiGet({action:'get_range',from:isoLocal(prevStart),to:isoLocal(end)}), ensureLibrary().catch(()=>{})]);
+    const ws=isoLocal(start), today=todayKey();
+    // Today's live draft replaces whatever is saved for it, so the count is current.
+    const live=draftToRows(currentDay,today,true);
+    const thisWeek=(rows||[]).filter(r=>r.date>=ws && !(r.date===today && r.day===currentDay)).concat(live);
+    const lastWeek=(rows||[]).filter(r=>r.date<ws);
+    const a=weeklyMuscleSets(thisWeek,LIB), b=weeklyMuscleSets(lastWeek,LIB);
+    const muscles=[...new Set([...Object.keys(a),...Object.keys(b)])].sort((x,y)=>(a[y]||0)-(a[x]||0)||(b[y]||0)-(b[x]||0));
+    const max=Math.max(WEEK_SET_TARGET.hi+4, ...muscles.map(m=>Math.max(a[m]||0,b[m]||0)));
+    const col={low:'#fbbf24',ok:'#4ade80',high:'#60a5fa'};
+    body.innerHTML = muscles.length ? `
+      <div class="wk-legend">hard sets this week · target ${WEEK_SET_TARGET.lo}–${WEEK_SET_TARGET.hi} · <span style="color:#64748b">│ last week</span></div>`+
+      muscles.map(m=>{ const n=a[m]||0, p=b[m]||0, band=volumeBand(n);
+        return `<div class="wk-row"><span class="wk-m">${escapeHtml(m)}</span>
+          <span class="wk-bar"><i class="wk-zone" style="left:${WEEK_SET_TARGET.lo/max*100}%;width:${(WEEK_SET_TARGET.hi-WEEK_SET_TARGET.lo)/max*100}%"></i><i class="wk-fill" style="width:${n/max*100}%;background:${col[band]}"></i>${p?`<i class="wk-prev" style="left:${p/max*100}%"></i>`:''}</span>
+          <span class="wk-n" style="color:${col[band]}">${n}</span><span class="wk-p">${p||'–'}</span></div>`; }).join('')+
+      `<div class="fin-sub" style="margin-top:10px">Completed working sets only — warm-ups excluded. Includes what you've checked off today.</div>`
+      : '<div class="empty" style="margin:20px 0">Nothing logged this week or last.</div>';
+  }catch(e){ body.innerHTML=`<div class="empty" style="margin:20px 0">Could not load: ${escapeHtml(e.message)}</div>`; }
+}
+function closeWeek(e){ if(e && e.target!==document.getElementById('week-overlay')) return; document.getElementById('week-overlay').classList.remove('open'); }
+
+// ─── Day plans (templates) ────────────────────────────────────────────────────
+let planList=[];
+async function openPlans(){
+  const ov=document.getElementById('plan-overlay');
+  ov.style.setProperty('--ac',PROGRAM[currentDay].accent);
+  ov.classList.add('open');
+  document.getElementById('plan-body').innerHTML='<div class="loading">Loading plans…</div>';
+  try{ [planList]=await Promise.all([apiGet({action:'get_templates',day:currentDay}), ensureLibrary().catch(()=>{})]); }
+  catch(e){ planList=[]; }
+  renderPlans();
+}
+function closePlans(e){ if(e && e.target!==document.getElementById('plan-overlay')) return; document.getElementById('plan-overlay').classList.remove('open'); }
+function describeSwaps(sw, day){
+  const slots=PROGRAM[day].slots||[], bySlot=new Map(slots.map(x=>[String(x.slotId),x]));
+  const nm=id=>(LIB[id]||{}).name||'?';
+  const parts=[];
+  Object.entries(sw.s||{}).forEach(([k,v])=>{ const sl=bySlot.get(String(k)); if(sl) parts.push(`${nm(sl.exId)} → ${nm(v)}`); });
+  (sw.h||[]).forEach(id=>{ const sl=bySlot.get(String(id)); if(sl) parts.push(`skip ${nm(sl.exId)}`); });
+  (sw.x||[]).forEach(id=>parts.push(`+ ${nm(id)}`));
+  return parts;
+}
+function renderPlans(){
+  const day=currentDay, sw=loadSwaps(day);
+  const cur=describeSwaps(sw,day);
+  const usualN=(PROGRAM[day].slots||[]).length;
+  let html=`<button class="pick-row${cur.length?'':' revert'}" onclick="applyPlan(null)"><span class="pick-name">Usual ${day}</span><span class="pick-meta">${usualN} exercises, as saved in the program</span></button>`;
+  planList.forEach(t=>{
+    const clean=sanitizeSwaps(t.swaps,PROGRAM[day].slots,LIB);
+    const d=describeSwaps(clean,day);
+    const n=usualN-clean.h.length+clean.x.length;
+    html+=`<div class="plan-row"><button class="pick-row${sw.plan===t.name?' revert':''}" onclick="applyPlan(${t.id})"><span class="pick-name">${escapeHtml(t.name)}</span><span class="pick-meta">${n} exercises · ${escapeHtml(d.join(' · ')||'same as usual')}</span></button><button class="plan-del" onclick="deletePlan(${t.id})" title="Delete plan">✕</button></div>`;
+  });
+  html+=`<div class="pick-group">Today's setup</div>`;
+  html+= cur.length ? `<div class="fin-sub" style="margin:0 2px 8px">${escapeHtml(cur.join(' · '))}</div>
+      <div class="plan-save"><input class="modal-input" id="plan-name" type="text" maxlength="60" placeholder="Save as… e.g. short, hotel gym" value="${escapeHtml(sw.plan||'')}"><button class="modal-btn" style="flex:0 0 auto;background:var(--ac);color:#0a0f1a;padding:9px 14px" onclick="savePlan()">Save</button></div>`
+    : `<div class="fin-sub" style="margin:0 2px">Same as usual. Use ⇄ on a card to swap or skip an exercise for today, then come back here to save that setup as a named plan.</div>`;
+  document.getElementById('plan-body').innerHTML=html;
+}
+async function applyPlan(id){
+  const day=currentDay;
+  const tpl=id==null?null:planList.find(t=>t.id===id);
+  const sw=tpl?sanitizeSwaps(tpl.swaps,PROGRAM[day].slots,LIB):emptySwaps();
+  if(tpl) sw.plan=tpl.name;
+  const next=buildDayList(PROGRAM[day].slots||[],LIB,sw), keep=new Set(next.map(e=>e.id));
+  const losing=PROGRAM[day].exercises.filter(e=>!keep.has(e.id) && (draft[e.id]||[]).some(x=>x.done||x.startedAt));
+  if(losing.length && !confirm(`This plan drops ${losing.map(e=>e.name).join(', ')}, which you've already logged sets for today. Apply anyway and discard them?`)) return;
+  saveSwaps(day,sw); applyDay(day);
+  Object.keys(draft).forEach(k=>{ if(!keep.has(+k)) delete draft[k]; });
+  const fresh=next.filter(e=>!draft[e.id]||!draft[e.id].length).map(e=>e.id);
+  document.getElementById('plan-overlay').classList.remove('open');
+  renderExercises();
+  if(fresh.length){
+    try{ const rows=await fetchSuggestionRows(day,fresh); absorbHistory(rows,day); }catch{}
+    for(const fid of fresh) await prepareExercise(day,fid,true);
+  }
+  saveDraftLocal(); renderExercises(); scheduleAutoSave();
+  showToast(tpl?`Plan: ${tpl.name}`:`Back to the usual ${day}`);
+}
+async function savePlan(){
+  const name=(document.getElementById('plan-name').value||'').trim();
+  if(!name){ document.getElementById('plan-name').style.borderColor='#f87171'; return; }
+  const sw=loadSwaps(currentDay);
+  try{
+    await apiPost({action:'save_template'},{day:currentDay,name,swaps:{s:sw.s,x:sw.x,h:sw.h||[]}});
+    sw.plan=name; saveSwaps(currentDay,sw);
+    planList=await apiGet({action:'get_templates',day:currentDay});
+    renderPlans(); renderToolRow(); showToast(`Saved plan “${name}”`);
+  }catch(e){ showToast('Could not save plan: '+e.message,'#f87171'); }
+}
+async function deletePlan(id){
+  const t=planList.find(x=>x.id===id); if(!t) return;
+  if(!confirm(`Delete the plan “${t.name}”? Your exercises and history are not affected.`)) return;
+  try{ await apiPost({action:'delete_template'},{id}); planList=planList.filter(x=>x.id!==id); renderPlans(); }
+  catch(e){ showToast('Delete failed: '+e.message,'#f87171'); }
+}
+// Skip a slot for today only (it stays in the program).
+function skipToday(){
+  if(!picker) return;
+  const day=currentDay, cur=PROGRAM[day].exercises.find(e=>e.id===picker.exId);
+  if(!cur) return;
+  const engaged=(draft[cur.id]||[]).filter(x=>x.done||x.startedAt).length;
+  if(engaged && !confirm(`You've already logged ${engaged} set${engaged>1?'s':''} of “${cur.name}”. Skip it anyway and discard ${engaged>1?'them':'it'}?`)) return;
+  const sw=loadSwaps(day);
+  if(cur.extra) sw.x=sw.x.filter(i=>i!==cur.id);
+  else { (sw.h ||= []).push(cur.slotId); delete sw.s[cur.slotId]; }
+  sw.plan='';
+  saveSwaps(day,sw); applyDay(day);
+  delete draft[cur.id]; saveDraftLocal();
+  document.getElementById('pick-overlay').classList.remove('open'); picker=null;
+  renderExercises(); scheduleAutoSave();
+  showToast(`Skipping ${cur.name} today — undo from ▤ plan`);
 }
 
 // Reliable mobile-safe download (clipboard truncates large payloads on iOS).
@@ -2437,6 +2720,7 @@ function resetSwipe(id, si) {
   await loadProgram();
   renderAll();
   applyFestive();
+  if(location.hash==='#history') switchView('history');
   await loadDraft();
 })();
 </script>

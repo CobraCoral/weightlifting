@@ -33,7 +33,19 @@ catch (e) { ok(false, 'sw.js parses'); }
 // ── 2. Extract testable blocks ───────────────────────────────────────────────
 const main = scriptsOf('index.html').reduce((a, b) => (b.length > a.length ? b : a), '');
 const blocks = [...main.matchAll(/\/\/ @@TESTABLE-START[^\n]*\n([\s\S]*?)\/\/ @@TESTABLE-END/g)].map(m => m[1]);
-ok(blocks.length >= 2, `found ${blocks.length} @@TESTABLE blocks (expected at least 2: progression + festive)`);
+ok(blocks.length >= 2, `found ${blocks.length} @@TESTABLE blocks in index.html (expected at least 2)`);
+{
+  const shared = fs.readFileSync(path.join(ROOT, 'shared.js'), 'utf8');
+  try { new vm.Script(shared, { filename: 'shared.js' }); ok(true, 'shared.js parses'); } catch (e) { ok(false, 'shared.js parses — ' + e.message); }
+  const sb = [...shared.matchAll(/\/\/ @@TESTABLE-START[^\n]*\n([\s\S]*?)\/\/ @@TESTABLE-END/g)].map(m => m[1]);
+  ok(sb.length === 1, 'shared.js has the festive testable block');
+  blocks.push(...sb);
+  for (const f of ['index.html', 'exercises.html', 'bjj.html']) {
+    const h = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    ok(h.includes('src="./shared.js"') && h.includes('href="./shared.css"'), `${f} loads the shared script and stylesheet`);
+    ok(h.includes('id="festive-banner"'), `${f} has the festive banner slot`);
+  }
+}
 
 // Sandbox with the globals the pure functions reference.
 const ctx = { PROGRAM: {}, draft: {}, suggestions: {}, bodyCompHistory: [],
@@ -49,7 +61,8 @@ vm.createContext(ctx);
 vm.runInContext(blocks.join('\n'), ctx);
 const { computeSuggestions, parseRepRange, getRepRange, progStep, dayStats, fmtSecs, bodyWeightOn, isBodyweightEx, dayProjection, computeLastSessions, rowsToDraft, clusterSupersets,
         weekBounds, nthWeekday, easterDate, eventsForWeek, festiveLabel, festiveTheme, isoLocal, csvCell,
-        emptySwaps, exFromRow, buildDayList, inferSwaps, pickerOptions, sessionExerciseGroups } = ctx;
+        emptySwaps, exFromRow, buildDayList, inferSwaps, pickerOptions, sessionExerciseGroups,
+        e1rm, computeBests, prCheck, topSet, computeLastNotes, weeklyMuscleSets, volumeBand, isFinished, currentRest, sanitizeSwaps, sparkPath, sessionsByExercise } = ctx;
 
 // ── 2b. Local dates and CSV cells ───────────────────────────────────────────
 console.log('\n[dates]');
@@ -518,9 +531,9 @@ console.log('\n[library days]');
   // inferSwaps: sets saved today for something not on the list
   eq(inferSwaps(slots, lib, emptySwaps(), [4]).s, { 11: 4 }, 'stray triceps sets land in the triceps slot with nothing logged');
   eq(inferSwaps(slots, lib, emptySwaps(), [4, 1]).s, { 12: 4 }, 'a slot that already has logged sets is never overwritten');
-  eq(inferSwaps(slots, lib, emptySwaps(), [7]), { s: {}, x: [7] }, 'no same-muscle slot -> kept as a today-only extra');
-  eq(inferSwaps(slots, lib, { s:{11:4}, x:[] }, [4]), { s: {11:4}, x: [] }, 'already on the list -> nothing changes');
-  eq(inferSwaps(slots, lib, emptySwaps(), [12345]), { s: {}, x: [] }, 'unknown ids are ignored');
+  eq(inferSwaps(slots, lib, emptySwaps(), [7]), { s: {}, x: [7], h: [] }, 'no same-muscle slot -> kept as a today-only extra');
+  eq(inferSwaps(slots, lib, { s:{11:4}, x:[] }, [4]), { s: {11:4}, x: [], h: [] }, 'already on the list -> nothing changes');
+  eq(inferSwaps(slots, lib, emptySwaps(), [12345]), { s: {}, x: [], h: [] }, 'unknown ids are ignored');
 
   // picker
   const po = pickerOptions(lib, { exclude:[1,2], muscle:'Triceps' });
@@ -543,7 +556,7 @@ console.log('\n[library page]');
   const lsrc = fs.readFileSync(path.join(ROOT, 'exercises.html'), 'utf8');
   const lb = [...lsrc.matchAll(/\/\/ @@TESTABLE-START[^\n]*\n([\s\S]*?)\/\/ @@TESTABLE-END/g)].map(m => m[1]);
   ok(lb.length === 1, 'exercises.html has one testable block');
-  const L = {}; vm.createContext(L); vm.runInContext(lb.join('\n') + ';Object.assign(this,{normName,findDuplicates,filterLibrary,groupByMuscle,prescription,fmtRest});', L);
+  const L = {}; vm.createContext(L); vm.runInContext(lb.join('\n') + ';Object.assign(this,{normName,findDuplicates,filterLibrary,groupByMuscle,prescription,fmtRest,duplicateGroups,daysAgoIso});', L);
   eq(L.normName("Dumbbell Waiter’s  Curl!"), 'dumbbell waiters curl', 'normName ignores case, apostrophes, punctuation, spacing');
   const exs = [ {id:1,name:'Calf Raises',muscle:'Calves',days:['LEGS']}, {id:2,name:'calf raises',muscle:'Calves',days:['FULL']},
                 {id:3,name:'Lu Raises',muscle:'Side delts',days:['PUSH'],alt:'Y raise'}, {id:4,name:'Calf Raises',is_deleted:true},
@@ -557,6 +570,76 @@ console.log('\n[library page]');
   eq(L.groupByMuscle(L.filterLibrary(exs)).map(g=>g.muscle), ['Side delts','Quads','Calves',''], 'groups follow muscle order, unassigned last');
   eq(L.prescription({ds:4,rt:'10-15',dw:'85',u:'lb',rest_s:105,step:'1.5'}), '4×10-15 · 85 lb · rest 1:45 · step 1.5', 'prescription line');
   eq(L.prescription({ds:3,rt:'8-12',dw:'0',u:'lb assist',rest_s:null,step:'5'}), '3×8-12 · lb assist', 'no weight / rest / default step are omitted');
+  eq(L.duplicateGroups(exs).map(g=>g.map(e=>e.id)), [[1,2]], 'duplicate groups pair up live same-name exercises');
+  eq(L.filterLibrary(exs,{dups:new Set([1,2])}).map(e=>e.id), [1,2], 'duplicates-only view');
+  eq(L.daysAgoIso('2026-11-14', 90), '2026-08-16', '90 days before Nov 14');
+  const ex2 = [{id:1,name:'A',last_date:'2026-11-01'},{id:2,name:'B',last_date:'2026-06-01'},{id:3,name:'C',last_date:null}];
+  eq(L.filterLibrary(ex2,{staleBefore:'2026-08-16'}).map(e=>e.id), [2,3], 'unused filter keeps never-logged and long-idle exercises');
+}
+
+// ── 6c. Records, warm-ups, notes, weekly volume, rest state ────────────────
+console.log('\n[records + warm-ups]');
+{
+  eq(Math.round(e1rm(100,10)*10)/10, 133.3, 'Epley e1RM');
+  eq(e1rm(100,60), e1rm(100,30), 'reps capped at 30 for e1RM');
+  const rows = [
+    {exercise_id:1,date:'2026-11-01',set_number:1,weight:50,reps:10,done:true},
+    {exercise_id:1,date:'2026-11-01',set_number:2,weight:60,reps:5,done:true},
+    {exercise_id:1,date:'2026-11-01',set_number:3,weight:90,reps:3,done:true,is_warmup:true},
+    {exercise_id:1,date:'2026-11-01',set_number:4,weight:70,reps:8,done:false},
+    {exercise_id:2,date:'2026-11-01',set_number:1,weight:0,reps:12,done:true},
+  ];
+  const b = computeBests(rows);
+  eq([b[1].w, Math.round(b[1].e1*10)/10, b[2]], [60, 70, undefined], 'bests ignore warm-ups, unfinished sets and zero-weight sets');
+  eq(prCheck(b[1], 65, 3), 'weight', 'heavier than ever -> weight PR');
+  eq(prCheck(b[1], 60, 6), 'e1rm', 'same top weight for more reps -> e1RM PR');
+  eq(prCheck(b[1], 60, 5), null, 'matching the best is not a PR');
+  eq(prCheck(b[1], 50, 10), null, 'lower e1RM is not a PR');
+  eq(prCheck(undefined, 100, 10), null, 'no history -> baseline, not a PR');
+  eq(topSet([{w:'50',r:'10',done:true},{w:'80',r:'5',done:true,wu:true},{w:'55',r:'9',done:true},{w:'90',r:'9',done:false}]).i, 2, 'top set skips warm-ups and unfinished sets');
+  eq(topSet([{w:'',r:'10',done:true}]), null, 'no loaded set -> no top set');
+
+  // warm-ups never reach the progression engine
+  const hist = sessionsByExercise([
+    {exercise_id:1,date:'2026-11-01',set_number:1,weight:20,reps:15,is_warmup:true},
+    {exercise_id:1,date:'2026-11-01',set_number:2,weight:50,reps:10},
+    {exercise_id:1,date:'2026-11-01',set_number:3,weight:50,reps:9}]);
+  eq(hist[1][0].sets.map(x=>x.w), [50,50], 'warm-up sets are excluded from "last session"');
+
+  eq(computeLastNotes([{exercise_id:1,date:'2026-10-01',note:'seat 3'},{exercise_id:1,date:'2026-11-01',note:'seat 4'},{exercise_id:1,date:'2026-11-05',note:null},{exercise_id:2,date:'2026-11-01'}]),
+     {1:{note:'seat 4',date:'2026-11-01'}}, 'latest non-empty note per exercise');
+
+  const lib = {1:{muscle:'Triceps'},2:{muscle:'Chest'},3:{}};
+  eq(weeklyMuscleSets([{exercise_id:1,done:true},{exercise_id:1,done:true},{exercise_id:1,done:true,is_warmup:true},{exercise_id:1,done:false},{exercise_id:2,done:true},{exercise_id:3,done:true},{exercise_id:9,done:true}], lib),
+     {Triceps:2, Chest:1, Other:2}, 'weekly sets: done working sets by muscle, unknown -> Other');
+  eq([volumeBand(4), volumeBand(10), volumeBand(20), volumeBand(21)], ['low','ok','ok','high'], 'volume bands around the 10-20 target');
+  eq([isFinished([]), isFinished([{done:true},{done:false}]), isFinished([{done:true}])], [false,false,true], 'isFinished');
+
+  // rest state
+  const t = n => new Date(Date.UTC(2026,10,14,15,0,n)).toISOString();
+  const list = [{id:1,name:'A',rest:90},{id:2,name:'B',rest:60}];
+  eq(currentRest(list, {1:[{done:false}],2:[{done:false}]}), null, 'nothing done -> no rest state');
+  let d = {1:[{done:true,startedAt:t(0),completedAt:t(30)},{done:false}],2:[{done:false}]};
+  let r = currentRest(list, d);
+  eq([r.kind,r.exId,r.set,r.tgt,r.since], ['rest',1,2,90,new Date(t(30)).getTime()], 'resting before the next set of the same exercise');
+  d[1][1].startedAt = t(100);
+  eq(currentRest(list, d), null, 'a set in progress -> no rest bar');
+  d = {1:[{done:true,completedAt:t(30)},{done:true,completedAt:t(200)}],2:[{done:false}]};
+  r = currentRest(list, d);
+  eq([r.kind,r.exId,r.name], ['next',2,'B'], 'exercise finished -> points at the next unfinished one');
+  d[2][0] = {done:true,completedAt:t(400)};
+  eq(currentRest(list, d), null, 'everything finished -> nothing to show');
+
+  // templates
+  const lib2 = {1:{id:1},2:{id:2},3:{id:3,archived:true}};
+  eq(sanitizeSwaps({s:{10:2,99:2,11:3,12:77},x:[2,3,55],h:[10,98]}, [{slotId:10},{slotId:11},{slotId:12}], lib2),
+     {s:{10:2},x:[2],h:[10]}, 'a saved plan drops slots/exercises that no longer exist or are archived');
+  const slots = [{slotId:10,exId:1,ssGroup:null},{slotId:11,exId:2,ssGroup:null}];
+  eq(buildDayList(slots, lib2, {s:{},x:[],h:[10]}).map(e=>e.id), [2], 'a slot skipped for today is left out');
+
+  eq(sparkPath([1],10,10), '', 'sparkline needs two points');
+  eq(sparkPath([1,3],10,10), 'M0.0,9.0 L10.0,1.0', 'sparkline scales into the box (higher value = higher on screen)');
+  eq(sparkPath([5,5,5],10,10).startsWith('M0.0,'), true, 'flat series does not divide by zero');
 }
 
 // ── 7. Day/tab wiring ────────────────────────────────────────────────────────

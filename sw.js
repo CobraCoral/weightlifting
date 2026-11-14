@@ -10,8 +10,8 @@
    Bump CACHE only if you change this file's strategy; page freshness does
    not depend on it because pages are always refetched when online.
    ───────────────────────────────────────────────────────────────────────────── */
-const CACHE = 'ironlog-sw-v3';
-const PRECACHE = ['./', './index.html', './bjj.html', './exercises.html'];
+const CACHE = 'ironlog-sw-v4';
+const PRECACHE = ['./', './index.html', './bjj.html', './exercises.html', './shared.js', './shared.css'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -31,7 +31,10 @@ self.addEventListener('activate', (event) => {
 });
 
 function isPage(req, url) {
-  return req.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/');
+  // The shared script/stylesheet are code too: always fetch fresh when online,
+  // so a deploy never pairs a new page with a stale shared file.
+  return req.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/')
+      || url.pathname.endsWith('.js') || url.pathname.endsWith('.css');
 }
 
 self.addEventListener('fetch', (event) => {

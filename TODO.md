@@ -72,7 +72,6 @@ drive-by URL abuse and takes a quarter of an hour. Do not treat it as done.
 - Phase (CUT / BULK) is stored per device in `localStorage`. If the app is used
   on more than one device, tap the chip on each. A `settings` table would make
   it follow the account; not worth it until auth (item 1) exists.
-- Festive theme for `bjj.html` (only `index.html` has it).
 - `reorder_exercises` is sequential but not transactional; a proper fix is a
   Postgres RPC, which needs a DB migration (the one attempted on 2026-10-17 was
   not approved).
