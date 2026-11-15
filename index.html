@@ -740,6 +740,19 @@ function computeSuggestions(rows, day){
   const res  = {};
   exs.forEach(ex=>{
     const sessions = hist[ex.id];
+    // Deliberate reset (library restart_w / restart_on): until a session is
+    // logged on or after the reset date, prescribe the reset load at the
+    // bottom of the rep range instead of progressing from the old weight.
+    if(ex.restartW!=null && ex.restartOn && (!sessions || !sessions.length || sessions[0].date < ex.restartOn)){
+      const rg = getRepRange(ex) || {};
+      const n  = (Number.isInteger(ex.ds) && ex.ds>0) ? ex.ds : 3;
+      const r0 = rg.lo!=null ? rg.lo : (rg.hi!=null ? rg.hi : NaN);
+      const aim = (rg.lo!=null && rg.hi!=null && rg.lo!==rg.hi) ? `${rg.lo}\u2013${rg.hi}` : (isNaN(r0)?'':String(r0));
+      res[ex.id] = { mode:'restart', color:'#a78bfa',
+        sets: Array.from({length:n}, ()=>({ w:ex.restartW, r:r0 })),
+        text: `\u21ba reset to ${progFmtW(ex.restartW)}${ex.u?' '+ex.u:''}${aim?' \u00d7 '+aim:''} \u00b7 strict form` };
+      return;
+    }
     if(!sessions || !sessions.length) return;                 // no history -> no suggestion
     const last     = sessions[0].sets;
     const prev     = sessions[1] ? sessions[1].sets : null;
@@ -876,6 +889,8 @@ function exFromRow(e){
     repMax: Number.isInteger(e.rep_max) ? e.rep_max : undefined,
     targetType: e.target_type || undefined,
     muscle: e.muscle || '',
+    restartW: (e.restart_w!=null && Number.isFinite(parseFloat(e.restart_w))) ? parseFloat(e.restart_w) : undefined,
+    restartOn: e.restart_on || undefined,
     archived: !!e.is_deleted,
     _historicalNames: Array.isArray(e.historical_names) ? e.historical_names : [],
   };

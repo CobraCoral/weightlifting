@@ -642,6 +642,25 @@ console.log('\n[records + warm-ups]');
   eq(sparkPath([5,5,5],10,10).startsWith('M0.0,'), true, 'flat series does not divide by zero');
 }
 
+// ── 6d. Deliberate load reset ───────────────────────────────────────────────
+console.log('\n[restart weight]');
+{
+  const day = Object.keys(ctx.PROGRAM)[0];
+  const keep = ctx.PROGRAM[day].exercises;
+  const ex = { id: 9001, name: 'Rear delt', ds: 2, rt: '12-15', u: 'lb/hand', restartW: 30, restartOn: '2026-11-15' };
+  ctx.PROGRAM[day].exercises = [ex];
+  const old = [1,2].map(n => ({ exercise_id: 9001, date: '2026-11-14', set_number: n, weight: 52.5, reps: 14, done: true }));
+  let s = computeSuggestions(old, day)[9001];
+  eq([s.mode, s.sets.length, s.sets[0].w, s.sets[0].r], ['restart', 2, 30, 12], 'reset weight replaces progression from the old load');
+  ok(/reset to 30 lb\/hand/.test(s.text) && /12.15/.test(s.text), 'reset is spelled out on the card');
+  s = computeSuggestions([], day)[9001];
+  eq(s.mode, 'restart', 'reset applies even with no history');
+  const after = old.concat([1,2].map(n => ({ exercise_id: 9001, date: '2026-11-21', set_number: n, weight: 30, reps: 13, done: true })));
+  s = computeSuggestions(after, day)[9001];
+  eq([s.mode, s.sets[0].w, s.sets[0].r], ['progress', 30, 14], 'once a session is logged after the reset date, normal progression resumes from it');
+  ctx.PROGRAM[day].exercises = keep;
+}
+
 // ── 7. Day/tab wiring ────────────────────────────────────────────────────────
 // Days are data-driven (exercises come from the DB by `day`), but the tab
 // labels, accents and week strip are client-side. A day in DAYS with no
