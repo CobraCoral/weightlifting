@@ -455,7 +455,7 @@ const PROGRAM = {
 const DAYS = Object.keys(PROGRAM).filter(d => !PROGRAM[d].retired);
 
 // ─── Schedule phase ──────────────────────────────────────────────────────────
-// CUT  — Tue LEGS · Thu PULL (+HOME pm) · Sat PUSH · Sun rest
+// CUT  — Tue LEGS · Thu (BJJ) + HOME pm · Sat PUSH · Sun PULL
 // BULK — Tue LEGS · Thu FULL (+HOME pm) · Sat PUSH · Sun PULL
 // The phase is an explicit choice: tap the CUT/BULK chip at the end of the week
 // strip and confirm. It used to flip itself the first time a FULL session was
@@ -473,8 +473,8 @@ function setPhase(bulk){
 function togglePhase(){
   const toBulk = !onBulk;
   const msg = toBulk
-    ? 'Switch the schedule to LEAN BULK?\n\nThu \u2192 FULL (+ delts pm) \u00b7 Sun \u2192 PULL'
-    : 'Switch the schedule back to CUT?\n\nThu \u2192 PULL (+ delts pm) \u00b7 Sun \u2192 rest';
+    ? 'Switch the schedule to LEAN BULK?\n\nThu \u2192 FULL (+ delts pm)'
+    : 'Switch the schedule back to CUT?\n\nThu \u2192 BJJ (+ delts pm) \u00b7 Sun \u2192 PULL';
   if(!confirm(msg)) return;
   if(setPhase(toBulk)) renderAll();
   showToast(toBulk ? 'Lean-bulk week active' : 'Cut week active');
@@ -486,10 +486,10 @@ const WEEK_CUT = [
   {d:'M',l:'BJJ',  lift:false},
   {d:'T',l:'Legs', lift:true, prog:'LEGS'},
   {d:'W',l:'BJJ',  lift:false},
-  {d:'T',l:'Pull', lift:true, prog:'PULL', pm:'HOME'},
+  {d:'T',l:'BJJ',  lift:false, pm:'HOME'},
   {d:'F',l:'BJJ',  lift:false},
   {d:'S',l:'Push', lift:true, prog:'PUSH'},
-  {d:'S',l:'Rest', lift:false},
+  {d:'S',l:'Pull', lift:true, prog:'PULL'},
 ];
 const WEEK_BULK = [
   {d:'M',l:'BJJ',  lift:false},
@@ -500,7 +500,7 @@ const WEEK_BULK = [
   {d:'S',l:'Push', lift:true, prog:'PUSH'},
   {d:'S',l:'Pull', lift:true, prog:'PULL'},
 ];
-const SPLIT_CUT  = {2:'LEGS',4:'PULL',6:'PUSH'};
+const SPLIT_CUT  = {2:'LEGS',6:'PUSH',0:'PULL'};
 const SPLIT_BULK = {2:'LEGS',4:'FULL',6:'PUSH',0:'PULL'};
 const week  = () => onBulk ? WEEK_BULK  : WEEK_CUT;
 const split = () => onBulk ? SPLIT_BULK : SPLIT_CUT;

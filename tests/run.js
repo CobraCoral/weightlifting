@@ -698,8 +698,9 @@ console.log('\n[day wiring]');
 
   const cutApp = load(undefined), bulkApp = load('bulk');
   const cut = cutApp.read(), bulk = bulkApp.read();
-  eq(cut.W[3].prog, 'PULL',  'cut: Thursday is the pull day');
-  eq(cut.SPLIT[0], undefined, 'cut: Sunday has no default (EXTRA retired)');
+  eq(cut.SPLIT, {0:'PULL',2:'LEGS',6:'PUSH'}, 'cut: Sat push, Sun pull, Tue legs');
+  eq([cut.W[3].lift, cut.W[3].pm], [false, 'HOME'], 'cut: Thursday is BJJ with the evening delt block');
+  eq(cut.W[6].prog, 'PULL', 'cut: Sunday is the pull day');
   eq(bulk.W[3].prog, 'FULL', 'bulk: Thursday becomes full body');
   eq(bulk.W[3].pm, 'HOME',   'bulk: Thursday keeps the evening delt block');
   eq(bulk.W[6].prog, 'PULL', 'bulk: Sunday becomes the pull day');
